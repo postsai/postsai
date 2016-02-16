@@ -15,5 +15,11 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "tableExport.jquery.plugin": "~1.4.0",
+    "bootstrap": "~3.3.6",
+    "bootstrap-table": "~1.10.0",
+    "jquery": "~2.2.0"
+  }
 }
