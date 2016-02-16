@@ -1,0 +1,19 @@
+{
+  "name": "postsai",
+  "version": "0.0.0",
+  "authors": [
+    "Hendrik Brummermann <nhnb@users.sourceforge.net>"
+  ],
+  "description": "SCM database",
+  "keywords": [
+    "CVS"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
