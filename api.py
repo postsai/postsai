@@ -20,7 +20,16 @@ class Postsai:
         rows = cursor.fetchall()
         conn.commit()
         conn.close()
+
+        # Workaround UTF-8 data in an ISO-8859-1 column
+        result = []
+        for row in rows:
+            tmp = []
+            result.append(tmp);
+            for col in row:
+                tmp.append(str(col).decode("UTF-8", errors='replace'))
         return rows
+
 
     def create_query(self, form):
         """creates the sql statement"""
