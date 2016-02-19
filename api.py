@@ -54,6 +54,8 @@ class Postsai:
         self.create_where_for_column("cvsroot", form, "repository")
         self.create_where_for_column("repository", form, "repository")
 
+        self.create_where_for_date(form)
+
         self.sql = self.sql + " ORDER BY checkins.ci_when DESC LIMIT 1000"
 
 
@@ -63,7 +65,11 @@ class Postsai:
         value = form.getfirst(column, "")
         if (value == ""):
             return ""
-        
+
+        # replace HEAD branch with empty string
+        if (column == "branch" and value == "HEAD"):
+            value = "" 
+
         type = form.getfirst(column+"type", "match")
         operator = '=';
         if (type == "match"):
@@ -74,6 +80,25 @@ class Postsai:
             operator = "NOT REGEXP"
         self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
         self.data.append(value)
+
+    
+    def create_where_for_date(self, form):
+        type = form.getfirst("date", "day")
+        if (type == "all"):
+            return
+        elif (type == "day"):
+            self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)"
+        elif (type == "week"):
+            self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 WEEK)"
+        elif (type == "month"):
+            self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 MONTH)"
+        elif (type == "hours"):
+            self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)"
+            self.data.append(form.getfirst("hours"))
+        elif (type == "explicit"):
+            self.sql = self.sql + " AND ci_when >= %s AND ci_when <= %s"
+            sel.data.append(form.getfirst("mindate")) 
+            sel.data.append(form.getfirst("maxdate")) 
 
 
     def process(self):
