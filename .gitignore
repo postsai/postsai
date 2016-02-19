@@ -1,2 +1,3 @@
 /bower_components/
 /config.py
+*.pyc
