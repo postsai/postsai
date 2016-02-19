@@ -1,6 +1,9 @@
 #! /usr/bin/python
 
+import cgi
+import json
 import MySQLdb as mdb
+
 import config
 
 def convert_to_builtin_type(obj):
@@ -18,3 +21,30 @@ class Postsai:
         conn.commit()
         conn.close()
         return rows
+
+    def create_query(self, form):
+        """creates the sql statement"""
+
+        self.data = []
+        self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, concat(concat(dirs.dir, '/'), files.file), 
+        checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository
+        FROM checkins 
+        JOIN branches ON checkins.branchid = branches.id
+        JOIN descs ON checkins.descid = descs.id
+        JOIN dirs ON checkins.dirid = dirs.id
+        JOIN files ON checkins.fileid = files.id
+        JOIN people ON checkins.whoid = people.id
+        JOIN repositories ON checkins.repositoryid = repositories.id
+        WHERE 1=1 ORDER BY checkins.ci_when DESC LIMIT 1000"""
+
+
+    def process(self):
+        print "Content-Type: text/json; charset='utf-8'\r"
+        print "\r"
+        form = cgi.FieldStorage()
+        self.create_query(form)
+        result = self.query()
+        print json.dumps(result, default=convert_to_builtin_type)
+
+
+Postsai().process()
