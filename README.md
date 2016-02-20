@@ -26,3 +26,15 @@ config_db_database = "postsai"
 ```
 
 * Configure commit hook
+
+Privacy
+-
+Postsai supports privacy filter.
+
+A common use case is to prevent queries for changes done by persons. But to allow queries on changes from bot-accounts.
+
+This example limits queries on the who-column to the value "cvsscript".
+
+``` python
+config_filter = {"who" : "^cvsscript$"}
+```
