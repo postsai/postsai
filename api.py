@@ -11,10 +11,16 @@ def convert_to_builtin_type(obj):
 
 class Postsai:
 
+    def __init__(self, config):
+        """Creates a Postsai api instance"""
+
+        self.config = config
+
+
     def query(self):
         """Executes the database query and prints the result"""
 
-        conn = mdb.connect(config.config_db_host, config.config_db_user, config.config_db_password, config.config_db_database)
+        conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
         cursor = conn.cursor()
         cursor.execute(self.sql, self.data)
         rows = cursor.fetchall()
@@ -56,7 +62,7 @@ class Postsai:
 
         self.create_where_for_date(form)
 
-        self.sql = self.sql + " ORDER BY checkins.ci_when DESC LIMIT 1000"
+        self.sql = self.sql + " ORDER BY checkins.ci_when DESC"
 
 
     def create_where_for_column(self, column, form, internal_column):
@@ -110,4 +116,4 @@ class Postsai:
         print json.dumps(result, default=convert_to_builtin_type)
 
 
-Postsai().process()
+Postsai(config).process()
