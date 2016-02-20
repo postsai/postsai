@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Postsai</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap-table/dist/bootstrap-table.min.css">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/bootstrap-table/dist/bootstrap-table.min.js"></script>
+    <script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
+    <script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
+</head>
+<body>
+
+<h3>Postsai query</h3>
+
+
+
+<form class="form-horizontal" method="GET" action="index.html">
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">Repository</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="repository" id="repository">
+      <label class="radio-inline">
+        <input type="radio" name="repositorytype" id="repositorymatch" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="repositorytype" id="repositoryregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="repositorytype" id="repositorynotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">Branch</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="branch" id="branch">
+      <label class="radio-inline">
+        <input type="radio" name="branchtype" id="branchmatch" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="branchtype" id="branchregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="branchtype" id="branchnotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+ 
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">Directory</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="dir" id="dir">
+      <label class="radio-inline">
+        <input type="radio" name="dirtype" id="dirmatch" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="dirtype" id="dirregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="dirtype" id="dirnotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">File</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="file" id="file">
+      <label class="radio-inline">
+        <input type="radio" name="filetype" id="filetype" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="filetype" id="fileregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="filetype" id="filenotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">Who</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="who" id="who">
+      <label class="radio-inline">
+        <input type="radio" name="whotype" id="whotype" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="whotype" id="whoregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="whotype" id="whonotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label for="repository" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="description" id="description">
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptiontype" value="match" checked> Match
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptionregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptionnotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="datehours" class="col-sm-2 control-label">Date</label>
+    <div class="col-sm-9">
+      <div class="radio  form-inline">
+        <label>
+          <input type="radio" name="date" id="datehours" value="hours">
+          In the last <input type="text" class="form-control" id="hours" name="hours"> hours
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="date" id="dateday" value="day" checked>
+          In the last day
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="date" id="dateweek" value="week">
+          In the last week
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="date" id="datemonth" value="month">
+          In the last month
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="date" id="datemonth" value="all">
+          Since the beginning of time
+        </label>
+      </div>
+      <div class="radio form-inline">
+        <label>
+          <input type="radio" name="date" id="dateexact" value="exact">
+          Between <input type="text" class="form-control" id="mindate" name="mindate" placeholder="yyyy-mm-dd hh:mm:ss">
+           and <input type="text" class="form-control" id="maxdate" name="maxdate" placeholder="yyyy-mm-dd hh:mm:ss"> 
+       </label>
+      </div>
+	</div>      
+  </div>
+
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-9">
+      <button type="submit" class="btn btn-default">Search</button>
+    </div>
+  </div>
+  
+</form>    
+
+<script type="text/javascript" src="postsai.js"></script>
+
+</body>
+</html>
