@@ -22,7 +22,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="repository" id="repository">
       <label class="radio-inline">
-        <input type="radio" name="repositorytype" id="repositorymatch" value="match"> Match
+        <input type="radio" name="repositorytype" id="repositorymatch" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="repositorytype" id="repositoryregexp" value="regexp"> Regular Expression
@@ -38,7 +38,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="branch" id="branch">
       <label class="radio-inline">
-        <input type="radio" name="branchtype" id="branchmatch" value="match"> Match
+        <input type="radio" name="branchtype" id="branchmatch" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="branchtype" id="branchregexp" value="regexp"> Regular Expression
@@ -54,7 +54,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="dir" id="dir">
       <label class="radio-inline">
-        <input type="radio" name="dirtype" id="dirmatch" value="match"> Match
+        <input type="radio" name="dirtype" id="dirmatch" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="dirtype" id="dirregexp" value="regexp"> Regular Expression
@@ -70,7 +70,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="file" id="file">
       <label class="radio-inline">
-        <input type="radio" name="filetype" id="filetype" value="match"> Match
+        <input type="radio" name="filetype" id="filetype" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="filetype" id="fileregexp" value="regexp"> Regular Expression
@@ -86,7 +86,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="who" id="who">
       <label class="radio-inline">
-        <input type="radio" name="whotype" id="whotype" value="match"> Match
+        <input type="radio" name="whotype" id="whotype" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="whotype" id="whoregexp" value="regexp"> Regular Expression
@@ -102,7 +102,7 @@
     <div class="col-sm-9">
       <input type="text" class="form-control" name="description" id="description">
       <label class="radio-inline">
-        <input type="radio" name="descriptiontype" id="descriptiontype" value="match"> Match
+        <input type="radio" name="descriptiontype" id="descriptiontype" value="match" checked> Match
       </label>
       <label class="radio-inline">
         <input type="radio" name="descriptiontype" id="descriptionregexp" value="regexp"> Regular Expression
@@ -118,7 +118,7 @@
     <div class="col-sm-9">
       <div class="radio  form-inline">
         <label>
-          <input type="radio" name="date" id="datehours" value="hours" checked>
+          <input type="radio" name="date" id="datehours" value="hours">
           In the last <input type="text" class="form-control" id="hours" name="hours"> hours
         </label>
       </div>
@@ -130,25 +130,25 @@
       </div>
       <div class="radio">
         <label>
-          <input type="radio" name="date" id="dateweek" value="week" checked>
+          <input type="radio" name="date" id="dateweek" value="week">
           In the last week
         </label>
       </div>
       <div class="radio">
         <label>
-          <input type="radio" name="date" id="datemonth" value="month" checked>
+          <input type="radio" name="date" id="datemonth" value="month">
           In the last month
         </label>
       </div>
       <div class="radio">
         <label>
-          <input type="radio" name="date" id="datemonth" value="all" checked>
+          <input type="radio" name="date" id="datemonth" value="all">
           Since the beginning of time
         </label>
       </div>
       <div class="radio form-inline">
         <label>
-          <input type="radio" name="date" id="dateexact" value="exact" checked>
+          <input type="radio" name="date" id="dateexact" value="exact">
           Between <input type="text" class="form-control" id="mindate" name="mindate" placeholder="yyyy-mm-dd hh:mm:ss">
            and <input type="text" class="form-control" id="maxdate" name="maxdate" placeholder="yyyy-mm-dd hh:mm:ss"> 
        </label>

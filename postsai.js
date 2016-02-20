@@ -1,5 +1,10 @@
+(function() {
+
 "use strict";
 
+/**
+ * merges commit messages on files commited together
+ */
 function mergeCells(data) {
 	var lastGroupStart = 0;
 	for (var i = 1; i < data.length; i++) {
@@ -19,6 +24,55 @@ function mergeCells(data) {
 	}
 }
 
+/**
+ * rewrites the links to include the query string
+ */
+function addQueryStringToLink() {
+	$(".action-add-querystring").each(function() {
+		var href = this.href;
+		if (href.indexOf("?") < 0) {
+			$(this).attr("href", this.href + window.location.search);
+		}
+	});
+}
+
+/**
+ * extracts parameters from query string
+ */
+// http://stackoverflow.com/a/20097994
+function getUrlVars() {
+	var vars = {};
+	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+	function(m,key,value) {
+		vars[key] = decodeURIComponent(value);
+	});
+	return vars;
+}
+
+/**
+ * loads URL parameters into search form
+ */
+function addValuesFromURLs() {
+	var params = getUrlVars();
+	$("input").each(function() {
+		var value = params[this.name];
+		if (!value) {
+			return;
+		}
+
+		if (this.type === "radio") {
+			if (this.value === value) {
+				$(this).attr("checked", true);
+			}
+		} else {
+			$(this).val(value);
+		}
+	});
+}
+
+/**
+ * loads the search result from the server
+ */
 function initTable() {
 	$('#table').bootstrapTable();
 
@@ -28,4 +82,13 @@ function initTable() {
 	});
 }
 
-initTable();
+
+
+$("ready", function() {
+	addQueryStringToLink();
+	addValuesFromURLs();
+	if (document.querySelector("body.page-searchresult")) {
+		initTable();
+	}
+});
+}());
