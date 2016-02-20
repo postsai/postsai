@@ -3,6 +3,7 @@
 import cgi
 import json
 import MySQLdb as mdb
+import re
 
 import config
 
@@ -11,10 +12,33 @@ def convert_to_builtin_type(obj):
 
 class Postsai:
 
+    def __init__(self, config):
+        """Creates a Postsai api instance"""
+
+        self.config = config
+
+
+    def validate_input(self, form):
+        """filter inputs, e. g. for privacy reasons"""
+
+        if hasattr(self.config, "config_filter") == False:
+            return ""
+
+        for key, filter in self.config.config_filter.items():
+            value = form.getfirst(key)
+            if value != "":
+                if value.startswith("^") and value.endswith("$"):
+                    value = value[1:-1]
+                if re.match(filter, value) == None:
+                    return "fail"
+        
+        return ""
+
+
     def query(self):
         """Executes the database query and prints the result"""
 
-        conn = mdb.connect(config.config_db_host, config.config_db_user, config.config_db_password, config.config_db_database)
+        conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
         cursor = conn.cursor()
         cursor.execute(self.sql, self.data)
         rows = cursor.fetchall()
@@ -56,7 +80,7 @@ class Postsai:
 
         self.create_where_for_date(form)
 
-        self.sql = self.sql + " ORDER BY checkins.ci_when DESC LIMIT 1000"
+        self.sql = self.sql + " ORDER BY checkins.ci_when DESC"
 
 
     def create_where_for_column(self, column, form, internal_column):
@@ -83,6 +107,8 @@ class Postsai:
 
     
     def create_where_for_date(self, form):
+        """parses the date parameters and adds them to the database query"""
+
         type = form.getfirst("date", "day")
         if (type == "all"):
             return
@@ -102,12 +128,19 @@ class Postsai:
 
 
     def process(self):
+        """processes an API request"""
+
         print "Content-Type: text/json; charset='utf-8'\r"
         print "\r"
         form = cgi.FieldStorage()
-        self.create_query(form)
-        result = self.query()
+
+        result = self.validate_input(form)
+
+        if result == "":
+            self.create_query(form)
+            result = self.query()
+
         print json.dumps(result, default=convert_to_builtin_type)
 
-
-Postsai().process()
+if __name__ == '__main__':
+    Postsai(config).process()
