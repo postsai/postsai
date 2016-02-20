@@ -18,7 +18,7 @@ class TestStringMethods(unittest.TestCase):
         def __init__(self, dict):
             self.dict = dict
 
-        def getfirst(self, key):
+        def getfirst(self, key, default=None):
             return self.dict[key]
 
 

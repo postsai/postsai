@@ -25,12 +25,12 @@ class Postsai:
             return ""
 
         for key, filter in self.config.config_filter.items():
-            value = form.getfirst(key)
+            value = form.getfirst(key, "")
             if value != "":
                 if value.startswith("^") and value.endswith("$"):
                     value = value[1:-1]
                 if re.match(filter, value) == None:
-                    return "fail"
+                    return "Missing permissions for query on column \"" + key + "\""
         
         return ""
 

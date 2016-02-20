@@ -77,6 +77,10 @@ function initTable() {
 	$('#table').bootstrapTable();
 
 	$.getJSON( "api.py" + window.location.search, function( data ) {
+		if (typeof data === "string") {
+			alert(data);
+			return;
+		}
     	$('#table').bootstrapTable('load', {data: data});
     	mergeCells(data);
 	});
