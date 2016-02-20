@@ -29,9 +29,9 @@ config_db_database = "postsai"
 
 Privacy
 -
-Postsai supports privacy filter.
+Postsai supports privacy filters.
 
-A common use case is to prevent queries for changes done by persons. But to allow queries on changes from bot-accounts.
+A common use case is to prevent queries for changes done by humans. But to allow queries on changes from bot-accounts.
 
 This example limits queries on the who-column to the value "cvsscript".
 
