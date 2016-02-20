@@ -1,4 +1,4 @@
-Postsai &nbsp;&nbsp;&nbsp;&nbsp;[![Code Climate](https://img.shields.io/codeclimate/github/postsai/postsai.svg)](https://codeclimate.com/github/postsai/postsai) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
+Postsai &nbsp;&nbsp;&nbsp;&nbsp;[![Travis](https://img.shields.io/travis/postsai/postsai.svg)](https://travis-ci.org/postsai/postsai/) [![Code Climate](https://img.shields.io/codeclimate/github/postsai/postsai.svg)](https://codeclimate.com/github/postsai/postsai) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
 -------
 
 Postsai is a commit database
