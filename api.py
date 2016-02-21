@@ -10,6 +10,56 @@ import config
 def convert_to_builtin_type(obj):
     return str(obj)
 
+class PostsaiDB:
+    """Databaes access for postsai"""
+
+
+    def __init__(self, config):
+        """Creates a Postsai api instance"""
+
+        self.config = config
+
+
+    def is_viewvc_database(self, cursor):
+        """checks whether this is a Viewvc database instead of a Bonsai database"""
+
+        cursor.execute("show tables like 'commits'")
+        return cursor.rowcount == 1
+
+
+    def fix_encoding_of_result(self, rows):
+        """ Workaround UTF-8 data in an ISO-8859-1 column"""
+
+        result = []
+        for row in rows:
+            tmp = []
+            result.append(tmp);
+            for col in row:
+                try:
+                    tmp.append(str(col).decode("UTF-8"))
+                except UnicodeDecodeError:
+                    tmp.append(str(col).decode("ISO-8859-1"))
+        return result
+
+
+    def query(self, sql, data):
+        """Executes the database query and prints the result"""
+
+        conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
+        cursor = conn.cursor()
+
+        if (self.is_viewvc_database(cursor)):
+            sql = sql.replace("checkins", "commits")
+
+        cursor.execute(sql, data)
+        rows = cursor.fetchall()
+        conn.commit()
+        conn.close()
+        return self.fix_encoding_of_result(rows)
+
+
+
+
 class Postsai:
 
     def __init__(self, config):
@@ -34,36 +84,6 @@ class Postsai:
         
         return ""
 
-
-    def is_viewvc_database(self, cursor):
-        """checks whether this is a Viewvc database instead of a Bonsai database"""
-        cursor.execute("show tables like 'commits'")
-        return cursor.rowcount == 1
-
-
-    def query(self):
-        """Executes the database query and prints the result"""
-
-        conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
-        cursor = conn.cursor()
-
-        sql = self.sql
-        if (self.is_viewvc_database(cursor)):
-            sql = sql.replace("checkins", "commits")
-
-        cursor.execute(sql, self.data)
-        rows = cursor.fetchall()
-        conn.commit()
-        conn.close()
-
-        # Workaround UTF-8 data in an ISO-8859-1 column
-        result = []
-        for row in rows:
-            tmp = []
-            result.append(tmp);
-            for col in row:
-                tmp.append(str(col).decode("UTF-8", errors='replace'))
-        return result
 
 
     def create_query(self, form):
@@ -149,7 +169,7 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
-            result = self.query()
+            result = PostsaiDB(self.config).query(self.sql, self.data)
 
         print json.dumps(result, default=convert_to_builtin_type)
 
