@@ -35,12 +35,23 @@ class Postsai:
         return ""
 
 
+    def is_viewvc_database(self, cursor):
+        """checks whether this is a Viewvc database instead of a Bonsai database"""
+        cursor.execute("show tables like 'commits'")
+        return cursor.rowcount == 1
+
+
     def query(self):
         """Executes the database query and prints the result"""
 
         conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
         cursor = conn.cursor()
-        cursor.execute(self.sql, self.data)
+
+        sql = self.sql
+        if (self.is_viewvc_database(cursor)):
+            sql = sql.replace("checkins", "commits")
+
+        cursor.execute(sql, self.data)
         rows = cursor.fetchall()
         conn.commit()
         conn.close()
