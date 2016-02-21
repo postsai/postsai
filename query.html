@@ -10,6 +10,7 @@
     <script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
     <script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
     <style>
+    .content {padding: 0 1em}
     .file {width: 20%}
     .breakword { 
 
@@ -52,6 +53,8 @@
   </div><!-- /.container-fluid -->
 </nav>
 
+<div class="content">
+<div id="preamble"><span class="search-parameter"></span></div>
 
  <table id="table"
  	data-search="true"
@@ -59,7 +62,8 @@
  	data-show-export="true"
  	data-show-refresh="true"
  	data-show-toggle="true"
- 	data-sortable="true">
+ 	data-sortable="true"
+ 	data-toolbar="#preamble">
 
     <thead>
     <tr>
@@ -79,5 +83,6 @@
     
     <script type="text/javascript" src="postsai.js"></script>
 
+</div>
 </body>
 </html>

@@ -70,6 +70,48 @@ function addValuesFromURLs() {
 	});
 }
 
+function renderQueryParameters() {
+	$(".search-parameter").each(function() {
+		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
+		var text = "";
+		var vars = getUrlVars();
+		for (var i = 0; i < params.length; i++) {
+
+			// only include relevant secondary parameters 
+			// as they max be filled even if the parent is not selected
+			var key = params[i].toLowerCase();
+			if (key === "hours") {
+				if (vars["date"] !== "hours") {
+					continue;
+				}
+			} else if (key === "mindate" || key === "maxdate") {
+				if (vars["date"] !== "exact") {
+					continue;
+				}
+			} 
+
+			var value = vars[key];
+			var type = vars[key + "type"];
+			if (!value) {
+				continue;
+			}
+			if (text.length > 0) {
+				text = text + ", ";
+			}
+			var operator = "=";
+			if (type === "regexp") {
+				operator = "~";
+			} else if (type === "notregexp") {
+				operator = "!~";
+			}
+			text = text + params[i] + " " + operator + " " + value;
+			
+			console.log(value);
+		}
+		$(this).text(text);
+	});
+}
+
 /**
  * loads the search result from the server
  */
@@ -92,6 +134,7 @@ $("ready", function() {
 	addQueryStringToLink();
 	addValuesFromURLs();
 	if (document.querySelector("body.page-searchresult")) {
+		renderQueryParameters();
 		initTable();
 	}
 });
