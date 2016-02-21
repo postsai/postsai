@@ -12,11 +12,34 @@
 </head>
 <body>
 
-<h3>Postsai query</h3>
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Postsai</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="search.html">Search <span class="sr-only">(current)</span></a></li>
+        <li><a class="action-add-querystring" href="query.html">Result</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
 
 
 
-<form class="form-horizontal" method="GET" action="index.html">
+
+<form class="form-horizontal" method="GET" action="query.html">
   <div class="form-group">
     <label for="repository" class="col-sm-2 control-label">Repository</label>
     <div class="col-sm-9">
@@ -148,7 +171,7 @@
       </div>
       <div class="radio form-inline">
         <label>
-          <input type="radio" name="date" id="dateexact" value="exact">
+          <input type="radio" name="date" id="dateexplicit" value="explicit">
           Between <input type="text" class="form-control" id="mindate" name="mindate" placeholder="yyyy-mm-dd hh:mm:ss">
            and <input type="text" class="form-control" id="maxdate" name="maxdate" placeholder="yyyy-mm-dd hh:mm:ss"> 
        </label>

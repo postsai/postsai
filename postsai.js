@@ -44,7 +44,7 @@ function getUrlVars() {
 	var vars = {};
 	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
 	function(m,key,value) {
-		vars[key] = decodeURIComponent(value);
+		vars[key] = decodeURIComponent(value.replace("+", " "));
 	});
 	return vars;
 }
@@ -71,13 +71,80 @@ function addValuesFromURLs() {
 }
 
 /**
+ * Is this a primary paramter or a sub-paramter of a selected parent?
+ */
+function isQueryParameterImportant(vars, key) {
+	if (key === "hours") {
+		if (vars["date"] !== "hours") {
+			return false;
+		}
+	} else if (key === "mindate" || key === "maxdate") {
+		if (vars["date"] !== "explicit") {
+			return false;
+		}
+	} 	
+	return true;
+}
+
+function renderQueryParameters() {
+	$(".search-parameter").each(function() {
+		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
+		var text = "";
+		var vars = getUrlVars();
+		for (var i = 0; i < params.length; i++) {
+			var key = params[i].toLowerCase();
+
+			if (!isQueryParameterImportant(vars, key)) {
+				continue;
+			}
+
+			var value = vars[key];
+			var type = vars[key + "type"];
+			if (!value) {
+				continue;
+			}
+			if (text.length > 0) {
+				text = text + ", ";
+			}
+			var operator = "=";
+			if (type === "regexp") {
+				operator = "~";
+			} else if (type === "notregexp") {
+				operator = "!~";
+			}
+			text = text + params[i] + " " + operator + " " + value;
+		}
+		$(this).text(text);
+	});
+}
+
+/**
+ * hides redundant columns to preserve space
+ */
+function hideRedundantColumns() {
+	var vars = getUrlVars();
+	if (vars["branch"]) {
+		$('#table').bootstrapTable('hideColumn', '5');
+	}
+	if (vars["repository"]) {
+		$('#table').bootstrapTable('hideColumn', '0');
+	}
+}
+
+
+/**
  * loads the search result from the server
  */
 function initTable() {
 	$('#table').bootstrapTable();
 
 	$.getJSON( "api.py" + window.location.search, function( data ) {
+		if (typeof data === "string") {
+			alert(data);
+			return;
+		}
     	$('#table').bootstrapTable('load', {data: data});
+		hideRedundantColumns();
     	mergeCells(data);
 	});
 }
@@ -88,6 +155,7 @@ $("ready", function() {
 	addQueryStringToLink();
 	addValuesFromURLs();
 	if (document.querySelector("body.page-searchresult")) {
+		renderQueryParameters();
 		initTable();
 	}
 });
