@@ -119,6 +119,20 @@ function renderQueryParameters() {
 }
 
 /**
+ * hides redundant columns to preserve space
+ */
+function hideRedundantColumns() {
+	var vars = getUrlVars();
+	if (vars["branch"]) {
+		$('#table').bootstrapTable('hideColumn', '5');
+	}
+	if (vars["repository"]) {
+		$('#table').bootstrapTable('hideColumn', '0');
+	}
+}
+
+
+/**
  * loads the search result from the server
  */
 function initTable() {
@@ -130,6 +144,7 @@ function initTable() {
 			return;
 		}
     	$('#table').bootstrapTable('load', {data: data});
+		hideRedundantColumns();
     	mergeCells(data);
 	});
 }
