@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Postsai</title>
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap-table/dist/bootstrap-table.min.css">
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/bootstrap-table/dist/bootstrap-table.min.js"></script>
+    <script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
+    <script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
+    <style>
+    .file {width: 20%}
+    .breakword { 
+
+/* Warning: Needed for oldIE support, but words are broken up letter-by-letter */
+ -ms-word-break: break-all;
+     word-break: break-all;
+
+     /* Non standard for webkit */
+     word-break: break-word;
+
+-webkit-hyphens: auto;
+   -moz-hyphens: auto;
+    -ms-hyphens: auto;
+        hyphens: auto;
+    }
+    </style>
+</head>
+<body class="page-searchresult">
+
+<ul>
+<li> <a class="action-add-querystring" href="search.html">Search</a>
+</ul>
+
+
+ <table id="table"
+ 	data-search="true"
+ 	data-show-columns="true"
+ 	data-show-export="true"
+ 	data-show-refresh="true"
+ 	data-show-toggle="true"
+ 	data-sortable="true">
+
+    <thead>
+    <tr>
+        <th data-field="0" data-sortable="true">Repository</th>
+        <th data-field="1" data-sortable="true">When</th>
+        <th data-field="2" data-sortable="true" class="breakword">Who</th>
+        <th data-field="3" data-sortable="true" class="breakword file">File</th>
+        <th data-field="4" data-sortable="true">Rev</th>
+        <th data-field="5" data-sortable="true" class="breakword">Branch</th>
+        <th data-field="6" data-sortable="true">+/-</th>
+        <th data-field="7" data-sortable="true">Description</th>
+        
+    </tr>
+    </thead>
+    </table>
+    
+    
+    <script type="text/javascript" src="postsai.js"></script>
+
+</body>
+</html>
