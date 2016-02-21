@@ -123,8 +123,8 @@ class Postsai:
             self.data.append(form.getfirst("hours"))
         elif (type == "explicit"):
             self.sql = self.sql + " AND ci_when >= %s AND ci_when <= %s"
-            sel.data.append(form.getfirst("mindate")) 
-            sel.data.append(form.getfirst("maxdate")) 
+            self.data.append(form.getfirst("mindate")) 
+            self.data.append(form.getfirst("maxdate")) 
 
 
     def process(self):

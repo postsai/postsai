@@ -44,7 +44,7 @@ function getUrlVars() {
 	var vars = {};
 	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
 	function(m,key,value) {
-		vars[key] = decodeURIComponent(value);
+		vars[key] = decodeURIComponent(value.replace("+", " "));
 	});
 	return vars;
 }
@@ -70,25 +70,33 @@ function addValuesFromURLs() {
 	});
 }
 
+/**
+ * Is this a primary paramter or a sub-paramter of a selected parent?
+ */
+function isQueryParameterImportant(vars, key) {
+	if (key === "hours") {
+		if (vars["date"] !== "hours") {
+			return false;
+		}
+	} else if (key === "mindate" || key === "maxdate") {
+		if (vars["date"] !== "explicit") {
+			return false;
+		}
+	} 	
+	return true;
+}
+
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
 		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
 		var text = "";
 		var vars = getUrlVars();
 		for (var i = 0; i < params.length; i++) {
-
-			// only include relevant secondary parameters 
-			// as they max be filled even if the parent is not selected
 			var key = params[i].toLowerCase();
-			if (key === "hours") {
-				if (vars["date"] !== "hours") {
-					continue;
-				}
-			} else if (key === "mindate" || key === "maxdate") {
-				if (vars["date"] !== "exact") {
-					continue;
-				}
-			} 
+
+			if (!isQueryParameterImportant(vars, key)) {
+				continue;
+			}
 
 			var value = vars[key];
 			var type = vars[key + "type"];
@@ -105,8 +113,6 @@ function renderQueryParameters() {
 				operator = "!~";
 			}
 			text = text + params[i] + " " + operator + " " + value;
-			
-			console.log(value);
 		}
 		$(this).text(text);
 	});
