@@ -149,8 +149,6 @@ function initTable() {
 	});
 }
 
-
-
 $("ready", function() {
 	addQueryStringToLink();
 	addValuesFromURLs();
@@ -160,3 +158,101 @@ $("ready", function() {
 	}
 });
 }());
+
+// http://stackoverflow.com/a/12034334
+var entityMap = {
+	"&": "&amp;",
+	"<": "&lt;",
+	">": "&gt;",
+	'"': '&quot;',
+	"'": '&#39;'
+};
+function escapeHtml(string) {
+	return String(string).replace(/[&<>"']/g, function (s) {
+		return entityMap[s];
+	});
+}
+	
+function formatTimestamp(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	return escapeHtml(value.substring(0, 16))
+}
+
+/**
+ * formats the description column to link to an issue tracker
+ */
+function formatTrackerLink(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	var res = escapeHtml(value)
+	if (!window.tracker) {
+		return res;
+	}
+	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, "<a href='" + window.tracker + "$1'>#$1</a>")
+}
+
+/**
+ * formats the file column to link to viewvc file log
+ */
+function formatFileLink(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	var res = escapeHtml(value)
+	if (!window.viewvc) {
+		return res;
+	}
+	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
+	return "<a href='" + viewvc + "/" + repository + "/" + res +"'>" + res + "</a>";
+}
+/**
+ * formats the rev column to link to viewvc file content
+ */
+function formatRevLink(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	var res = escapeHtml(value)
+	if (!window.viewvc) {
+		return res;
+	}
+	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
+	var file = escapeHtml(row[3]);
+	return "<a href='" + viewvc + "/" + repository + "/" + file + "?revision=" 
+		+ res + "&view=markup'>" + res + "</a>";
+}
+
+/**
+ * format the diff column to link to the difference
+ */
+function formatDiffLink(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	var res = escapeHtml(value)
+	if (!window.viewvc) {
+		return res;
+	}
+	
+	var file = escapeHtml(row[3]);
+	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
+	var ref = escapeHtml(row[4])
+	var pre = ref;
+	
+	// calculate previous revision number
+	var split = ref.split(".");
+	var last = split[split.length - 1];
+	if (last === "1" && split.length > 2) {
+		split.pop();
+		split.pop();
+	} else {
+		split[split.length - 1] = parseInt(last) - 1;
+	}
+	pre = split.join(".");
+	
+	var diff = "?r1=" + pre + "&r2=" + ref;
+	return "<a href='" + viewvc + "/" + repository + "/" + file + diff +"'>" + res + "</a>";
+}
