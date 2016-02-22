@@ -47,6 +47,26 @@ class TestStringMethods(unittest.TestCase):
         input = self.FormMock({"who" : "^cvsscript$"})
         self.assertEqual(postsai.validate_input(input), "", "^cvsscript$ is a permitted user")
 
+
+    def test_create_where_for_column(self):
+        postsai = api.Postsai(self.ConfigMock())
+
+        postsai.sql = ""
+        postsai.data = []
+        form = self.FormMock({"file" : "config.py", "filetype" : "", 
+                              "branch" : "HEAD", "branchtype" : "match",
+                              "dir": "webapps.*", "dirtype" : "regexp"})
+
+        postsai.create_where_for_column("file", form, "file")
+        self.assertEqual(postsai.sql, " AND file = %s")
+        
+        postsai.create_where_for_column("branch", form, "branch")
+        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s")
+
+        postsai.create_where_for_column("dir", form, "dir")
+        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s")
+        
+        
  
 
 if __name__ == '__main__':
