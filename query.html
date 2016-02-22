@@ -12,6 +12,7 @@
     <style>
     .content {padding: 0 1em}
     .file {width: 20%}
+    .hidden {display: none}
     .breakword { 
 
 /* Warning: Needed for oldIE support, but words are broken up letter-by-letter */
@@ -57,14 +58,15 @@
 <div id="preamble"><span class="search-parameter"></span></div>
 
 
- <table id="table"
+<table id="table"
  	data-search="true"
  	data-show-columns="true"
  	data-show-export="true"
  	data-show-refresh="true"
  	data-show-toggle="true"
  	data-sortable="true"
- 	data-toolbar="#preamble">
+ 	data-toolbar="#preamble"
+ 	class="hidden">
 
     <thead>
     <tr>
@@ -79,7 +81,8 @@
         
     </tr>
     </thead>
-    </table>
+</table>
+<div class="spinner">Please stand by while the database is working.</div>
     
     
 </div>
