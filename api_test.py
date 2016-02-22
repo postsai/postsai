@@ -66,8 +66,31 @@ class TestStringMethods(unittest.TestCase):
         postsai.create_where_for_column("dir", form, "dir")
         self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s")
         
-        
- 
+    
+    def test_create_where_for_date(self):
+        postsai = api.Postsai(self.ConfigMock())
+        postsai.data = []
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "day"}))
+        self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "week"}))
+        self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 WEEK)")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "month"}))
+        self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 MONTH)")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "hours", "hours" : "2"}))
+        self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "2016-02-22", "maxdate" : ""}))
+        self.assertEqual(postsai.sql, " AND ci_when >= %s")
+
 
 if __name__ == '__main__':
     unittest.main()

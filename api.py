@@ -153,9 +153,14 @@ class Postsai:
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)"
             self.data.append(form.getfirst("hours"))
         elif (type == "explicit"):
-            self.sql = self.sql + " AND ci_when >= %s AND ci_when <= %s"
-            self.data.append(form.getfirst("mindate")) 
-            self.data.append(form.getfirst("maxdate")) 
+            mindate = form.getfirst("mindate", "")
+            if mindate != "":
+                self.sql = self.sql + " AND ci_when >= %s"
+                self.data.append(mindate) 
+            maxdate = form.getfirst("maxdate", "")
+            if maxdate != "":
+                self.sql = self.sql + " AND ci_when <= %s"
+                self.data.append(maxdate) 
 
 
     def process(self):
