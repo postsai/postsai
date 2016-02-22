@@ -48,3 +48,11 @@ This example limits queries on the who-column to the value "cvsscript".
 ``` python
 config_filter = {"who" : "^cvsscript$"}
 ```
+
+
+<!--
+Building
+-
+zip -r /tmp/postsai-0.1.zip postsai --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*"
+
+-->
