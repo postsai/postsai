@@ -146,6 +146,8 @@ function initTable() {
     	$('#table').bootstrapTable('load', {data: data});
 		hideRedundantColumns();
     	mergeCells(data);
+    	$('#table').removeClass("hidden")
+    	$(".spinner").addClass("hidden")
 	});
 }
 
