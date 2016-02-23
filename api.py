@@ -166,8 +166,8 @@ class Postsai:
     def process(self):
         """processes an API request"""
 
-        print "Content-Type: text/json; charset='utf-8'\r"
-        print "\r"
+        print("Content-Type: text/json; charset='utf-8'\r")
+        print("\r")
         form = cgi.FieldStorage()
 
         result = self.validate_input(form)
@@ -176,7 +176,7 @@ class Postsai:
             self.create_query(form)
             result = PostsaiDB(self.config).query(self.sql, self.data)
 
-        print json.dumps(result, default=convert_to_builtin_type)
+        print(json.dumps(result, default=convert_to_builtin_type))
 
 if __name__ == '__main__':
     Postsai(config).process()
