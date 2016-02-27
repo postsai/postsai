@@ -14,9 +14,36 @@ class CacheTests(unittest.TestCase):
         self.assertEqual(cache.get("file", "stendhal.java"), "1", "created entry does in cache")
 
 
+class PostsaiDBTests(unittest.TestCase):
+    "test for he db access"
+
+    def test_rewrite(self):
+        db = api.PostsaiDB({})
+
+        db.is_viewvc_database = False
+        self.assertEquals(
+            db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"),
+            "SELECT revision FROM checkins WHERE 1=0",
+            "No rewriting on bonsai databases")
+
+        db.is_viewvc_database = True
+        self.assertEquals(
+            db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"),
+            "SELECT revision FROM commits WHERE 1=0",
+            "Rewriting on ViewVC databases")
+
+    def test_fix_encoding_of_result(self):
+        data = [["a", u"\u00c4".encode("UTF-8")]]
+
+        res = api.PostsaiDB({}).fix_encoding_of_result(data)
+
+        self.assertEqual(res[0][0], "a", "Normal character is unchanged")
+        self.assertEqual(res[0][1], u"\u00c4", "Special character is decoded")
+
+
 
 class PostsaiTests(unittest.TestCase):
-    "test for he api"
+    "test for the api"
 
     class FormMock:
         """mock cgi form based on a dictionary"""
@@ -26,16 +53,6 @@ class PostsaiTests(unittest.TestCase):
 
         def getfirst(self, key, default=None):
             return self.dict[key]
-
-
-
-    def test_fix_encoding_of_result(self):
-        data = [["a", u"\u00c4".encode("UTF-8")]]
-
-        res = api.PostsaiDB({}).fix_encoding_of_result(data)
-
-        self.assertEqual(res[0][0], "a", "Normal character is unchanged")
-        self.assertEqual(res[0][1], u"\u00c4", "Special character is decoded")
 
 
     def test_validate_input(self):

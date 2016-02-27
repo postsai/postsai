@@ -42,11 +42,32 @@ class PostsaiDB:
         self.config = config
 
 
-    def is_viewvc_database(self, cursor):
-        """checks whether this is a Viewvc database instead of a Bonsai database"""
+    def connect(self):
+        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], 
+                           self.config['db']['password'], self.config['db']['database'])
 
+        # checks whether this is a ViewVC database instead of a Bonsai database
+        cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
-        return cursor.rowcount == 1
+        self.is_viewvc_database = (cursor.rowcount == 1)
+
+
+    def rewrite_sql(self, sql):
+        if self.is_viewvc_database:
+            sql = sql.replace("checkins", "commits")
+        return sql
+
+
+    def update_database_structure(self):
+        """alters the database structure"""
+
+        cursor = self.conn.cursor()
+
+        # increase column width of checkins
+        cursor.execute(self.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"))
+        size = cursor.description[0][3]
+        if size < 50:
+            cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
 
 
     def fix_encoding_of_result(self, rows):
@@ -64,20 +85,18 @@ class PostsaiDB:
         return result
 
 
-    def query(self, sql, data):
+    def one_shot_query(self, sql, data):
         """Executes the database query and prints the result"""
 
-        conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], self.config['db']['password'], self.config['db']['database'])
-        conn.begin();
-        cursor = conn.cursor()
+        self.connect()
+        self.conn.begin();
+        cursor = self.conn.cursor()
 
-        if (self.is_viewvc_database(cursor)):
-            sql = sql.replace("checkins", "commits")
 
-        cursor.execute(sql, data)
+        cursor.execute(self.rewrite_sql(sql), data)
         rows = cursor.fetchall()
-        conn.commit()
-        conn.close()
+        self.conn.commit()
+        self.conn.close()
         return self.fix_encoding_of_result(rows)
 
 
@@ -199,10 +218,11 @@ class Postsai:
             self.create_query(form)
             result = {
                 "config" : self.config['ui'], 
-                "data" : PostsaiDB(self.config).query(self.sql, self.data)
+                "data" : PostsaiDB(self.config).one_shot_query(self.sql, self.data)
             }
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
 if __name__ == '__main__':
     Postsai(vars(config)).process()
+
