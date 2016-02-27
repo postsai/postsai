@@ -123,11 +123,11 @@ function renderQueryParameters() {
  */
 function hideRedundantColumns() {
 	var vars = getUrlVars();
-	if (vars["branch"]) {
+	if (vars["branch"] && vars["branchtype"] === "match") {
 		$('th[data-field="5"').remove();
 //		$('#table').bootstrapTable('hideColumn', '5');
 	}
-	if (vars["repository"]) {
+	if (vars["repository"] && vars["repositorytype"] === "match") {
 		$('th[data-field="0"').remove();
 //		$('#table').bootstrapTable('hideColumn', '0');
 	}
