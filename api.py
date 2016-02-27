@@ -35,6 +35,15 @@ class Cache:
 class PostsaiDB:
     """Database access for postsai"""
 
+    column_table_mapping = {
+        "repository" : "repositories",
+        "who" : "people",
+        "dir" : "dirs",
+        "file" : "files",
+        "branch" : "branches",
+        "description" : "descs"
+    }
+
 
     def __init__(self, config):
         """Creates a Postsai api instance"""
@@ -68,6 +77,8 @@ class PostsaiDB:
         size = cursor.description[0][3]
         if size < 50:
             cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+        
+        cursor.close()
 
 
     def fix_encoding_of_result(self, rows):
@@ -100,6 +111,54 @@ class PostsaiDB:
         return self.fix_encoding_of_result(rows)
 
 
+    def fill_id_cache(self, cursor, column, value):
+        """fills the id-cache"""
+
+        sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
+        cursor.execute(sql, [value])
+        rows = cursor.fetchall()
+        if len(rows) > 0:
+            self.cache.put(column, value, rows[0][0])
+        else:
+            sql = "INSERT INTO " + self.column_table_mapping[column] + " (" + column + ") VALUE (%s)"
+            cursor.execute(sql, [value])
+            self.cache.put(column, value, cursor.lastrowid)
+
+
+    def import_data(self, rows):
+        """Imports data"""
+
+        self.connect()
+        self.conn.begin()
+        self.cache = Cache()
+        cursor = self.conn.cursor()
+
+        for row in rows:
+            for key, table in self.column_table_mapping.items():
+                self.fill_id_cache(cursor, key, row[key])
+        
+        for row in rows:
+            sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
+                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            cursor.execute(sql, [
+                row["type"], 
+                row["ci_when"], 
+                self.cache.get("who", row["who"]),
+                self.cache.get("repository", row["repository"]),
+                self.cache.get("dir", row["dir"]),
+                self.cache.get("file", row["file"]),
+                row["revision"],
+                self.cache.get("branch", row["branch"]),
+                row["addedlines"],
+                row["removedlines"],
+                self.cache.get("description", row["description"]),
+                ""
+                ])
+
+        cursor.close()
+        self.conn.commit()
+        self.conn.close()
+        
 
 
 class Postsai:
