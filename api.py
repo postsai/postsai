@@ -10,8 +10,39 @@ import config
 def convert_to_builtin_type(obj):
     return str(obj)
 
+class Cache:
+    """Cache"""
+
+    cache = {};
+
+    def put(self, type, key, value):
+        """adds an entry to the cache"""
+
+        if not type in self.cache:
+            self.cache[type] = {}
+        self.cache[type][key] = value;
+
+
+    def get(self, type, key):
+        """gets an entry from the cache"""
+
+        if not type in self.cache:
+            return None;
+        return self.cache[type][key];
+
+
+
 class PostsaiDB:
-    """Databaes access for postsai"""
+    """Database access for postsai"""
+
+    column_table_mapping = {
+        "repository" : "repositories",
+        "who" : "people",
+        "dir" : "dirs",
+        "file" : "files",
+        "branch" : "branches",
+        "description" : "descs"
+    }
 
 
     def __init__(self, config):
@@ -20,11 +51,34 @@ class PostsaiDB:
         self.config = config
 
 
-    def is_viewvc_database(self, cursor):
-        """checks whether this is a Viewvc database instead of a Bonsai database"""
+    def connect(self):
+        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], 
+                           self.config['db']['password'], self.config['db']['database'])
 
+        # checks whether this is a ViewVC database instead of a Bonsai database
+        cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
-        return cursor.rowcount == 1
+        self.is_viewvc_database = (cursor.rowcount == 1)
+
+
+    def rewrite_sql(self, sql):
+        if self.is_viewvc_database:
+            sql = sql.replace("checkins", "commits")
+        return sql
+
+
+    def update_database_structure(self):
+        """alters the database structure"""
+
+        cursor = self.conn.cursor()
+
+        # increase column width of checkins
+        cursor.execute(self.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"))
+        size = cursor.description[0][3]
+        if size < 50:
+            cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+        
+        cursor.close()
 
 
     def fix_encoding_of_result(self, rows):
@@ -42,22 +96,69 @@ class PostsaiDB:
         return result
 
 
-    def query(self, sql, data):
+    def one_shot_query(self, sql, data):
         """Executes the database query and prints the result"""
 
-        conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], self.config['db']['password'], self.config['db']['database'])
-        cursor = conn.cursor()
+        self.connect()
+        self.conn.begin();
+        cursor = self.conn.cursor()
 
-        if (self.is_viewvc_database(cursor)):
-            sql = sql.replace("checkins", "commits")
 
-        cursor.execute(sql, data)
+        cursor.execute(self.rewrite_sql(sql), data)
         rows = cursor.fetchall()
-        conn.commit()
-        conn.close()
+        self.conn.commit()
+        self.conn.close()
         return self.fix_encoding_of_result(rows)
 
 
+    def fill_id_cache(self, cursor, column, value):
+        """fills the id-cache"""
+
+        sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
+        cursor.execute(sql, [value])
+        rows = cursor.fetchall()
+        if len(rows) > 0:
+            self.cache.put(column, value, rows[0][0])
+        else:
+            sql = "INSERT INTO " + self.column_table_mapping[column] + " (" + column + ") VALUE (%s)"
+            cursor.execute(sql, [value])
+            self.cache.put(column, value, cursor.lastrowid)
+
+
+    def import_data(self, rows):
+        """Imports data"""
+
+        self.connect()
+        self.conn.begin()
+        self.cache = Cache()
+        cursor = self.conn.cursor()
+
+        for row in rows:
+            for key, table in self.column_table_mapping.items():
+                self.fill_id_cache(cursor, key, row[key])
+        
+        for row in rows:
+            sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
+                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            cursor.execute(sql, [
+                row["type"], 
+                row["ci_when"], 
+                self.cache.get("who", row["who"]),
+                self.cache.get("repository", row["repository"]),
+                self.cache.get("dir", row["dir"]),
+                self.cache.get("file", row["file"]),
+                row["revision"],
+                self.cache.get("branch", row["branch"]),
+                row["addedlines"],
+                row["removedlines"],
+                self.cache.get("description", row["description"]),
+                ""
+                ])
+
+        cursor.close()
+        self.conn.commit()
+        self.conn.close()
+        
 
 
 class Postsai:
@@ -176,10 +277,11 @@ class Postsai:
             self.create_query(form)
             result = {
                 "config" : self.config['ui'], 
-                "data" : PostsaiDB(self.config).query(self.sql, self.data)
+                "data" : PostsaiDB(self.config).one_shot_query(self.sql, self.data)
             }
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
 if __name__ == '__main__':
     Postsai(vars(config)).process()
+
