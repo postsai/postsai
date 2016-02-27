@@ -5,12 +5,6 @@ import unittest
 
 class TestStringMethods(unittest.TestCase):
     "test for he api"
-    
-    class ConfigMock:
-        """mock configuration for tests"""
-
-        config_filter = {"who" : "^cvsscript$"}
-
 
     class FormMock:
         """mock cgi form based on a dictionary"""
@@ -26,18 +20,18 @@ class TestStringMethods(unittest.TestCase):
     def test_fix_encoding_of_result(self):
         data = [["a", u"\u00c4".encode("UTF-8")]]
 
-        res = api.PostsaiDB(self.ConfigMock()).fix_encoding_of_result(data)
+        res = api.PostsaiDB({}).fix_encoding_of_result(data)
 
         self.assertEqual(res[0][0], "a", "Normal character is unchanged")
         self.assertEqual(res[0][1], u"\u00c4", "Special character is decoded")
 
 
     def test_validate_input(self):
-        postsai = api.Postsai(self)
+        postsai = api.Postsai({})
         input = self.FormMock({"who" : "postman"})
         self.assertEqual(postsai.validate_input(input), "", "no filter")
 
-        postsai = api.Postsai(self.ConfigMock())
+        postsai = api.Postsai({"filter" : { "who" : "^cvsscript$" }})
         input = self.FormMock({"who" : "postman"})
         self.assertNotEqual(postsai.validate_input(input), "", "postman is not a permitted user")
 
@@ -49,7 +43,7 @@ class TestStringMethods(unittest.TestCase):
 
 
     def test_create_where_for_column(self):
-        postsai = api.Postsai(self.ConfigMock())
+        postsai = api.Postsai({})
 
         postsai.sql = ""
         postsai.data = []
@@ -68,7 +62,7 @@ class TestStringMethods(unittest.TestCase):
         
     
     def test_create_where_for_date(self):
-        postsai = api.Postsai(self.ConfigMock())
+        postsai = api.Postsai({})
         postsai.data = []
 
         postsai.sql = ""

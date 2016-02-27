@@ -143,15 +143,17 @@ function initTable() {
 			alert(data);
 			return;
 		}
-    	$('#table').bootstrapTable('load', {data: data});
+		window.config = data.config;
+    	$('#table').bootstrapTable('load', {data: data.data});
 		hideRedundantColumns();
-    	mergeCells(data);
+    	mergeCells(data.data);
     	$('#table').removeClass("hidden")
     	$(".spinner").addClass("hidden")
 	});
 }
 
 $("ready", function() {
+	window.config = {};
 	addQueryStringToLink();
 	addValuesFromURLs();
 	if (document.querySelector("body.page-searchresult")) {
@@ -190,10 +192,11 @@ function formatTrackerLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value)
-	if (!window.tracker) {
+	if (!window.config.tracker) {
 		return res;
 	}
-	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, "<a href='" + window.tracker + "$1'>#$1</a>")
+	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, 
+		"<a href='" + window.config.tracker + "$1'>#$1</a>")
 }
 
 /**
@@ -204,12 +207,13 @@ function formatFileLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value)
-	if (!window.viewvc) {
+	if (!window.config.viewvc) {
 		return res;
 	}
 	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
-	return "<a href='" + viewvc + "/" + repository + "/" + res +"'>" + res + "</a>";
+	return "<a href='" + window.config.viewvc + "/" + repository + "/" + res +"'>" + res + "</a>";
 }
+
 /**
  * formats the rev column to link to viewvc file content
  */
@@ -218,12 +222,12 @@ function formatRevLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value)
-	if (!window.viewvc) {
+	if (!window.config.viewvc) {
 		return res;
 	}
 	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
 	var file = escapeHtml(row[3]);
-	return "<a href='" + viewvc + "/" + repository + "/" + file + "?revision=" 
+	return "<a href='" + window.config.viewvc + "/" + repository + "/" + file + "?revision=" 
 		+ res + "&view=markup'>" + res + "</a>";
 }
 
@@ -235,7 +239,7 @@ function formatDiffLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value)
-	if (!window.viewvc) {
+	if (!window.config.viewvc) {
 		return res;
 	}
 	
@@ -256,5 +260,6 @@ function formatDiffLink(value, row, index) {
 	pre = split.join(".");
 	
 	var diff = "?r1=" + pre + "&r2=" + ref;
-	return "<a href='" + viewvc + "/" + repository + "/" + file + diff +"'>" + res + "</a>";
+	return "<a href='" + window.config.viewvc + "/" + repository + "/" + file + diff +"'>" + res + "</a>";
 }
+
