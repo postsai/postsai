@@ -124,10 +124,12 @@ function renderQueryParameters() {
 function hideRedundantColumns() {
 	var vars = getUrlVars();
 	if (vars["branch"]) {
-		$('#table').bootstrapTable('hideColumn', '5');
+		$('th[data-field="5"').remove();
+//		$('#table').bootstrapTable('hideColumn', '5');
 	}
 	if (vars["repository"]) {
-		$('#table').bootstrapTable('hideColumn', '0');
+		$('th[data-field="0"').remove();
+//		$('#table').bootstrapTable('hideColumn', '0');
 	}
 }
 
@@ -136,16 +138,15 @@ function hideRedundantColumns() {
  * loads the search result from the server
  */
 function initTable() {
-	$('#table').bootstrapTable();
-
 	$.getJSON( "api.py" + window.location.search, function( data ) {
 		if (typeof data === "string") {
 			alert(data);
 			return;
 		}
 		window.config = data.config;
-    	$('#table').bootstrapTable('load', {data: data.data});
 		hideRedundantColumns();
+		$('#table').bootstrapTable();
+    	$('#table').bootstrapTable('load', {data: data.data});
     	mergeCells(data.data);
     	$('#table').removeClass("hidden")
     	$(".spinner").addClass("hidden")
