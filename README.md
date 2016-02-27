@@ -31,12 +31,14 @@ db = {
 
 Integration
 -
-Postsai can be integreated with ViewVC and various issue trackers, including Github and Bugzilla.
+Postsai can be integrated with ViewVC and various issue trackers, including Github and Bugzilla.
 
-* Create a file config.js with the following content:
-``` javascript
-tracker = "https://hiszilla.his.de/hiszilla/show_bug.cgi?id="
-viewvc = "https://cvs.his.de/cgi-bin/viewvc.cgi";
+* Add the following configuration to config.py:
+``` python
+ui = {
+	"tracker" : "https://hiszilla.his.de/hiszilla/show_bug.cgi?id=",
+	"viewvc" : "https://cvs.his.de/cgi-bin/viewvc.cgi"
+}
 ```
 
 Privacy

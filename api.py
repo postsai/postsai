@@ -174,7 +174,10 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
-            result = PostsaiDB(self.config).query(self.sql, self.data)
+            result = {
+                "config" : self.config['ui'], 
+                "data" : PostsaiDB(self.config).query(self.sql, self.data)
+            }
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
