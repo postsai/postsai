@@ -3,7 +3,7 @@
 "use strict";
 
 /**
- * merges commit messages on files commited together
+ * merges commit messages on files committed together
  */
 function mergeCells(data) {
 	var lastGroupStart = 0;
@@ -20,6 +20,18 @@ function mergeCells(data) {
 			}
 			
 			lastGroupStart = i;
+		}
+	}
+	i = data.length - 1;
+	if (
+			(data[i][0] === data[lastGroupStart][0])
+		&& (data[i][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
+		&& (data[i][2] === data[lastGroupStart][2])
+		&& (data[i][5] === data[lastGroupStart][5])
+		&& (data[i][7] === data[lastGroupStart][7])) {
+		
+		if (lastGroupStart !== i) {
+			$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart + 1});
 		}
 	}
 }
