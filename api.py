@@ -10,8 +10,30 @@ import config
 def convert_to_builtin_type(obj):
     return str(obj)
 
+class Cache:
+    """Cache"""
+
+    cache = {};
+
+    def put(self, type, key, value):
+        """adds an entry to the cache"""
+
+        if not type in self.cache:
+            self.cache[type] = {}
+        self.cache[type][key] = value;
+
+
+    def get(self, type, key):
+        """gets an entry from the cache"""
+
+        if not type in self.cache:
+            return None;
+        return self.cache[type][key];
+
+
+
 class PostsaiDB:
-    """Databaes access for postsai"""
+    """Database access for postsai"""
 
 
     def __init__(self, config):
@@ -46,6 +68,7 @@ class PostsaiDB:
         """Executes the database query and prints the result"""
 
         conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], self.config['db']['password'], self.config['db']['database'])
+        conn.begin();
         cursor = conn.cursor()
 
         if (self.is_viewvc_database(cursor)):

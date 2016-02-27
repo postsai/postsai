@@ -3,7 +3,19 @@
 import api
 import unittest
 
-class TestStringMethods(unittest.TestCase):
+class CacheTests(unittest.TestCase):
+    """tests for the cache"""
+
+    def cache(self):
+        cache = postsai.Cache()
+        self.assertIsNone(cache.get("file", "stendhal.java"), "entry not in cache")
+
+        cache.put("file", "stendhal.java", "1")
+        self.assertEqual(cache.get("file", "stendhal.java"), "1", "created entry does in cache")
+
+
+
+class PostsaiTests(unittest.TestCase):
     "test for he api"
 
     class FormMock:
