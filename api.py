@@ -45,7 +45,7 @@ class PostsaiDB:
     def query(self, sql, data):
         """Executes the database query and prints the result"""
 
-        conn = mdb.connect(self.config.config_db_host, self.config.config_db_user, self.config.config_db_password, self.config.config_db_database)
+        conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], self.config['db']['password'], self.config['db']['database'])
         cursor = conn.cursor()
 
         if (self.is_viewvc_database(cursor)):
@@ -71,10 +71,10 @@ class Postsai:
     def validate_input(self, form):
         """filter inputs, e. g. for privacy reasons"""
 
-        if hasattr(self.config, "config_filter") == False:
+        if not "filter" in self.config:
             return ""
 
-        for key, filter in self.config.config_filter.items():
+        for key, filter in self.config['filter'].items():
             value = form.getfirst(key, "")
             if value != "":
                 if value.startswith("^") and value.endswith("$"):
@@ -179,4 +179,4 @@ class Postsai:
         print(json.dumps(result, default=convert_to_builtin_type))
 
 if __name__ == '__main__':
-    Postsai(config).process()
+    Postsai(vars(config)).process()

@@ -19,10 +19,12 @@ apt-get install python python-mysqldb
 ``` python
 #!/usr/bin/python
  
-config_db_host = "localhost"
-config_db_user = "dbuser"
-config_db_password = "dbpassword"
-config_db_database = "postsai"
+db = {
+	"host" : "localhost",
+	"user" : "dbuser",
+	"password" : "dbpassword",
+	"database" : "postsai"
+}
 ```
 
 * Configure commit hook
@@ -46,7 +48,9 @@ A common use case is to prevent queries for changes done by humans. But to allow
 This example limits queries on the who-column to the value "cvsscript".
 
 ``` python
-config_filter = {"who" : "^cvsscript$"}
+filter = {
+	"who" : "^cvsscript$"
+}
 ```
 
 
