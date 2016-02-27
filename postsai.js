@@ -10,7 +10,7 @@ function mergeCells(data) {
 	for (var i = 1; i < data.length; i++) {
 		if (
 				(data[i][0] !== data[lastGroupStart][0])
-			|| (data[i][1] !== data[lastGroupStart][1])
+			|| (data[i][1].substring(0, 10) !== data[lastGroupStart][1].substring(0, 10))
 			|| (data[i][2] !== data[lastGroupStart][2])
 			|| (data[i][5] !== data[lastGroupStart][5])
 			|| (data[i][7] !== data[lastGroupStart][7])) {
