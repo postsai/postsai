@@ -336,8 +336,9 @@ class Postsai:
                     rows.append(row)
         db = PostsaiDB(self.config)
         db.import_data(rows)
-
-
+        print("Content-Type: text/plain; charset='utf-8'\r")
+        print("\r")
+        print("Completed")
 
 if __name__ == '__main__':
     if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
