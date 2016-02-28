@@ -98,6 +98,22 @@ function isQueryParameterImportant(vars, key) {
 	return true;
 }
 
+/**
+ * converts the operator parameter into a human readable form
+ */
+function typeToOperator(type) {
+	var operator = "=";
+	if (type === "regexp") {
+		operator = "~";
+	} else if (type === "notregexp") {
+		operator = "!~";
+	}
+	return operator
+}
+
+/**
+ * renders a summary of the search query
+ */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
 		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
@@ -105,25 +121,18 @@ function renderQueryParameters() {
 		var vars = getUrlVars();
 		for (var i = 0; i < params.length; i++) {
 			var key = params[i].toLowerCase();
-
 			if (!isQueryParameterImportant(vars, key)) {
 				continue;
 			}
-
 			var value = vars[key];
-			var type = vars[key + "type"];
 			if (!value) {
 				continue;
 			}
 			if (text.length > 0) {
 				text = text + ", ";
 			}
-			var operator = "=";
-			if (type === "regexp") {
-				operator = "~";
-			} else if (type === "notregexp") {
-				operator = "!~";
-			}
+			var type = vars[key + "type"];
+			var operator = typeToOperator(type)
 			text = text + params[i] + " " + operator + " " + value;
 		}
 		$(this).text(text);
