@@ -113,6 +113,15 @@ class PostsaiDB:
 
     def fill_id_cache(self, cursor, column, value):
         """fills the id-cache"""
+        data = [value]
+        extra_column = ""
+        extra_data = ""
+
+        # Special case for description column
+        if column == "description":
+            extra_column = ", hash"
+            extra_data = ", %s"
+            data.append(len(value))
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
         cursor.execute(sql, [value])
@@ -120,8 +129,8 @@ class PostsaiDB:
         if len(rows) > 0:
             self.cache.put(column, value, rows[0][0])
         else:
-            sql = "INSERT INTO " + self.column_table_mapping[column] + " (" + column + ") VALUE (%s)"
-            cursor.execute(sql, [value])
+            sql = "INSERT INTO " + self.column_table_mapping[column] + " (" + column + extra_column + ") VALUE (%s" + extra_data + ")"
+            cursor.execute(sql, data)
             self.cache.put(column, value, cursor.lastrowid)
 
 
@@ -282,6 +291,43 @@ class Postsai:
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
+
+    def import_from_webhook(self, data):
+        actionMap = {
+            "Add" : "added",
+            "Remove" : "removed",
+            "Change" : "modified"
+        }
+        rows = []
+        branch = data['ref'][data['ref'].rfind("/")+1:]
+        for commit in data['commits']:
+            for type in ("Change", "Add", "Remove"):
+                for full_path in commit[actionMap[type]]:
+
+                    dir = full_path[0:full_path.rfind("/")]
+                    file = full_path[full_path.rfind("/")+1:]
+                    row = {
+                        "type" : type,
+                        "ci_when" : commit['timestamp'], 
+                        "who" : commit['author']['email'],
+                        "repository" : data['repository']['full_name'],
+                        "dir" : dir,
+                        "file" : file,
+                        "revision" : commit['id'],
+                        "branch" : branch,
+                        "addedlines" : "0",
+                        "removedlines" : "0",
+                        "description" : commit['message']
+                    }
+                    rows.append(row)
+        db = PostsaiDB(self.config)
+        db.import_data(rows)
+
+
+
 if __name__ == '__main__':
-    Postsai(vars(config)).process()
+    if cgi.FieldStorage().getfirst("date", "") == "":
+        Postsai(vars(config)).import_from_webhook(json.loads(sys.stdin.read()))
+    else:
+        Postsai(vars(config)).process()
 
