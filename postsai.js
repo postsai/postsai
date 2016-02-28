@@ -1,4 +1,5 @@
 (function() {
+window.$ = window.$ || {};
 
 "use strict";
 
@@ -21,7 +22,7 @@ function mergeCells(data) {
 	for (var i = 1; i < data.length; i++) {
 		if (!areRowsMergable(data, i, lastGroupStart)) {
 			if (lastGroupStart + 1 !== i) {
-				$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
+				$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
 			}
 			
 			lastGroupStart = i;
@@ -30,7 +31,7 @@ function mergeCells(data) {
 	var index = data.length - 1;
 	if (areRowsMergable(data, index, lastGroupStart)) {
 		if (lastGroupStart !== index) {
-			$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
+			$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
 		}
 	}
 }
@@ -53,10 +54,10 @@ function addQueryStringToLink() {
 // http://stackoverflow.com/a/20097994
 function getUrlVars() {
 	var vars = {};
-	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
-	function(m,key,value) {
-		vars[key] = decodeURIComponent(value.replace("+", " "));
-	});
+	window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+		function(m,key,value) {
+			vars[key] = decodeURIComponent(value.replace("+", " "));
+		});
 	return vars;
 }
 
@@ -135,12 +136,12 @@ function renderQueryParameters() {
 function hideRedundantColumns() {
 	var vars = getUrlVars();
 	if (vars["branch"] && vars["branchtype"] === "match") {
-		$('th[data-field="5"').remove();
-//		$('#table').bootstrapTable('hideColumn', '5');
+		$("th[data-field='5'").remove();
+//		$('#table').bootstrapTable("hideColumn", "5");
 	}
 	if (vars["repository"] && vars["repositorytype"] === "match") {
-		$('th[data-field="0"').remove();
-//		$('#table').bootstrapTable('hideColumn', '0');
+		$("th[data-field='0'").remove();
+//		$('#table').bootstrapTable("hideColumn", "0");
 	}
 }
 
@@ -156,11 +157,11 @@ function initTable() {
 		}
 		window.config = data.config;
 		hideRedundantColumns();
-		$('#table').bootstrapTable();
-    	$('#table').bootstrapTable('load', {data: data.data});
+		$("#table").bootstrapTable();
+    	$("#table").bootstrapTable("load", {data: data.data});
     	mergeCells(data.data);
-    	$('#table').removeClass("hidden")
-    	$(".spinner").addClass("hidden")
+    	$("#table").removeClass("hidden");
+    	$(".spinner").addClass("hidden");
 	});
 }
 
@@ -180,8 +181,8 @@ var entityMap = {
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
-	'"': '&quot;',
-	"'": '&#39;'
+	"\"": "&quot;",
+	"'": "&#39;"
 };
 function escapeHtml(string) {
 	return String(string).replace(/[&<>"']/g, function (s) {
@@ -203,7 +204,7 @@ function formatTrackerLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.tracker) {
 		return res;
 	}
@@ -218,7 +219,7 @@ function formatFileLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}
@@ -233,7 +234,7 @@ function formatRevLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}
