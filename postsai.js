@@ -3,18 +3,23 @@
 "use strict";
 
 /**
+ * areRowMergable?
+ */
+function areRowsMergable(data, lastGroupStart, index) {
+	return (data[index][0] === data[lastGroupStart][0])
+		&& (data[index][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
+		&& (data[index][2] === data[lastGroupStart][2])
+		&& (data[index][5] === data[lastGroupStart][5])
+		&& (data[index][7] === data[lastGroupStart][7]);
+}
+
+/**
  * merges commit messages on files committed together
  */
 function mergeCells(data) {
 	var lastGroupStart = 0;
 	for (var i = 1; i < data.length; i++) {
-		if (
-				(data[i][0] !== data[lastGroupStart][0])
-			|| (data[i][1].substring(0, 10) !== data[lastGroupStart][1].substring(0, 10))
-			|| (data[i][2] !== data[lastGroupStart][2])
-			|| (data[i][5] !== data[lastGroupStart][5])
-			|| (data[i][7] !== data[lastGroupStart][7])) {
-			
+		if (!areRowsMergable(data, i, lastGroupStart)) {
 			if (lastGroupStart + 1 !== i) {
 				$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
 			}
@@ -22,16 +27,10 @@ function mergeCells(data) {
 			lastGroupStart = i;
 		}
 	}
-	i = data.length - 1;
-	if (
-			(data[i][0] === data[lastGroupStart][0])
-		&& (data[i][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
-		&& (data[i][2] === data[lastGroupStart][2])
-		&& (data[i][5] === data[lastGroupStart][5])
-		&& (data[i][7] === data[lastGroupStart][7])) {
-		
-		if (lastGroupStart !== i) {
-			$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart + 1});
+	var index = data.length - 1;
+	if (areRowsMergable(data, index, lastGroupStart)) {
+		if (lastGroupStart !== index) {
+			$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
 		}
 	}
 }
