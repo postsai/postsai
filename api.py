@@ -294,20 +294,23 @@ class Postsai:
 
     def import_from_webhook(self, data):
         actionMap = {
-            "Add" : "added",
-            "Remove" : "removed",
-            "Change" : "modified"
+            "added" : "Add",
+            "copied": "Add",
+            "removed" : "Remove",
+            "modified" : "Change" 
         }
         rows = []
         branch = data['ref'][data['ref'].rfind("/")+1:]
         for commit in data['commits']:
-            for type in ("Change", "Add", "Remove"):
-                for full_path in commit[actionMap[type]]:
+            for type in ("added", "copied", "removed", "modified"):
+                if not type in commit:
+                    continue
+                for full_path in commit[type]:
 
                     dir = full_path[0:full_path.rfind("/")]
                     file = full_path[full_path.rfind("/")+1:]
                     row = {
-                        "type" : type,
+                        "type" : actionMap[type],
                         "ci_when" : commit['timestamp'], 
                         "who" : commit['author']['email'],
                         "repository" : data['repository']['full_name'],
