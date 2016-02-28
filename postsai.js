@@ -1,6 +1,18 @@
 (function() {
+window.$ = window.$ || {};
 
 "use strict";
+
+/**
+ * areRowMergable?
+ */
+function areRowsMergable(data, lastGroupStart, index) {
+	return (data[index][0] === data[lastGroupStart][0])
+		&& (data[index][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
+		&& (data[index][2] === data[lastGroupStart][2])
+		&& (data[index][5] === data[lastGroupStart][5])
+		&& (data[index][7] === data[lastGroupStart][7]);
+}
 
 /**
  * merges commit messages on files committed together
@@ -8,30 +20,18 @@
 function mergeCells(data) {
 	var lastGroupStart = 0;
 	for (var i = 1; i < data.length; i++) {
-		if (
-				(data[i][0] !== data[lastGroupStart][0])
-			|| (data[i][1].substring(0, 10) !== data[lastGroupStart][1].substring(0, 10))
-			|| (data[i][2] !== data[lastGroupStart][2])
-			|| (data[i][5] !== data[lastGroupStart][5])
-			|| (data[i][7] !== data[lastGroupStart][7])) {
-			
+		if (!areRowsMergable(data, i, lastGroupStart)) {
 			if (lastGroupStart + 1 !== i) {
-				$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
+				$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
 			}
 			
 			lastGroupStart = i;
 		}
 	}
-	i = data.length - 1;
-	if (
-			(data[i][0] === data[lastGroupStart][0])
-		&& (data[i][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
-		&& (data[i][2] === data[lastGroupStart][2])
-		&& (data[i][5] === data[lastGroupStart][5])
-		&& (data[i][7] === data[lastGroupStart][7])) {
-		
-		if (lastGroupStart !== i) {
-			$("#table").bootstrapTable('mergeCells', {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart + 1});
+	var index = data.length - 1;
+	if (areRowsMergable(data, index, lastGroupStart)) {
+		if (lastGroupStart !== index) {
+			$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
 		}
 	}
 }
@@ -54,10 +54,10 @@ function addQueryStringToLink() {
 // http://stackoverflow.com/a/20097994
 function getUrlVars() {
 	var vars = {};
-	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
-	function(m,key,value) {
-		vars[key] = decodeURIComponent(value.replace("+", " "));
-	});
+	window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+		function(m,key,value) {
+			vars[key] = decodeURIComponent(value.replace("+", " "));
+		});
 	return vars;
 }
 
@@ -98,6 +98,22 @@ function isQueryParameterImportant(vars, key) {
 	return true;
 }
 
+/**
+ * converts the operator parameter into a human readable form
+ */
+function typeToOperator(type) {
+	var operator = "=";
+	if (type === "regexp") {
+		operator = "~";
+	} else if (type === "notregexp") {
+		operator = "!~";
+	}
+	return operator
+}
+
+/**
+ * renders a summary of the search query
+ */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
 		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
@@ -105,25 +121,18 @@ function renderQueryParameters() {
 		var vars = getUrlVars();
 		for (var i = 0; i < params.length; i++) {
 			var key = params[i].toLowerCase();
-
 			if (!isQueryParameterImportant(vars, key)) {
 				continue;
 			}
-
 			var value = vars[key];
-			var type = vars[key + "type"];
 			if (!value) {
 				continue;
 			}
 			if (text.length > 0) {
 				text = text + ", ";
 			}
-			var operator = "=";
-			if (type === "regexp") {
-				operator = "~";
-			} else if (type === "notregexp") {
-				operator = "!~";
-			}
+			var type = vars[key + "type"];
+			var operator = typeToOperator(type)
 			text = text + params[i] + " " + operator + " " + value;
 		}
 		$(this).text(text);
@@ -136,12 +145,12 @@ function renderQueryParameters() {
 function hideRedundantColumns() {
 	var vars = getUrlVars();
 	if (vars["branch"] && vars["branchtype"] === "match") {
-		$('th[data-field="5"').remove();
-//		$('#table').bootstrapTable('hideColumn', '5');
+		$("th[data-field='5'").remove();
+//		$('#table').bootstrapTable("hideColumn", "5");
 	}
 	if (vars["repository"] && vars["repositorytype"] === "match") {
-		$('th[data-field="0"').remove();
-//		$('#table').bootstrapTable('hideColumn', '0');
+		$("th[data-field='0'").remove();
+//		$('#table').bootstrapTable("hideColumn", "0");
 	}
 }
 
@@ -157,11 +166,11 @@ function initTable() {
 		}
 		window.config = data.config;
 		hideRedundantColumns();
-		$('#table').bootstrapTable();
-    	$('#table').bootstrapTable('load', {data: data.data});
-    	mergeCells(data.data);
-    	$('#table').removeClass("hidden")
-    	$(".spinner").addClass("hidden")
+		$("#table").bootstrapTable();
+		$("#table").bootstrapTable("load", {data: data.data});
+		mergeCells(data.data);
+		$("#table").removeClass("hidden");
+		$(".spinner").addClass("hidden");
 	});
 }
 
@@ -181,8 +190,8 @@ var entityMap = {
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
-	'"': '&quot;',
-	"'": '&#39;'
+	"\"": "&quot;",
+	"'": "&#39;"
 };
 function escapeHtml(string) {
 	return String(string).replace(/[&<>"']/g, function (s) {
@@ -194,7 +203,7 @@ function formatTimestamp(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	return escapeHtml(value.substring(0, 16))
+	return escapeHtml(value.substring(0, 16));
 }
 
 /**
@@ -204,12 +213,12 @@ function formatTrackerLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.tracker) {
 		return res;
 	}
 	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, 
-		"<a href='" + window.config.tracker + "$1'>#$1</a>")
+		"<a href='" + window.config.tracker + "$1'>#$1</a>");
 }
 
 /**
@@ -219,7 +228,7 @@ function formatFileLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}
@@ -234,7 +243,7 @@ function formatRevLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}
@@ -251,7 +260,7 @@ function formatDiffLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}

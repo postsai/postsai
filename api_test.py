@@ -48,42 +48,42 @@ class PostsaiTests(unittest.TestCase):
     class FormMock:
         """mock cgi form based on a dictionary"""
 
-        def __init__(self, dict):
-            self.dict = dict
+        def __init__(self, map):
+            self.map = map
 
         def getfirst(self, key, default=None):
-            return self.dict[key]
+            return self.map[key]
 
     def test_split_full_path(self):
         postsai = api.Postsai({})
-        dir, file = postsai.split_full_path("README.md")
-        self.assertEquals(dir, "", "empty dir on README.md")
+        folder, file = postsai.split_full_path("README.md")
+        self.assertEquals(folder, "", "empty folder on README.md")
         self.assertEquals(file, "README.md", "file README.md on README.md")
 
-        dir, file = postsai.split_full_path("")
-        self.assertEquals(dir, "", "empty dir on empty")
+        folder, file = postsai.split_full_path("")
+        self.assertEquals(folder, "", "empty folder on empty")
         self.assertEquals(file, "", "empty file on empty")
 
-        dir, file = postsai.split_full_path("dir/README.md")
-        self.assertEquals(dir, "dir", "dir dir on dir/README.md")
-        self.assertEquals(file, "README.md", "file README on dir/README.md")
+        folder, file = postsai.split_full_path("folder/README.md")
+        self.assertEquals(folder, "folder", "folder folder on folder/README.md")
+        self.assertEquals(file, "README.md", "file README on folder/README.md")
 
 
 
     def test_validate_input(self):
         postsai = api.Postsai({})
-        input = self.FormMock({"who" : "postman"})
-        self.assertEqual(postsai.validate_input(input), "", "no filter")
+        form = self.FormMock({"who" : "postman"})
+        self.assertEqual(postsai.validate_input(form), "", "no filter")
 
         postsai = api.Postsai({"filter" : { "who" : "^cvsscript$" }})
-        input = self.FormMock({"who" : "postman"})
-        self.assertNotEqual(postsai.validate_input(input), "", "postman is not a permitted user")
+        form = self.FormMock({"who" : "postman"})
+        self.assertNotEqual(postsai.validate_input(form), "", "postman is not a permitted user")
 
-        input = self.FormMock({"who" : "cvsscript"})
-        self.assertEqual(postsai.validate_input(input), "", "cvsscript is a permitted user")
+        form = self.FormMock({"who" : "cvsscript"})
+        self.assertEqual(postsai.validate_input(form), "", "cvsscript is a permitted user")
 
-        input = self.FormMock({"who" : "^cvsscript$"})
-        self.assertEqual(postsai.validate_input(input), "", "^cvsscript$ is a permitted user")
+        form = self.FormMock({"who" : "^cvsscript$"})
+        self.assertEqual(postsai.validate_input(form), "", "^cvsscript$ is a permitted user")
 
 
     def test_create_where_for_column(self):
@@ -91,13 +91,13 @@ class PostsaiTests(unittest.TestCase):
 
         postsai.sql = ""
         postsai.data = []
-        form = self.FormMock({"file" : "config.py", "filetype" : "", 
+        form = self.FormMock({"file" : "config.py", "filetype" : "",
                               "branch" : "HEAD", "branchtype" : "match",
                               "dir": "webapps.*", "dirtype" : "regexp"})
 
         postsai.create_where_for_column("file", form, "file")
         self.assertEqual(postsai.sql, " AND file = %s")
-        
+
         postsai.create_where_for_column("branch", form, "branch")
         self.assertEqual(postsai.sql, " AND file = %s AND branch = %s")
 

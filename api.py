@@ -17,20 +17,20 @@ class Cache:
 
     cache = {};
 
-    def put(self, type, key, value):
+    def put(self, entity_type, key, value):
         """adds an entry to the cache"""
 
-        if not type in self.cache:
-            self.cache[type] = {}
-        self.cache[type][key] = value;
+        if not entity_type in self.cache:
+            self.cache[entity_type] = {}
+        self.cache[entity_type][key] = value;
 
 
-    def get(self, type, key):
+    def get(self, entity_type, key):
         """gets an entry from the cache"""
 
-        if not type in self.cache:
+        if not entity_type in self.cache:
             return None;
-        return self.cache[type][key];
+        return self.cache[entity_type][key];
 
 
 
@@ -54,7 +54,7 @@ class PostsaiDB:
 
 
     def connect(self):
-        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'], 
+        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'],
                            self.config['db']['password'], self.config['db']['database'])
 
         # checks whether this is a ViewVC database instead of a Bonsai database
@@ -79,7 +79,7 @@ class PostsaiDB:
         size = cursor.description[0][3]
         if size < 50:
             cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
-        
+
         cursor.close()
 
 
@@ -145,15 +145,15 @@ class PostsaiDB:
         cursor = self.conn.cursor()
 
         for row in rows:
-            for key, table in self.column_table_mapping.items():
+            for key in self.column_table_mapping:
                 self.fill_id_cache(cursor, key, row[key])
-        
+
         for row in rows:
             sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
                  VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
-                row["type"], 
-                row["ci_when"], 
+                row["type"],
+                row["ci_when"],
                 self.cache.get("who", row["who"]),
                 self.cache.get("repository", row["repository"]),
                 self.cache.get("dir", row["dir"]),
@@ -202,7 +202,7 @@ class Postsai:
         """creates the sql statement"""
 
         self.data = []
-        self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, concat(concat(dirs.dir, '/'), files.file), 
+        self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, concat(concat(dirs.dir, '/'), files.file),
         checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
@@ -228,22 +228,22 @@ class Postsai:
 
     def create_where_for_column(self, column, form, internal_column):
         """create the where part for the specified column with data from the request"""
-        
+
         value = form.getfirst(column, "")
         if (value == ""):
             return ""
 
         # replace HEAD branch with empty string
         if (column == "branch" and value == "HEAD"):
-            value = "" 
+            value = ""
 
-        type = form.getfirst(column+"type", "match")
+        matchtype = form.getfirst(column+"type", "match")
         operator = '=';
-        if (type == "match"):
+        if (matchtype == "match"):
             operator = '='
-        elif (type == "regexp"):
+        elif (matchtype == "regexp"):
             operator = "REGEXP"
-        elif (type == "notregexp"):
+        elif (matchtype == "notregexp"):
             operator = "NOT REGEXP"
         self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
         self.data.append(value)
@@ -252,27 +252,27 @@ class Postsai:
     def create_where_for_date(self, form):
         """parses the date parameters and adds them to the database query"""
 
-        type = form.getfirst("date", "day")
-        if (type == "all"):
+        datetype = form.getfirst("date", "day")
+        if (datetype == "all"):
             return
-        elif (type == "day"):
+        elif (datetype == "day"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)"
-        elif (type == "week"):
+        elif (datetype == "week"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 WEEK)"
-        elif (type == "month"):
+        elif (datetype == "month"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 MONTH)"
-        elif (type == "hours"):
+        elif (datetype == "hours"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)"
             self.data.append(form.getfirst("hours"))
-        elif (type == "explicit"):
+        elif (datetype == "explicit"):
             mindate = form.getfirst("mindate", "")
             if mindate != "":
                 self.sql = self.sql + " AND ci_when >= %s"
-                self.data.append(mindate) 
+                self.data.append(mindate)
             maxdate = form.getfirst("maxdate", "")
             if maxdate != "":
                 self.sql = self.sql + " AND ci_when <= %s"
-                self.data.append(maxdate) 
+                self.data.append(maxdate)
 
 
     def process(self):
@@ -287,7 +287,7 @@ class Postsai:
         if result == "":
             self.create_query(form)
             result = {
-                "config" : self.config['ui'], 
+                "config" : self.config['ui'],
                 "data" : PostsaiDB(self.config).one_shot_query(self.sql, self.data)
             }
 
@@ -295,13 +295,13 @@ class Postsai:
 
     def split_full_path(self, full_path):
         """splits a full_path into directory and file parts"""
-         
+
         sep = full_path.rfind("/")
-        dir = ""
+        folder = ""
         if (sep > -1):
-            dir = full_path[0:sep]
+            folder = full_path[0:sep]
         file = full_path[sep+1:]
-        return dir, file
+        return folder, file
 
 
     def import_from_webhook(self, data):
@@ -309,23 +309,23 @@ class Postsai:
             "added" : "Add",
             "copied": "Add",
             "removed" : "Remove",
-            "modified" : "Change" 
+            "modified" : "Change"
         }
         rows = []
         branch = data['ref'][data['ref'].rfind("/")+1:]
         for commit in data['commits']:
-            for type in ("added", "copied", "removed", "modified"):
-                if not type in commit:
+            for change in ("added", "copied", "removed", "modified"):
+                if not change in commit:
                     continue
-                for full_path in commit[type]:
+                for full_path in commit[change]:
 
-                    dir, file = self.split_full_path(full_path)
+                    folder, file = self.split_full_path(full_path)
                     row = {
-                        "type" : actionMap[type],
-                        "ci_when" : commit['timestamp'], 
+                        "type" : actionMap[change],
+                        "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
                         "repository" : data['repository']['full_name'],
-                        "dir" : dir,
+                        "dir" : folder,
                         "file" : file,
                         "revision" : commit['id'],
                         "branch" : branch,
