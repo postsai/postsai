@@ -4,6 +4,7 @@ import cgi
 import json
 import MySQLdb as mdb
 import re
+from os import environ
 
 import config
 
@@ -291,6 +292,16 @@ class Postsai:
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
+    def split_full_path(self, full_path):
+        """splits a full_path into directory and file parts"""
+         
+        sep = full_path.rfind("/")
+        dir = ""
+        if (sep > -1):
+            dir = full_path[0:sep]
+        file = full_path[sep+1:]
+        return dir, file
+
 
     def import_from_webhook(self, data):
         actionMap = {
@@ -307,8 +318,7 @@ class Postsai:
                     continue
                 for full_path in commit[type]:
 
-                    dir = full_path[0:full_path.rfind("/")]
-                    file = full_path[full_path.rfind("/")+1:]
+                    dir, file = self.split_full_path(full_path)
                     row = {
                         "type" : actionMap[type],
                         "ci_when" : commit['timestamp'], 

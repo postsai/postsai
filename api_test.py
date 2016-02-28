@@ -54,6 +54,21 @@ class PostsaiTests(unittest.TestCase):
         def getfirst(self, key, default=None):
             return self.dict[key]
 
+    def test_split_full_path(self):
+        postsai = api.Postsai({})
+        dir, file = postsai.split_full_path("README.md")
+        self.assertEquals(dir, "", "empty dir on README.md")
+        self.assertEquals(file, "README.md", "file README.md on README.md")
+
+        dir, file = postsai.split_full_path("")
+        self.assertEquals(dir, "", "empty dir on empty")
+        self.assertEquals(file, "", "empty file on empty")
+
+        dir, file = postsai.split_full_path("dir/README.md")
+        self.assertEquals(dir, "dir", "dir dir on dir/README.md")
+        self.assertEquals(file, "README.md", "file README on dir/README.md")
+
+
 
     def test_validate_input(self):
         postsai = api.Postsai({})
