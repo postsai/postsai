@@ -149,7 +149,7 @@ class PostsaiDB:
         for row in rows:
             sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
                  VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-            cursor.execute(sql, [
+            cursor.execute(self.rewrite_sql(sql), [
                 row["type"], 
                 row["ci_when"], 
                 self.cache.get("who", row["who"]),
@@ -329,8 +329,7 @@ class Postsai:
 
 
 if __name__ == '__main__':
-    if cgi.FieldStorage().getfirst("date", "") == "":
+    if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
         Postsai(vars(config)).import_from_webhook(json.loads(sys.stdin.read()))
     else:
         Postsai(vars(config)).process()
-
