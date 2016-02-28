@@ -158,10 +158,10 @@ function initTable() {
 		window.config = data.config;
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
-    	$("#table").bootstrapTable("load", {data: data.data});
-    	mergeCells(data.data);
-    	$("#table").removeClass("hidden");
-    	$(".spinner").addClass("hidden");
+		$("#table").bootstrapTable("load", {data: data.data});
+		mergeCells(data.data);
+		$("#table").removeClass("hidden");
+		$(".spinner").addClass("hidden");
 	});
 }
 
@@ -194,7 +194,7 @@ function formatTimestamp(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	return escapeHtml(value.substring(0, 16))
+	return escapeHtml(value.substring(0, 16));
 }
 
 /**
@@ -209,7 +209,7 @@ function formatTrackerLink(value, row, index) {
 		return res;
 	}
 	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, 
-		"<a href='" + window.config.tracker + "$1'>#$1</a>")
+		"<a href='" + window.config.tracker + "$1'>#$1</a>");
 }
 
 /**
@@ -251,7 +251,7 @@ function formatDiffLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value)
+	var res = escapeHtml(value);
 	if (!window.config.viewvc) {
 		return res;
 	}
