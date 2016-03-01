@@ -149,7 +149,7 @@ class PostsaiDB:
                 self.fill_id_cache(cursor, key, row[key])
 
         for row in rows:
-            sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
+            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
                  VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
                 row["type"],
@@ -313,6 +313,11 @@ class Postsai:
         }
         rows = []
         branch = data['ref'][data['ref'].rfind("/")+1:]
+        repo = data['repository']
+        if "full_name" in repo:
+            repo_name = repo["full_name"]
+        else:
+            repo_name = repo["name"]
         for commit in data['commits']:
             for change in ("added", "copied", "removed", "modified"):
                 if not change in commit:
@@ -324,7 +329,7 @@ class Postsai:
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
-                        "repository" : data['repository']['full_name'],
+                        "repository" : repo_name,
                         "dir" : folder,
                         "file" : file,
                         "revision" : commit['id'],
