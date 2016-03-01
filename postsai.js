@@ -189,7 +189,61 @@ function escapeHtml(string) {
 		return entityMap[s];
 	});
 }
-	
+
+
+function guessSCM(revision) {
+	if (revision.indexOf(".") >= 0) {
+		return "cvs";
+	} else if (revision.length < 40) {
+		return "subversion";
+	}
+	return "git";
+}
+
+function calculatePreviousCvsRevision(revision) {
+	var split = revision.split(".");
+	var last = split[split.length - 1];
+	if (last === "1" && split.length > 2) {
+		split.pop();
+		split.pop();
+	} else {
+		split[split.length - 1] = parseInt(last) - 1;
+	}
+	return split.join(".");	
+}
+
+function rowToProp(row) {
+	var scm = guessSCM(row[4]);
+	var prop = {
+		"[repository]": escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/")),
+		"[file]" : escapeHtml(row[3]),
+		"[revision]": escapeHtml(row[4]),
+		"[short_revision]": escapeHtml(row[4]),
+		"[scm]": scm
+	};
+	if (scm === "cvs") {
+		prop["[old_revision]"] = escapeHtml(calculatePreviousCvsRevision(row[4]));
+		prop["[home_url]"] = window.config.viewvc
+	}
+	if (scm === "git") {
+		prop["short_revision"] = escapeHtml(row[4].substring(0, 8));
+	}
+	return prop;
+}
+
+function argsubst(str, prop) {
+	for (var key in prop) {
+		if (prop.hasOwnProperty(key)) {
+			var value = prop[key];
+			while(str.indexOf(key) > -1) {
+				str = str.replace(key, value);
+			}
+		}
+	}
+	return str;
+}
+
+
 function formatTimestamp(value, row, index) {
 	if (!value) {
 		return "-";
@@ -219,12 +273,11 @@ function formatFileLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value);
-	if (!window.config.viewvc) {
-		return res;
+	var prop = rowToProp(row);
+	if (!prop["[home_url]"]) {
+		return escapeHtml(value);
 	}
-	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
-	return "<a href='" + window.config.viewvc + "/" + repository + "/" + res +"'>" + res + "</a>";
+	return argsubst("<a href='[home_url]/[repository]/[file]'>[file]</a>", prop);
 }
 
 /**
@@ -234,14 +287,11 @@ function formatRevLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value);
-	if (!window.config.viewvc) {
-		return res;
+	var prop = rowToProp(row);
+	if (!prop["[home_url]"]) {
+		return escapeHtml(value);
 	}
-	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
-	var file = escapeHtml(row[3]);
-	return "<a href='" + window.config.viewvc + "/" + repository + "/" + file + "?revision=" 
-		+ res + "&view=markup'>" + res + "</a>";
+	return argsubst("<a href='[home_url]/[repository]/[file]?revision=[revision]&view=markup'>[short_revision]</a>", prop);
 }
 
 /**
@@ -251,36 +301,22 @@ function formatDiffLink(value, row, index) {
 	if (!value) {
 		return "-";
 	}
-	var res = escapeHtml(value);
-	if (!window.config.viewvc) {
-		return res;
+	var prop = rowToProp(row);
+	if (!prop["[home_url]"]) {
+		return escapeHtml(value);
 	}
-	
-	var file = escapeHtml(row[3]);
-	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
-	var ref = escapeHtml(row[4]);
-	var pre = ref;
-	
-	// calculate previous revision number
-	var split = ref.split(".");
-	var last = split[split.length - 1];
-	if (last === "1" && split.length > 2) {
-		split.pop();
-		split.pop();
-	} else {
-		split[split.length - 1] = parseInt(last) - 1;
-	}
-	pre = split.join(".");
-	
-	var diff = "?r1=" + pre + "&r2=" + ref;
-	return "<a href='" + window.config.viewvc + "/" + repository + "/" + file + diff +"'>" + res + "</a>";
+
+	return argsubst("<a href='[home_url]/[repository]/[file]?r1=[old_revision]&r2=[revision]'>"
+		+ escapeHtml(value) + "</a>", prop);
 }
+
 
 // export functions
 window["formatRevLink"] = formatRevLink;
 window["formatFileLink"] = formatFileLink;
 window["formatTimestamp"] = formatTimestamp;
 window["formatTrackerLink"] = formatTrackerLink;
+window["formatDiffLink"] = formatDiffLink;
 
 $("ready", function() {
 	window.config = {};
