@@ -1,6 +1,6 @@
-(function() {
-window.$ = window.$ || {};
+var $ = window.$ || {};
 
+(function() {
 "use strict";
 
 /**
@@ -108,7 +108,7 @@ function typeToOperator(type) {
 	} else if (type === "notregexp") {
 		operator = "!~";
 	}
-	return operator
+	return operator;
 }
 
 /**
@@ -132,7 +132,7 @@ function renderQueryParameters() {
 				text = text + ", ";
 			}
 			var type = vars[key + "type"];
-			var operator = typeToOperator(type)
+			var operator = typeToOperator(type);
 			text = text + params[i] + " " + operator + " " + value;
 		}
 		$(this).text(text);
@@ -175,17 +175,6 @@ function initTable() {
 		$(".spinner").addClass("hidden");
 	});
 }
-
-$("ready", function() {
-	window.config = {};
-	addQueryStringToLink();
-	addValuesFromURLs();
-	if (document.querySelector("body.page-searchresult")) {
-		renderQueryParameters();
-		initTable();
-	}
-});
-}());
 
 // http://stackoverflow.com/a/12034334
 var entityMap = {
@@ -269,7 +258,7 @@ function formatDiffLink(value, row, index) {
 	
 	var file = escapeHtml(row[3]);
 	var repository = escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"));
-	var ref = escapeHtml(row[4])
+	var ref = escapeHtml(row[4]);
 	var pre = ref;
 	
 	// calculate previous revision number
@@ -287,3 +276,19 @@ function formatDiffLink(value, row, index) {
 	return "<a href='" + window.config.viewvc + "/" + repository + "/" + file + diff +"'>" + res + "</a>";
 }
 
+// export functions
+window["formatRevLink"] = formatRevLink;
+window["formatFileLink"] = formatFileLink;
+window["formatTimestamp"] = formatTimestamp;
+window["formatTrackerLink"] = formatTrackerLink;
+
+$("ready", function() {
+	window.config = {};
+	addQueryStringToLink();
+	addValuesFromURLs();
+	if (document.querySelector("body.page-searchresult")) {
+		renderQueryParameters();
+		initTable();
+	}
+});
+}());
