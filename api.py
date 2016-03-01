@@ -149,7 +149,7 @@ class PostsaiDB:
                 self.fill_id_cache(cursor, key, row[key])
 
         for row in rows:
-            sql = """INSERT INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
+            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
                  VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
                 row["type"],
