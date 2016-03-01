@@ -168,7 +168,9 @@ function initTable() {
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
 		$("#table").bootstrapTable("load", {data: data.data});
-		mergeCells(data.data);
+		if (data.data.length > 0) {
+			mergeCells(data.data);
+		}
 		$("#table").removeClass("hidden");
 		$(".spinner").addClass("hidden");
 	});
