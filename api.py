@@ -61,7 +61,12 @@ class PostsaiDB:
         cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
         self.is_viewvc_database = (cursor.rowcount == 1)
+        cursor.close()
+        self.conn.begin();
 
+    def disconnect(self):
+        self.conn.commit()
+        self.conn.close()
 
     def rewrite_sql(self, sql):
         if self.is_viewvc_database:
@@ -79,6 +84,11 @@ class PostsaiDB:
         size = cursor.description[0][3]
         if size < 50:
             cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+
+        # add columns to repositories table
+        cursor.execute("SELECT * FROM repositories WHERE 1=0")
+        if len(cursor.description) < 3:
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), tracker_url VARCHAR(255))")
 
         cursor.close()
 
@@ -98,18 +108,27 @@ class PostsaiDB:
         return result
 
 
+    def query(self, sql, data, cursor_type=None):
+        cursor = self.conn.cursor(cursor_type)
+        cursor.execute(self.rewrite_sql(sql), data)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def query_as_double_map(self, sql, key, data=None):
+        rows = self.query(sql, data, mdb.cursors.DictCursor)
+        res = {}
+        for row in rows:
+            res[row[key]] = row
+        return res
+        
+
     def one_shot_query(self, sql, data):
         """Executes the database query and prints the result"""
 
         self.connect()
-        self.conn.begin();
-        cursor = self.conn.cursor()
-
-
-        cursor.execute(self.rewrite_sql(sql), data)
-        rows = cursor.fetchall()
-        self.conn.commit()
-        self.conn.close()
+        rows = self.query(sql, data)
+        self.disconnect()
         return self.fix_encoding_of_result(rows)
 
 
@@ -140,8 +159,8 @@ class PostsaiDB:
         """Imports data"""
 
         self.connect()
-        self.conn.begin()
         self.cache = Cache()
+        self.update_database_structure()
         cursor = self.conn.cursor()
 
         for row in rows:
@@ -167,8 +186,7 @@ class PostsaiDB:
                 ])
 
         cursor.close()
-        self.conn.commit()
-        self.conn.close()
+        self.disconnect()
         
 
 
@@ -286,9 +304,17 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
+            
+            db = PostsaiDB(self.config)
+            db.connect()
+            rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
+            repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
+            db.disconnect()
+            
             result = {
                 "config" : self.config['ui'],
-                "data" : PostsaiDB(self.config).one_shot_query(self.sql, self.data)
+                "data" : rows,
+                "repositories": repositories
             }
 
         print(json.dumps(result, default=convert_to_builtin_type))
