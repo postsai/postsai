@@ -165,6 +165,7 @@ function initTable() {
 			return;
 		}
 		window.config = data.config;
+		window.repositories = data.repositories;
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
 		$("#table").bootstrapTable("load", {data: data.data});
@@ -226,7 +227,7 @@ function rowToProp(row) {
 		prop["[home_url]"] = window.config.viewvc
 	}
 	if (scm === "git") {
-		prop["short_revision"] = escapeHtml(row[4].substring(0, 8));
+		prop["[short_revision]"] = escapeHtml(row[4].substring(0, 8));
 	}
 	return prop;
 }
@@ -259,11 +260,15 @@ function formatTrackerLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value);
-	if (!window.config.tracker) {
+	
+	var prop = rowToProp(row);
+	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
+	var url = repoConfig ? repoConfig["tracker_url"] : window.config.tracker;
+	if (!url) {
 		return res;
 	}
-	return res.replace(/#([0-9][0-9][0-9][0-9][0-9]*)/g, 
-		"<a href='" + window.config.tracker + "$1'>#$1</a>");
+
+	return res.replace(/#([0-9]*)/g, "<a href='" + url + "'>#$1</a>");
 }
 
 
@@ -275,10 +280,12 @@ function formatFileLink(value, row, index) {
 		return "-";
 	}
 	var prop = rowToProp(row);
-	if (!prop["[home_url]"]) {
+	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
+	var url = repoConfig ? repoConfig["file_url"] : null;
+	if (!url) {
 		return escapeHtml(value);
 	}
-	return argsubst("<a href='[home_url]/[repository]/[file]?revision=[revision]&view=markup'>[file]</a>", prop);
+	return argsubst("<a href='" + url + "'>[file]</a>", prop);
 }
 
 /**
@@ -289,11 +296,12 @@ function formatDiffLink(value, row, index) {
 		return "-";
 	}
 	var prop = rowToProp(row);
-	if (!prop["[home_url]"]) {
-		return escapeHtml(value);
+	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
+	var url = repoConfig ? repoConfig["commit_url"] : null;
+	if (!url) {
+		return prop["[short_revision]"];
 	}
-
-	return argsubst("<a href='[home_url]/[repository]/[file]?r1=[old_revision]&r2=[revision]'>[short_revision]</a>", prop);
+	return argsubst("<a href='" + url + "'>[short_revision]</a>", prop);
 }
 
 
