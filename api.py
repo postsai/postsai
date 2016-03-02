@@ -379,7 +379,7 @@ class Postsai:
         if "project" in data and "web_url" in data["project"]: # gitlab
             url = data["project"]["web_url"]
         else:
-            url = rep["url"]
+            url = repo["url"]
 
         for commit in data['commits']:
             for change in ("added", "copied", "removed", "modified"):
@@ -392,7 +392,7 @@ class Postsai:
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
-                        "url" : repo["url"],
+                        "url" : url,
                         "repository" : repo_name,
                         "dir" : folder,
                         "file" : file,
