@@ -115,25 +115,49 @@ class PostsaiDB:
         cursor.close()
         return rows
 
+
     def query_as_double_map(self, sql, key, data=None):
         rows = self.query(sql, data, mdb.cursors.DictCursor)
         res = {}
         for row in rows:
             res[row[key]] = row
         return res
+
+
+    def guess_repository_urls(self, row):
+        """guesses the repository urls"""
         
+        base_url = row["url"]
+        if (base_url.find(row["repository"]) == -1):
+            base_url = base_url + "/" + row["repository"]
 
-    def one_shot_query(self, sql, data):
-        """Executes the database query and prints the result"""
+        file_url = ""
+        commit_url = ""
+        tracker_url = ""
 
-        self.connect()
-        rows = self.query(sql, data)
-        self.disconnect()
-        return self.fix_encoding_of_result(rows)
+        if base_url.find("https://github.com/") == 0 or base_url.find("gitlab"):
+            file_url = base_url + "/blob/[revision]/[file]"
+            commit_url = base_url + "/commit/[revision]"
+            tracker_url = base_url + "/issues/$1"
+
+        elif base_url.find("://sourceforge.net"):
+            commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
+            file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
 
 
-    def fill_id_cache(self, cursor, column, value):
+        # CVS
+            # file_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup', 
+            # commit_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]', 
+
+        # git instaweb
+            # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
+            # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
+        return (base_url, file_url, commit_url, tracker_url)
+
+
+    def fill_id_cache(self, cursor, column, row):
         """fills the id-cache"""
+        value = row[column]
         data = [value]
         extra_column = ""
         extra_data = ""
@@ -143,6 +167,10 @@ class PostsaiDB:
             extra_column = ", hash"
             extra_data = ", %s"
             data.append(len(value))
+        elif column == "repository":
+            extra_columns = ", base_url, file_url, commit_url, tracker_url"
+            extra_data = ", %s, %s, %s, %s"
+            data.extend(self.guess_repository_urls(row))
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
         cursor.execute(sql, [value])
@@ -165,7 +193,7 @@ class PostsaiDB:
 
         for row in rows:
             for key in self.column_table_mapping:
-                self.fill_id_cache(cursor, key, row[key])
+                self.fill_id_cache(cursor, key, row)
 
         for row in rows:
             sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
@@ -340,10 +368,19 @@ class Postsai:
         rows = []
         branch = data['ref'][data['ref'].rfind("/")+1:]
         repo = data['repository']
-        if "full_name" in repo:
+
+        if "full_name" in repo:  # github, sourceforge
             repo_name = repo["full_name"]
+        elif "project" in data and "path_with_namespace" in data["project"]: # gitlab
+            repo_name = data["project"]["path_with_namespace"]
         else:
-            repo_name = repo["name"]
+            repo_name = repo["name"] # notify-webhook
+        
+        if "project" in data and "web_url" in data["project"]: # gitlab
+            url = data["project"]["web_url"]
+        else:
+            url = rep["url"]
+
         for commit in data['commits']:
             for change in ("added", "copied", "removed", "modified"):
                 if not change in commit:
@@ -355,6 +392,7 @@ class Postsai:
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
+                        "url" : repo["url"],
                         "repository" : repo_name,
                         "dir" : folder,
                         "file" : file,
