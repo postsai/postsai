@@ -266,8 +266,9 @@ function formatTrackerLink(value, row, index) {
 		"<a href='" + window.config.tracker + "$1'>#$1</a>");
 }
 
+
 /**
- * formats the file column to link to viewvc file log
+ * formats the rev column to link to viewvc file content
  */
 function formatFileLink(value, row, index) {
 	if (!value) {
@@ -277,21 +278,7 @@ function formatFileLink(value, row, index) {
 	if (!prop["[home_url]"]) {
 		return escapeHtml(value);
 	}
-	return argsubst("<a href='[home_url]/[repository]/[file]'>[file]</a>", prop);
-}
-
-/**
- * formats the rev column to link to viewvc file content
- */
-function formatRevLink(value, row, index) {
-	if (!value) {
-		return "-";
-	}
-	var prop = rowToProp(row);
-	if (!prop["[home_url]"]) {
-		return escapeHtml(value);
-	}
-	return argsubst("<a href='[home_url]/[repository]/[file]?revision=[revision]&view=markup'>[short_revision]</a>", prop);
+	return argsubst("<a href='[home_url]/[repository]/[file]?revision=[revision]&view=markup'>[file]</a>", prop);
 }
 
 /**
@@ -306,13 +293,11 @@ function formatDiffLink(value, row, index) {
 		return escapeHtml(value);
 	}
 
-	return argsubst("<a href='[home_url]/[repository]/[file]?r1=[old_revision]&r2=[revision]'>"
-		+ escapeHtml(value) + "</a>", prop);
+	return argsubst("<a href='[home_url]/[repository]/[file]?r1=[old_revision]&r2=[revision]'>[short_revision]</a>", prop);
 }
 
 
 // export functions
-window["formatRevLink"] = formatRevLink;
 window["formatFileLink"] = formatFileLink;
 window["formatTimestamp"] = formatTimestamp;
 window["formatTrackerLink"] = formatTrackerLink;
