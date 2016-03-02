@@ -61,7 +61,12 @@ class PostsaiDB:
         cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
         self.is_viewvc_database = (cursor.rowcount == 1)
+        cursor.close()
+        self.conn.begin();
 
+    def disconnect(self):
+        self.conn.commit()
+        self.conn.close()
 
     def rewrite_sql(self, sql):
         if self.is_viewvc_database:
@@ -79,6 +84,11 @@ class PostsaiDB:
         size = cursor.description[0][3]
         if size < 50:
             cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+
+        # add columns to repositories table
+        cursor.execute("SELECT * FROM repositories WHERE 1=0")
+        if len(cursor.description) < 3:
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), tracker_url VARCHAR(255))")
 
         cursor.close()
 
@@ -98,23 +108,56 @@ class PostsaiDB:
         return result
 
 
-    def one_shot_query(self, sql, data):
-        """Executes the database query and prints the result"""
-
-        self.connect()
-        self.conn.begin();
-        cursor = self.conn.cursor()
-
-
+    def query(self, sql, data, cursor_type=None):
+        cursor = self.conn.cursor(cursor_type)
         cursor.execute(self.rewrite_sql(sql), data)
         rows = cursor.fetchall()
-        self.conn.commit()
-        self.conn.close()
-        return self.fix_encoding_of_result(rows)
+        cursor.close()
+        return rows
 
 
-    def fill_id_cache(self, cursor, column, value):
+    def query_as_double_map(self, sql, key, data=None):
+        rows = self.query(sql, data, mdb.cursors.DictCursor)
+        res = {}
+        for row in rows:
+            res[row[key]] = row
+        return res
+
+
+    def guess_repository_urls(self, row):
+        """guesses the repository urls"""
+        
+        base_url = row["url"]
+        if (base_url.find(row["repository"]) == -1):
+            base_url = base_url + "/" + row["repository"]
+
+        file_url = ""
+        commit_url = ""
+        tracker_url = ""
+
+        if base_url.find("https://github.com/") == 0 or base_url.find("gitlab"):
+            file_url = base_url + "/blob/[revision]/[file]"
+            commit_url = base_url + "/commit/[revision]"
+            tracker_url = base_url + "/issues/$1"
+
+        elif base_url.find("://sourceforge.net"):
+            commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
+            file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+
+
+        # CVS
+            # file_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup', 
+            # commit_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]', 
+
+        # git instaweb
+            # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
+            # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
+        return (base_url, file_url, commit_url, tracker_url)
+
+
+    def fill_id_cache(self, cursor, column, row):
         """fills the id-cache"""
+        value = row[column]
         data = [value]
         extra_column = ""
         extra_data = ""
@@ -124,6 +167,10 @@ class PostsaiDB:
             extra_column = ", hash"
             extra_data = ", %s"
             data.append(len(value))
+        elif column == "repository":
+            extra_columns = ", base_url, file_url, commit_url, tracker_url"
+            extra_data = ", %s, %s, %s, %s"
+            data.extend(self.guess_repository_urls(row))
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
         cursor.execute(sql, [value])
@@ -140,13 +187,13 @@ class PostsaiDB:
         """Imports data"""
 
         self.connect()
-        self.conn.begin()
         self.cache = Cache()
+        self.update_database_structure()
         cursor = self.conn.cursor()
 
         for row in rows:
             for key in self.column_table_mapping:
-                self.fill_id_cache(cursor, key, row[key])
+                self.fill_id_cache(cursor, key, row)
 
         for row in rows:
             sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
@@ -167,8 +214,7 @@ class PostsaiDB:
                 ])
 
         cursor.close()
-        self.conn.commit()
-        self.conn.close()
+        self.disconnect()
         
 
 
@@ -286,9 +332,17 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
+            
+            db = PostsaiDB(self.config)
+            db.connect()
+            rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
+            repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
+            db.disconnect()
+            
             result = {
                 "config" : self.config['ui'],
-                "data" : PostsaiDB(self.config).one_shot_query(self.sql, self.data)
+                "data" : rows,
+                "repositories": repositories
             }
 
         print(json.dumps(result, default=convert_to_builtin_type))
@@ -314,10 +368,19 @@ class Postsai:
         rows = []
         branch = data['ref'][data['ref'].rfind("/")+1:]
         repo = data['repository']
-        if "full_name" in repo:
+
+        if "full_name" in repo:  # github, sourceforge
             repo_name = repo["full_name"]
+        elif "project" in data and "path_with_namespace" in data["project"]: # gitlab
+            repo_name = data["project"]["path_with_namespace"]
         else:
-            repo_name = repo["name"]
+            repo_name = repo["name"] # notify-webhook
+        
+        if "project" in data and "web_url" in data["project"]: # gitlab
+            url = data["project"]["web_url"]
+        else:
+            url = repo["url"]
+
         for commit in data['commits']:
             for change in ("added", "copied", "removed", "modified"):
                 if not change in commit:
@@ -329,6 +392,7 @@ class Postsai:
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
+                        "url" : url,
                         "repository" : repo_name,
                         "dir" : folder,
                         "file" : file,

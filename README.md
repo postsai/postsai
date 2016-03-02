@@ -31,13 +31,22 @@ db = {
 
 Integration
 -
-Postsai can be integrated with ViewVC and various issue trackers, including Github and Bugzilla.
+Postsai integrates with various hosted and local repositories:
 
-* Add the following configuration to config.py:
+- GitHub, Gitlab and SourceForge
+  - Just add a Webhook to https://example.com/postsai/api.py and you are done.
+- Self hosted Git repositories (including Gitolite)
+  - Use [notify-webhook](https://github.com/youyongsong/notify-webhook) to setup a webhook with the following configuration<br>webhookurl=https://example.com/postsai/api.py<br> webhook-contenttype=application/json
+  - Edit the database table "repositories" to configure links. For git instaweb use: <br>file_url=http://example.com/?p=[repository];a=blob;f=[file];h=[revision]<br>commit_url=http://example.com/?p=[repository];a=commitdiff;h=[revision]
+- CVS
+  - Setup [ViewVC](http://www.viewvc.org/) with database suport (for example via apt-get install viewvc viewvc-query) and use the same database for Postsai
+  - Edit the database table "repositories" to configure links.<br>file_url=http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup<br>commit_url=http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]
+
+   
+A global issue tracker is supported as fallback by adding the following configuration to config.py
 ``` python
 ui = {
 	"tracker" : "https://hiszilla.his.de/hiszilla/show_bug.cgi?id=",
-	"viewvc" : "https://cvs.his.de/cgi-bin/viewvc.cgi"
 }
 ```
 
