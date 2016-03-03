@@ -104,7 +104,7 @@ class PostsaiTests(unittest.TestCase):
         postsai.create_where_for_column("dir", form, "dir")
         self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s")
 
-    
+
     def test_create_where_for_date(self):
         postsai = api.Postsai({})
         postsai.data = []

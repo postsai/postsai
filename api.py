@@ -215,7 +215,7 @@ class PostsaiDB:
 
         cursor.close()
         self.disconnect()
-        
+
 
 
 class Postsai:

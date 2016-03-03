@@ -251,6 +251,11 @@ function formatTimestamp(value, row, index) {
 	return escapeHtml(value.substring(0, 16));
 }
 
+function readRepositoryConfig(repo, key, fallback) {
+	var repoConfig = window.repositories ? window.repositories[repo] : null;
+	return repoConfig ? repoConfig[key] : fallback;	
+}
+
 /**
  * formats the description column to link to an issue tracker
  */
@@ -259,9 +264,7 @@ function formatTrackerLink(value, row, index) {
 		return "-";
 	}
 	var res = escapeHtml(value);
-	
-	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
-	var url = repoConfig ? repoConfig["tracker_url"] : window.config.tracker;
+	var url = readRepositoryConfig(row[0], "tracker_url", window.config.tracker);
 	if (!url) {
 		return res;
 	}
@@ -278,8 +281,7 @@ function formatFileLink(value, row, index) {
 		return "-";
 	}
 	var prop = rowToProp(row);
-	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
-	var url = repoConfig ? repoConfig["file_url"] : null;
+	var url = readRepositoryConfig(row[0], "file_url", null);
 	if (!url) {
 		return escapeHtml(value);
 	}
@@ -294,8 +296,7 @@ function formatDiffLink(value, row, index) {
 		return "-";
 	}
 	var prop = rowToProp(row);
-	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
-	var url = repoConfig ? repoConfig["commit_url"] : null;
+	var url = readRepositoryConfig(row[0], "commit_url", null);
 	if (!url) {
 		return prop["[short_revision]"];
 	}
