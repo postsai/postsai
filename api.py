@@ -358,6 +358,12 @@ class Postsai:
         return folder, file
 
 
+    def import_rewrite_properties(self, data):
+        if data["branch"] == "master":
+            data["branch"] = ""
+        data["who"] = data["who"].replace("@", "#")
+        return data
+
     def import_from_webhook(self, data):
         actionMap = {
             "added" : "Add",
@@ -388,7 +394,7 @@ class Postsai:
                 for full_path in commit[change]:
 
                     folder, file = self.split_full_path(full_path)
-                    row = {
+                    row = self.import_rewrite_properties({
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
@@ -401,7 +407,7 @@ class Postsai:
                         "addedlines" : "0",
                         "removedlines" : "0",
                         "description" : commit['message']
-                    }
+                    })
                     rows.append(row)
         db = PostsaiDB(self.config)
         db.import_data(rows)
