@@ -224,7 +224,6 @@ function rowToProp(row) {
 	};
 	if (scm === "cvs") {
 		prop["[old_revision]"] = escapeHtml(calculatePreviousCvsRevision(row[4]));
-		prop["[home_url]"] = window.config.viewvc
 	}
 	if (scm === "git") {
 		prop["[short_revision]"] = escapeHtml(row[4].substring(0, 8));
@@ -261,7 +260,6 @@ function formatTrackerLink(value, row, index) {
 	}
 	var res = escapeHtml(value);
 	
-	var prop = rowToProp(row);
 	var repoConfig = window.repositories ? window.repositories[row[0]] : null;
 	var url = repoConfig ? repoConfig["tracker_url"] : window.config.tracker;
 	if (!url) {

@@ -48,11 +48,11 @@ class PostsaiTests(unittest.TestCase):
     class FormMock:
         """mock cgi form based on a dictionary"""
 
-        def __init__(self, map):
-            self.map = map
+        def __init__(self, data):
+            self.data = data
 
         def getfirst(self, key, default=None):
-            return self.map[key]
+            return self.data[key]
 
     def test_split_full_path(self):
         postsai = api.Postsai({})
@@ -103,7 +103,7 @@ class PostsaiTests(unittest.TestCase):
 
         postsai.create_where_for_column("dir", form, "dir")
         self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s")
-        
+
     
     def test_create_where_for_date(self):
         postsai = api.Postsai({})

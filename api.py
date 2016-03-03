@@ -126,7 +126,7 @@ class PostsaiDB:
 
     def guess_repository_urls(self, row):
         """guesses the repository urls"""
-        
+
         base_url = row["url"]
         if (base_url.find(row["repository"]) == -1):
             base_url = base_url + "/" + row["repository"]
@@ -146,8 +146,8 @@ class PostsaiDB:
 
 
         # CVS
-            # file_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup', 
-            # commit_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]', 
+            # file_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup',
+            # commit_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]',
 
         # git instaweb
             # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
@@ -168,7 +168,7 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_columns = ", base_url, file_url, commit_url, tracker_url"
+            extra_column = ", base_url, file_url, commit_url, tracker_url"
             extra_data = ", %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
 
@@ -196,7 +196,7 @@ class PostsaiDB:
                 self.fill_id_cache(cursor, key, row)
 
         for row in rows:
-            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag) 
+            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag)
                  VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
                 row["type"],
@@ -232,12 +232,12 @@ class Postsai:
         if not "filter" in self.config:
             return ""
 
-        for key, filter in self.config['filter'].items():
+        for key, condition_filter in self.config['filter'].items():
             value = form.getfirst(key, "")
             if value != "":
                 if value.startswith("^") and value.endswith("$"):
                     value = value[1:-1]
-                if re.match(filter, value) == None:
+                if re.match(condition_filter, value) == None:
                     return "Missing permissions for query on column \"" + key + "\""
         
         return ""
