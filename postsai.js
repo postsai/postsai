@@ -102,7 +102,7 @@ function isQueryParameterImportant(vars, key) {
  * converts the operator parameter into a human readable form
  */
 function typeToOperator(type) {
-	var operator = "=";
+	var operator = "";
 	if (type === "regexp") {
 		operator = "~";
 	} else if (type === "notregexp") {
@@ -116,8 +116,9 @@ function typeToOperator(type) {
  */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
-		var params = ["Repository", "When", "Who", "Directory", "File", "Rev", "Branch", "Description", "Date", "Hours", "MinDate", "MaxDate"];
+		var params = ["Repository", "Branch", "When", "Who", "Directory", "File", "Rev", "Description", "Date", "Hours", "MinDate", "MaxDate"];
 		var text = "";
+		var title = "";
 		var vars = getUrlVars();
 		for (var i = 0; i < params.length; i++) {
 			var key = params[i].toLowerCase();
@@ -130,12 +131,15 @@ function renderQueryParameters() {
 			}
 			if (text.length > 0) {
 				text = text + ", ";
+				title = title + ", ";
 			}
 			var type = vars[key + "type"];
 			var operator = typeToOperator(type);
-			text = text + params[i] + " " + operator + " " + value;
+			text = text + params[i] + ": " + operator + " " + value;
+			title = title + operator + " " + value;
 		}
 		$(this).text(text);
+		$("title").text(title);
 	});
 }
 
@@ -273,9 +277,6 @@ function formatTrackerLink(value, row, index) {
 }
 
 
-/**
- * formats the rev column to link to viewvc file content
- */
 function formatFileLink(value, row, index) {
 	if (!value) {
 		return "-";
@@ -288,9 +289,7 @@ function formatFileLink(value, row, index) {
 	return argsubst("<a href='" + url + "'>[file]</a>", prop);
 }
 
-/**
- * format the diff column to link to the difference
- */
+
 function formatDiffLink(value, row, index) {
 	if (!value) {
 		return "-";
@@ -315,7 +314,7 @@ function formatRepository(value, row, index) {
 function formatAuthor(value, row, index) {
 	var icon = "";
 	if (window.config.avatar) {
-		icon = "<img src='http://www.gravatar.com/avatar/" + md5(value) + ".jpg?s=20&amp;d=mm'> ";
+		icon = "<img src='" + window.config.avatar + "/avatar/" + md5(value) + ".jpg?s=20&amp;d=mm'> ";
 	}
 	var text = value;
 	if (window.config.trim_email) {

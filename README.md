@@ -71,6 +71,7 @@ By default the full email address of the author is displayed without profile ico
 ui = {
     "avatar" : "https://gravatar.com",
     "trim_email" : True
+}
 ```
 
 <!--
