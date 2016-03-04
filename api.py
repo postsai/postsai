@@ -88,7 +88,7 @@ class PostsaiDB:
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
         if len(cursor.description) < 3:
-            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), tracker_url VARCHAR(255))")
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
 
         cursor.close()
 
@@ -143,6 +143,7 @@ class PostsaiDB:
         elif base_url.find("://sourceforge.net"):
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+            icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
 
 
         # CVS
@@ -239,7 +240,7 @@ class Postsai:
                     value = value[1:-1]
                 if re.match(condition_filter, value) == None:
                     return "Missing permissions for query on column \"" + key + "\""
-        
+
         return ""
 
 

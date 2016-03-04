@@ -303,12 +303,22 @@ function formatDiffLink(value, row, index) {
 	return argsubst("<a href='" + url + "'>[short_revision]</a>", prop);
 }
 
+function formatRepository(value, row, index) {
+	var prop = rowToProp(row);
+	var url = readRepositoryConfig(row[0], "icon_url", "unknown.png");
+	if (!url) {
+		url = "unknown.png";
+	}
+	return "<img src='" + url + "' height='16px' width='16px'> " + escapeHtml(value);
+}
+
 
 // export functions
 window["formatFileLink"] = formatFileLink;
 window["formatTimestamp"] = formatTimestamp;
 window["formatTrackerLink"] = formatTrackerLink;
 window["formatDiffLink"] = formatDiffLink;
+window["formatRepository"] = formatRepository;
 
 $("ready", function() {
 	window.config = {};
