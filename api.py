@@ -362,7 +362,6 @@ class Postsai:
     def import_rewrite_properties(self, data):
         if data["branch"] == "master":
             data["branch"] = ""
-        data["who"] = data["who"].replace("@", "#")
         return data
 
     def import_from_webhook(self, data):

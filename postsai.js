@@ -309,11 +309,23 @@ function formatRepository(value, row, index) {
 	if (!url) {
 		url = "unknown.png";
 	}
-	return "<img src='" + url + "' height='16px' width='16px'> " + escapeHtml(value);
+	return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
 }
 
+function formatAuthor(value, row, index) {
+	var icon = "";
+	if (window.config.avatar) {
+		icon = "<img src='http://www.gravatar.com/avatar/" + md5(value) + ".jpg?s=20&amp;d=mm'> ";
+	}
+	var text = value;
+	if (window.config.trim_email) {
+		text = text.replace(/@.*/, "");
+	}
+    return icon + escapeHtml(text);
+}
 
 // export functions
+window["formatAuthor"] = formatAuthor;
 window["formatFileLink"] = formatFileLink;
 window["formatTimestamp"] = formatTimestamp;
 window["formatTrackerLink"] = formatTrackerLink;

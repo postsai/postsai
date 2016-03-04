@@ -50,6 +50,7 @@ ui = {
 }
 ```
 
+
 Privacy
 -
 Postsai supports privacy filters.
@@ -64,6 +65,13 @@ filter = {
 }
 ```
 
+By default the full email address of the author is displayed without profile icon. Both settings can be configured independently:
+
+``` python
+ui = {
+    "avatar" : "https://gravatar.com",
+    "trim_email" : True
+```
 
 <!--
 Building
