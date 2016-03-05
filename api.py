@@ -382,6 +382,7 @@ class Postsai:
             repo_name = data["project"]["path_with_namespace"]
         else:
             repo_name = repo["name"] # notify-webhook
+        repo_name = repo_name.strip("/") # sourceforge
         
         if "project" in data and "web_url" in data["project"]: # gitlab
             url = data["project"]["web_url"]
