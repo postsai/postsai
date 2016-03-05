@@ -326,6 +326,7 @@ class Postsai:
         """processes an API request"""
 
         print("Content-Type: text/json; charset='utf-8'\r")
+        print("Cache-Control: max-age=60\r")
         print("\r")
         form = cgi.FieldStorage()
 
