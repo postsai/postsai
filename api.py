@@ -135,12 +135,12 @@ class PostsaiDB:
         commit_url = ""
         tracker_url = ""
 
-        if base_url.find("https://github.com/") == 0 or base_url.find("gitlab"):
+        if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
             file_url = base_url + "/blob/[revision]/[file]"
             commit_url = base_url + "/commit/[revision]"
             tracker_url = base_url + "/issues/$1"
 
-        elif base_url.find("://sourceforge.net"):
+        elif base_url.find("://sourceforge.net") > -1:
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
