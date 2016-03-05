@@ -304,9 +304,9 @@ function formatDiffLink(value, row, index) {
 
 function formatRepository(value, row, index) {
 	var prop = rowToProp(row);
-	var url = readRepositoryConfig(row[0], "icon_url", "unknown.png");
+	var url = readRepositoryConfig(row[0], "icon_url", "resources/unknown.png");
 	if (!url) {
-		url = "unknown.png";
+		url = "resources/unknown.png";
 	}
 	return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
 }
