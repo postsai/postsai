@@ -139,7 +139,7 @@ function renderQueryParameters() {
 			title = title + operator + " " + value;
 		}
 		$(this).text(text);
-		$("title").text(title);
+		$("title").text(title + " - Postsai");
 	});
 }
 
