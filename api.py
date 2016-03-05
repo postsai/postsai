@@ -88,7 +88,7 @@ class PostsaiDB:
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
         if len(cursor.description) < 3:
-            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), tracker_url VARCHAR(255))")
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
 
         cursor.close()
 
@@ -143,6 +143,7 @@ class PostsaiDB:
         elif base_url.find("://sourceforge.net"):
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+            icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
 
 
         # CVS
@@ -239,7 +240,7 @@ class Postsai:
                     value = value[1:-1]
                 if re.match(condition_filter, value) == None:
                     return "Missing permissions for query on column \"" + key + "\""
-        
+
         return ""
 
 
@@ -325,6 +326,7 @@ class Postsai:
         """processes an API request"""
 
         print("Content-Type: text/json; charset='utf-8'\r")
+        print("Cache-Control: max-age=60\r")
         print("\r")
         form = cgi.FieldStorage()
 
@@ -358,6 +360,11 @@ class Postsai:
         return folder, file
 
 
+    def import_rewrite_properties(self, data):
+        if data["branch"] == "master":
+            data["branch"] = ""
+        return data
+
     def import_from_webhook(self, data):
         actionMap = {
             "added" : "Add",
@@ -388,7 +395,7 @@ class Postsai:
                 for full_path in commit[change]:
 
                     folder, file = self.split_full_path(full_path)
-                    row = {
+                    row = self.import_rewrite_properties({
                         "type" : actionMap[change],
                         "ci_when" : commit['timestamp'],
                         "who" : commit['author']['email'],
@@ -401,7 +408,7 @@ class Postsai:
                         "addedlines" : "0",
                         "removedlines" : "0",
                         "description" : commit['message']
-                    }
+                    })
                     rows.append(row)
         db = PostsaiDB(self.config)
         db.import_data(rows)
