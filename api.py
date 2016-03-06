@@ -349,6 +349,15 @@ class Postsai:
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
+
+
+class PostsaiImporter:
+    """Imports commits from a webhook"""
+
+    def __init__(self, config, data):
+        self.config = config
+        self.data = data
+
     def split_full_path(self, full_path):
         """splits a full_path into directory and file parts"""
 
@@ -360,65 +369,81 @@ class Postsai:
         return folder, file
 
 
-    def import_rewrite_properties(self, data):
-        if data["branch"] == "master":
-            data["branch"] = ""
-        return data
+    def extract_repo_name(self):
+        repo = self.data['repository']
 
-    def import_from_webhook(self, data):
+        if "full_name" in repo:  # github, sourceforge
+            repo_name = repo["full_name"]
+        elif "project" in self.data and "path_with_namespace" in self.data["project"]: # gitlab
+            repo_name = self.data["project"]["path_with_namespace"]
+        else:
+            repo_name = repo["name"] # notify-webhook
+        return repo_name.strip("/") # sourceforge
+
+
+    def extract_url(self):
+        if "project" in self.data and "web_url" in self.data["project"]: # gitlab
+            url = self.data["project"]["web_url"]
+        else:
+            url = self.data['repository']["url"]
+        return url
+
+
+    def extract_branch(self):
+        branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
+        if branch == "master":
+            return ""
+        return branch
+
+
+    def extract_files(self, commit):
+        result = {}
         actionMap = {
             "added" : "Add",
             "copied": "Add",
             "removed" : "Remove",
             "modified" : "Change"
         }
+        for change in ("added", "copied", "removed", "modified"):
+            if not change in commit:
+                continue
+            for full_path in commit[change]:
+                result[full_path] = actionMap[change]
+        return result
+
+
+    def import_from_webhook(self):
         rows = []
-        branch = data['ref'][data['ref'].rfind("/")+1:]
-        repo = data['repository']
 
-        if "full_name" in repo:  # github, sourceforge
-            repo_name = repo["full_name"]
-        elif "project" in data and "path_with_namespace" in data["project"]: # gitlab
-            repo_name = data["project"]["path_with_namespace"]
-        else:
-            repo_name = repo["name"] # notify-webhook
-        repo_name = repo_name.strip("/") # sourceforge
-        
-        if "project" in data and "web_url" in data["project"]: # gitlab
-            url = data["project"]["web_url"]
-        else:
-            url = repo["url"]
+        for commit in self.data['commits']:
+            for full_path, change_type in self.extract_files(commit).items():
+                folder, file = self.split_full_path(full_path)
+                row = {
+                    "type" : change_type,
+                    "ci_when" : commit['timestamp'],
+                    "who" : commit['author']['email'],
+                    "url" : self.extract_url(),
+                    "repository" : self.extract_repo_name(),
+                    "dir" : folder,
+                    "file" : file,
+                    "revision" : commit['id'],
+                    "branch" : self.extract_branch(),
+                    "addedlines" : "0",
+                    "removedlines" : "0",
+                    "description" : commit['message']
+                }
+                rows.append(row)
 
-        for commit in data['commits']:
-            for change in ("added", "copied", "removed", "modified"):
-                if not change in commit:
-                    continue
-                for full_path in commit[change]:
-
-                    folder, file = self.split_full_path(full_path)
-                    row = self.import_rewrite_properties({
-                        "type" : actionMap[change],
-                        "ci_when" : commit['timestamp'],
-                        "who" : commit['author']['email'],
-                        "url" : url,
-                        "repository" : repo_name,
-                        "dir" : folder,
-                        "file" : file,
-                        "revision" : commit['id'],
-                        "branch" : branch,
-                        "addedlines" : "0",
-                        "removedlines" : "0",
-                        "description" : commit['message']
-                    })
-                    rows.append(row)
         db = PostsaiDB(self.config)
         db.import_data(rows)
         print("Content-Type: text/plain; charset='utf-8'\r")
         print("\r")
         print("Completed")
 
+
+
 if __name__ == '__main__':
     if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
-        Postsai(vars(config)).import_from_webhook(json.loads(sys.stdin.read()))
+        PostsaiImporter(vars(config), json.loads(sys.stdin.read())).import_from_webhook()
     else:
         Postsai(vars(config)).process()
