@@ -134,13 +134,14 @@ class PostsaiDB:
         file_url = ""
         commit_url = ""
         tracker_url = ""
+        icon_url = ""
 
-        if base_url.find("https://github.com/") == 0 or base_url.find("gitlab"):
+        if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
             file_url = base_url + "/blob/[revision]/[file]"
             commit_url = base_url + "/commit/[revision]"
             tracker_url = base_url + "/issues/$1"
 
-        elif base_url.find("://sourceforge.net"):
+        elif base_url.find("://sourceforge.net") > -1:
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
@@ -153,7 +154,7 @@ class PostsaiDB:
         # git instaweb
             # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
             # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
-        return (base_url, file_url, commit_url, tracker_url)
+        return (base_url, file_url, commit_url, tracker_url, icon_url)
 
 
     def fill_id_cache(self, cursor, column, row):
@@ -169,8 +170,8 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_column = ", base_url, file_url, commit_url, tracker_url"
-            extra_data = ", %s, %s, %s, %s"
+            extra_column = ", base_url, file_url, commit_url, tracker_url, icon_url"
+            extra_data = ", %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
@@ -295,7 +296,7 @@ class Postsai:
         self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
         self.data.append(value)
 
-    
+
     def create_where_for_date(self, form):
         """parses the date parameters and adds them to the database query"""
 
@@ -349,6 +350,15 @@ class Postsai:
 
         print(json.dumps(result, default=convert_to_builtin_type))
 
+
+
+class PostsaiImporter:
+    """Imports commits from a webhook"""
+
+    def __init__(self, config, data):
+        self.config = config
+        self.data = data
+
     def split_full_path(self, full_path):
         """splits a full_path into directory and file parts"""
 
@@ -360,64 +370,94 @@ class Postsai:
         return folder, file
 
 
-    def import_rewrite_properties(self, data):
-        if data["branch"] == "master":
-            data["branch"] = ""
-        return data
+    def extract_repo_name(self):
+        repo = self.data['repository']
 
-    def import_from_webhook(self, data):
+        if "full_name" in repo:  # github, sourceforge
+            repo_name = repo["full_name"]
+        elif "project" in self.data and "path_with_namespace" in self.data["project"]: # gitlab
+            repo_name = self.data["project"]["path_with_namespace"]
+        else:
+            repo_name = repo["name"] # notify-webhook
+        return repo_name.strip("/") # sourceforge
+
+
+    def extract_url(self):
+        if "project" in self.data and "web_url" in self.data["project"]: # gitlab
+            url = self.data["project"]["web_url"]
+        else:
+            url = self.data['repository']["url"]
+        return url
+
+
+    def extract_branch(self):
+        branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
+        if branch == "master":
+            return ""
+        return branch
+
+
+    def filter_out_folders(self, files):
+        """Sourceforge includes folders in the file list"""
+
+        result = {}
+        for file_to_test, value in files.items():
+            for file in files.keys():
+                if file.find(file_to_test + "/") == 0:
+                    break
+            else:
+                result[file_to_test] = value
+        return result
+
+
+    def extract_files(self, commit):
+        result = {}
         actionMap = {
             "added" : "Add",
             "copied": "Add",
             "removed" : "Remove",
             "modified" : "Change"
         }
+        for change in ("added", "copied", "removed", "modified"):
+            if not change in commit:
+                continue
+            for full_path in commit[change]:
+                result[full_path] = actionMap[change]
+        return result
+
+
+    def import_from_webhook(self):
         rows = []
-        branch = data['ref'][data['ref'].rfind("/")+1:]
-        repo = data['repository']
 
-        if "full_name" in repo:  # github, sourceforge
-            repo_name = repo["full_name"]
-        elif "project" in data and "path_with_namespace" in data["project"]: # gitlab
-            repo_name = data["project"]["path_with_namespace"]
-        else:
-            repo_name = repo["name"] # notify-webhook
-        
-        if "project" in data and "web_url" in data["project"]: # gitlab
-            url = data["project"]["web_url"]
-        else:
-            url = repo["url"]
+        for commit in self.data['commits']:
+            for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
+                folder, file = self.split_full_path(full_path)
+                row = {
+                    "type" : change_type,
+                    "ci_when" : commit['timestamp'],
+                    "who" : commit['author']['email'],
+                    "url" : self.extract_url(),
+                    "repository" : self.extract_repo_name(),
+                    "dir" : folder,
+                    "file" : file,
+                    "revision" : commit['id'],
+                    "branch" : self.extract_branch(),
+                    "addedlines" : "0",
+                    "removedlines" : "0",
+                    "description" : commit['message']
+                }
+                rows.append(row)
 
-        for commit in data['commits']:
-            for change in ("added", "copied", "removed", "modified"):
-                if not change in commit:
-                    continue
-                for full_path in commit[change]:
-
-                    folder, file = self.split_full_path(full_path)
-                    row = self.import_rewrite_properties({
-                        "type" : actionMap[change],
-                        "ci_when" : commit['timestamp'],
-                        "who" : commit['author']['email'],
-                        "url" : url,
-                        "repository" : repo_name,
-                        "dir" : folder,
-                        "file" : file,
-                        "revision" : commit['id'],
-                        "branch" : branch,
-                        "addedlines" : "0",
-                        "removedlines" : "0",
-                        "description" : commit['message']
-                    })
-                    rows.append(row)
         db = PostsaiDB(self.config)
         db.import_data(rows)
         print("Content-Type: text/plain; charset='utf-8'\r")
         print("\r")
         print("Completed")
 
+
+
 if __name__ == '__main__':
     if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
-        Postsai(vars(config)).import_from_webhook(json.loads(sys.stdin.read()))
+        PostsaiImporter(vars(config), json.loads(sys.stdin.read())).import_from_webhook()
     else:
         Postsai(vars(config)).process()
