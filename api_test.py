@@ -54,21 +54,6 @@ class PostsaiTests(unittest.TestCase):
         def getfirst(self, key, default=None):
             return self.data[key]
 
-    def test_split_full_path(self):
-        postsai = api.Postsai({})
-        folder, file = postsai.split_full_path("README.md")
-        self.assertEquals(folder, "", "empty folder on README.md")
-        self.assertEquals(file, "README.md", "file README.md on README.md")
-
-        folder, file = postsai.split_full_path("")
-        self.assertEquals(folder, "", "empty folder on empty")
-        self.assertEquals(file, "", "empty file on empty")
-
-        folder, file = postsai.split_full_path("folder/README.md")
-        self.assertEquals(folder, "folder", "folder folder on folder/README.md")
-        self.assertEquals(file, "README.md", "file README on folder/README.md")
-
-
 
     def test_validate_input(self):
         postsai = api.Postsai({})
@@ -128,6 +113,34 @@ class PostsaiTests(unittest.TestCase):
         postsai.sql = ""
         postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "2016-02-22", "maxdate" : ""}))
         self.assertEqual(postsai.sql, " AND ci_when >= %s")
+
+
+
+class PostsaiImporterTests(unittest.TestCase):
+    "test for the importer"
+
+
+    def test_split_full_path(self):
+        postsai = api.PostsaiImporter({}, {})
+        folder, file = postsai.split_full_path("README.md")
+        self.assertEquals(folder, "", "empty folder on README.md")
+        self.assertEquals(file, "README.md", "file README.md on README.md")
+
+        folder, file = postsai.split_full_path("")
+        self.assertEquals(folder, "", "empty folder on empty")
+        self.assertEquals(file, "", "empty file on empty")
+
+        folder, file = postsai.split_full_path("folder/README.md")
+        self.assertEquals(folder, "folder", "folder folder on folder/README.md")
+        self.assertEquals(file, "README.md", "file README on folder/README.md")
+
+
+    def test_filter_out_folders(self):
+        postsai = api.PostsaiImporter({}, {})
+        res = postsai.filter_out_folders({"content" : "change", "content/game" : "change", "content/game/sourcelog.php" : "change" })
+        self.assertIn("content/game/sourcelog.php", res, "file remained in list")
+        self.assertNotIn("content", res, "folder was removed from list")
+        self.assertNotIn("content/game", res, "folder was removed from list")
 
 
 if __name__ == '__main__':

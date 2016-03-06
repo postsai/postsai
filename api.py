@@ -397,6 +397,19 @@ class PostsaiImporter:
         return branch
 
 
+    def filter_out_folders(self, files):
+        """Sourceforge includes folders in the file list"""
+
+        result = {}
+        for file_to_test, value in files.items():
+            for file in files.keys():
+                if file.find(file_to_test + "/") == 0:
+                    break
+            else:
+                result[file_to_test] = value
+        return result
+
+
     def extract_files(self, commit):
         result = {}
         actionMap = {
@@ -417,7 +430,7 @@ class PostsaiImporter:
         rows = []
 
         for commit in self.data['commits']:
-            for full_path, change_type in self.extract_files(commit).items():
+            for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
