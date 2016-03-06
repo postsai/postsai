@@ -134,6 +134,7 @@ class PostsaiDB:
         file_url = ""
         commit_url = ""
         tracker_url = ""
+        icon_url = ""
 
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
             file_url = base_url + "/blob/[revision]/[file]"
@@ -153,7 +154,7 @@ class PostsaiDB:
         # git instaweb
             # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
             # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
-        return (base_url, file_url, commit_url, tracker_url)
+        return (base_url, file_url, commit_url, tracker_url, icon_url)
 
 
     def fill_id_cache(self, cursor, column, row):
@@ -169,8 +170,8 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_column = ", base_url, file_url, commit_url, tracker_url"
-            extra_data = ", %s, %s, %s, %s"
+            extra_column = ", base_url, file_url, commit_url, tracker_url, icon_url"
+            extra_data = ", %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
@@ -295,7 +296,7 @@ class Postsai:
         self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
         self.data.append(value)
 
-    
+
     def create_where_for_date(self, form):
         """parses the date parameters and adds them to the database query"""
 
