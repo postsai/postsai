@@ -394,7 +394,7 @@ class PostsaiImporter:
 
     def extract_branch(self):
         branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
-        if branch == "master":
+        if branch == "master" or branch == "HEAD":
             return ""
         return branch
 
