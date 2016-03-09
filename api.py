@@ -92,8 +92,8 @@ class PostsaiDB:
 
         cursor.close()
 
-
-    def fix_encoding_of_result(self, rows):
+    @staticmethod
+    def fix_encoding_of_result(rows):
         """ Workaround UTF-8 data in an ISO-8859-1 column"""
 
         result = []
@@ -335,7 +335,7 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
-            
+
             db = PostsaiDB(self.config)
             db.connect()
             rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
@@ -359,7 +359,9 @@ class PostsaiImporter:
         self.config = config
         self.data = data
 
-    def split_full_path(self, full_path):
+
+    @staticmethod
+    def split_full_path(full_path):
         """splits a full_path into directory and file parts"""
 
         sep = full_path.rfind("/")
@@ -397,7 +399,8 @@ class PostsaiImporter:
         return branch
 
 
-    def filter_out_folders(self, files):
+    @staticmethod
+    def filter_out_folders(files):
         """Sourceforge includes folders in the file list"""
 
         result = {}
@@ -410,7 +413,8 @@ class PostsaiImporter:
         return result
 
 
-    def extract_files(self, commit):
+    @staticmethod
+    def extract_files(commit):
         result = {}
         actionMap = {
             "added" : "Add",
@@ -425,6 +429,13 @@ class PostsaiImporter:
                 result[full_path] = actionMap[change]
         return result
 
+    @staticmethod
+    def file_revision(commit, full_path):
+        if "revisions" in commit:
+            return commit["revisions"][full_path]
+        else:
+            return commit["id"]
+
 
     def import_from_webhook(self):
         rows = []
@@ -434,17 +445,17 @@ class PostsaiImporter:
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
-                    "ci_when" : commit['timestamp'],
-                    "who" : commit['author']['email'],
+                    "ci_when" : commit["timestamp"],
+                    "who" : commit["author"]["email"],
                     "url" : self.extract_url(),
                     "repository" : self.extract_repo_name(),
                     "dir" : folder,
                     "file" : file,
-                    "revision" : commit['id'],
+                    "revision" : self.file_revision(commit, full_path),
                     "branch" : self.extract_branch(),
                     "addedlines" : "0",
                     "removedlines" : "0",
-                    "description" : commit['message']
+                    "description" : commit["message"]
                 }
                 rows.append(row)
 
