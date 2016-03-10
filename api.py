@@ -90,6 +90,10 @@ class PostsaiDB:
         if len(cursor.description) < 3:
             cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
 
+        cursor.execute(self.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
+        if len(cursor.description) < 13:
+            cursor.execute(self.rewrite_sql("ALTER TABLE checkins ADD (commitid mediumint(9), key commitid(commitid))"))
+
         cursor.close()
 
     @staticmethod

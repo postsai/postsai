@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   `addedlines` int(11) NOT NULL,
   `removedlines` int(11) NOT NULL,
   `descid` mediumint(9) NOT NULL,
+  `commitid` mediumint(9),
   PRIMARY KEY(`id`),
   UNIQUE KEY `repositoryid` (`repositoryid`,`dirid`,`fileid`,`revision`),
   KEY `ci_when` (`ci_when`),
@@ -134,13 +135,24 @@ CREATE TABLE IF NOT EXISTS `tags` (
   KEY `dirid` (`dirid`),
   KEY `fileid` (`fileid`),
   KEY `branchid` (`branchid`)
-)
+);
+CREATE TABLE IF NOT EXISTS `commitids` (
+  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `hash` varchar(60),
+  `co_when` datetime NOT NULL,
+  `authorid` mediumint(9) NOT NULL,
+  `committerid` mediumint(9) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash` (`hash`)
+)  
         """
+        print("OK: Starting database structure check and update")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):
                 self.db.query(sql, [])
-        print("OK: Database structure check & update")
+        self.db.update_database_structure()
+        print("OK: Completed database structure check and update")
 
     def print_apache_help(self):
         # TODO
