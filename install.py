@@ -5,8 +5,10 @@ import api
 import warnings
 
 class PostsaiInstaller:
+    """Installer for Postsai"""
 
-    def print_config_help_and_exit(self):
+    @staticmethod
+    def print_config_help_and_exit():
         help_config_file = """
     Please create a file called config.py with this content an run install.py again: 
 

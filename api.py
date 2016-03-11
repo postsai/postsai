@@ -132,7 +132,8 @@ class PostsaiDB:
         return res
 
 
-    def guess_repository_urls(self, row):
+    @staticmethod
+    def guess_repository_urls(row):
         """guesses the repository urls"""
 
         base_url = row["url"]
@@ -358,7 +359,7 @@ class Postsai:
             rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
             repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
             db.disconnect()
-            
+
             result = {
                 "config" : self.config['ui'],
                 "data" : rows,
