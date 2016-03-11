@@ -39,7 +39,8 @@ Postsai integrates with various hosted and local repositories:
   - Use [notify-webhook](https://github.com/youyongsong/notify-webhook) to setup a webhook with the following configuration<br>webhookurl=https://example.com/postsai/api.py<br> webhook-contenttype=application/json
   - Edit the database table "repositories" to configure links. For git instaweb use: <br>file_url=http://example.com/?p=[repository];a=blob;f=[file];h=[revision]<br>commit_url=http://example.com/?p=[repository];a=commitdiff;h=[revision]
 - CVS
-  - Setup [ViewVC](http://www.viewvc.org/) with database suport (for example via apt-get install viewvc viewvc-query) and use the same database for Postsai
+  - Define a CVS Webhook [notify-cvs-webhook](postsai/notify-cvs-webhook) in CVSROOT/loginfo with --url=https://example.com/postsai/api.py
+  - -or- Setup [ViewVC](http://www.viewvc.org/) with database support (for example via apt-get install viewvc viewvc-query) and use the same database for Postsai
   - Edit the database table "repositories" to configure links.<br>file_url=http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup<br>commit_url=http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]
 
    
