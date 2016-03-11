@@ -5,6 +5,7 @@ import json
 import MySQLdb as mdb
 import re
 import sys
+import datetime
 from os import environ
 
 import config
@@ -43,7 +44,8 @@ class PostsaiDB:
         "dir" : "dirs",
         "file" : "files",
         "branch" : "branches",
-        "description" : "descs"
+        "description" : "descs",
+        "hash": "commitids"
     }
 
 
@@ -64,9 +66,11 @@ class PostsaiDB:
         cursor.close()
         self.conn.begin();
 
+
     def disconnect(self):
         self.conn.commit()
         self.conn.close()
+
 
     def rewrite_sql(self, sql):
         if self.is_viewvc_database:
@@ -90,10 +94,14 @@ class PostsaiDB:
         if len(cursor.description) < 3:
             cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
 
+        cursor.execute(self.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
+        if len(cursor.description) < 13:
+            cursor.execute(self.rewrite_sql("ALTER TABLE checkins ADD (commitid mediumint(9), key commitid(commitid))"))
+
         cursor.close()
 
-
-    def fix_encoding_of_result(self, rows):
+    @staticmethod
+    def fix_encoding_of_result(rows):
         """ Workaround UTF-8 data in an ISO-8859-1 column"""
 
         result = []
@@ -156,15 +164,10 @@ class PostsaiDB:
             # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
         return (base_url, file_url, commit_url, tracker_url, icon_url)
 
-
-    def fill_id_cache(self, cursor, column, row):
-        """fills the id-cache"""
-        value = row[column]
-        data = [value]
+    def extra_data_for_key_tables(self, cursor, column, row, value):
         extra_column = ""
         extra_data = ""
-
-        # Special case for description column
+        data = [value]
         if column == "description":
             extra_column = ", hash"
             extra_data = ", %s"
@@ -173,6 +176,19 @@ class PostsaiDB:
             extra_column = ", base_url, file_url, commit_url, tracker_url, icon_url"
             extra_data = ", %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
+        elif column == "hash":
+            extra_column = ", authorid, committerid, co_when"
+            extra_data = ", %s, %s, %s"
+            self.fill_id_cache(cursor, "who", row, row["author"])
+            self.fill_id_cache(cursor, "who", row, row["committer"])
+            data.extend((self.cache.get("who", row["author"]), self.cache.get("who", row["committer"]), row["co_when"]))
+        return data, extra_column, extra_data
+
+
+    def fill_id_cache(self, cursor, column, row, value):
+        """fills the id-cache"""
+
+        data, extra_column, extra_data = self.extra_data_for_key_tables(cursor, column, row, value)
 
         sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
         cursor.execute(sql, [value])
@@ -195,11 +211,11 @@ class PostsaiDB:
 
         for row in rows:
             for key in self.column_table_mapping:
-                self.fill_id_cache(cursor, key, row)
+                self.fill_id_cache(cursor, key, row, row[key])
 
         for row in rows:
-            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag)
-                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag, commitid)
+                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
                 row["type"],
                 row["ci_when"],
@@ -212,7 +228,8 @@ class PostsaiDB:
                 row["addedlines"],
                 row["removedlines"],
                 self.cache.get("description", row["description"]),
-                ""
+                "",
+                self.cache.get("hash", row["commitid"])
                 ])
 
         cursor.close()
@@ -335,7 +352,7 @@ class Postsai:
 
         if result == "":
             self.create_query(form)
-            
+
             db = PostsaiDB(self.config)
             db.connect()
             rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
@@ -359,7 +376,9 @@ class PostsaiImporter:
         self.config = config
         self.data = data
 
-    def split_full_path(self, full_path):
+
+    @staticmethod
+    def split_full_path(full_path):
         """splits a full_path into directory and file parts"""
 
         sep = full_path.rfind("/")
@@ -392,12 +411,13 @@ class PostsaiImporter:
 
     def extract_branch(self):
         branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
-        if branch == "master":
+        if branch == "master" or branch == "HEAD":
             return ""
         return branch
 
 
-    def filter_out_folders(self, files):
+    @staticmethod
+    def filter_out_folders(files):
         """Sourceforge includes folders in the file list"""
 
         result = {}
@@ -410,7 +430,8 @@ class PostsaiImporter:
         return result
 
 
-    def extract_files(self, commit):
+    @staticmethod
+    def extract_files(commit):
         result = {}
         actionMap = {
             "added" : "Add",
@@ -426,6 +447,21 @@ class PostsaiImporter:
         return result
 
 
+    @staticmethod
+    def file_revision(commit, full_path):
+        if "revisions" in commit:
+            return commit["revisions"][full_path]
+        else:
+            return commit["id"]
+
+
+    @staticmethod
+    def extract_committer(commit):
+        if "committer" in commit:
+            return commit["committer"]
+        else:
+            return commit["author"]
+
     def import_from_webhook(self):
         rows = []
 
@@ -434,20 +470,24 @@ class PostsaiImporter:
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
-                    "ci_when" : commit['timestamp'],
-                    "who" : commit['author']['email'],
+                    "ci_when" : datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "co_when" : commit["timestamp"],
+                    "who" : commit["author"]["email"],
                     "url" : self.extract_url(),
                     "repository" : self.extract_repo_name(),
                     "dir" : folder,
                     "file" : file,
-                    "revision" : commit['id'],
+                    "revision" : self.file_revision(commit, full_path),
                     "branch" : self.extract_branch(),
                     "addedlines" : "0",
                     "removedlines" : "0",
-                    "description" : commit['message']
+                    "description" : commit["message"],
+                    "commitid" : commit["id"],
+                    "hash" : commit["id"],
+                    "author" : commit["author"]["email"],
+                    "committer" : self.extract_committer(commit)["email"]
                 }
                 rows.append(row)
-
         db = PostsaiDB(self.config)
         db.import_data(rows)
         print("Content-Type: text/plain; charset='utf-8'\r")
