@@ -5,6 +5,7 @@ import json
 import MySQLdb as mdb
 import re
 import sys
+import datetime
 from os import environ
 
 import config
@@ -469,7 +470,7 @@ class PostsaiImporter:
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
-                    "ci_when" : commit["timestamp"],
+                    "ci_when" : datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
                     "co_when" : commit["timestamp"],
                     "who" : commit["author"]["email"],
                     "url" : self.extract_url(),
