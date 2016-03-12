@@ -1,4 +1,4 @@
-Postsai &nbsp;&nbsp;&nbsp;&nbsp;[![Travis](https://img.shields.io/travis/postsai/postsai.svg)](https://travis-ci.org/postsai/postsai/) [![Codacy](https://img.shields.io/codacy/b057b8d7eafc41b1a2c4c131b59bcd7c.svg)](https://www.codacy.com/app/arianne/postsai) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
+![Logo](https://raw.githubusercontent.com/postsai/postsai/master/resources/postsai-64.png) Postsai &nbsp;&nbsp;&nbsp;&nbsp;[![Travis](https://img.shields.io/travis/postsai/postsai.svg)](https://travis-ci.org/postsai/postsai/) [![Codacy](https://img.shields.io/codacy/b057b8d7eafc41b1a2c4c131b59bcd7c.svg)](https://www.codacy.com/app/arianne/postsai) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
 -------
 
 Postsai is a commit database
@@ -26,8 +26,13 @@ db = {
 	"database" : "postsai"
 }
 ```
+* Execte `./install.py` and follow instructions
+* Configure Apache to execute cgi-scripts in /etc/apache/sites/enabled/*
 
-* Configure commit hook
+``` config
+AddHandler cgi-script .cy
+Options +ExecCGI
+```
 
 Integration
 -
@@ -78,6 +83,6 @@ ui = {
 <!--
 Building
 -
-zip -r /tmp/postsai-0.1.zip postsai --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*"
+zip -r /tmp/postsai-0.3.zip postsai --exclude postsai/.travis.yml --exclude "postsai/.g*" --exclude "postsai/.p*" --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*"
 
 -->
