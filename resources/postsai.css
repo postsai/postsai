@@ -1,4 +1,12 @@
-.content {padding: 0 1em}
+.content {
+	padding: 0 1em;
+	overflow-x: hidden
+}
+@media (max-width: 700px) {
+	.content {
+		padding: 0 .2em;
+	}
+}
 .file {width: 20%}
 .hidden {display: none}
 .footer {text-align: right}
