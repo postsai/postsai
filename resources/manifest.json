@@ -3,27 +3,28 @@
   "short_name": "postsai",
   "icons": [
     {
-      "src": "resources/postsai-96.png",
+      "src": "postsai-96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "resources/postsai-144.png",
+      "src": "postsai-144.png",
       "sizes": "144x144",
       "type": "image/png"
     }],
   "splash_screens": [
     {
-      "src": "resources/postsai-96.png",
+      "src": "postsai-96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "resources/postsai-144.png",
+      "src": "postsai-144.png",
       "sizes": "144x144",
       "type": "image/png"
     }
   ],
+  "display": "standalone",
   "theme_color": "#e7e7e7",
   "background_color": "white"
 }
