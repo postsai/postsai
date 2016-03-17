@@ -359,9 +359,13 @@ class Postsai:
             rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
             repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
             db.disconnect()
+            
+            ui = {}
+            if "ui" in vars(config):
+                ui = self.config['ui']
 
             result = {
-                "config" : self.config['ui'],
+                "config" : ui,
                 "data" : rows,
                 "repositories": repositories
             }
