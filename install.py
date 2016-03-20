@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   `descid` mediumint(9) NOT NULL,
   `commitid` mediumint(9),
   PRIMARY KEY(`id`),
-  UNIQUE KEY `repositoryid` (`repositoryid`,`dirid`,`fileid`,`revision`),
+  UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`),
   KEY `ci_when` (`ci_when`),
   KEY `whoid` (`whoid`),
   KEY `repositoryid_2` (`repositoryid`),
@@ -154,6 +154,18 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             for sql in structure.split(";"):
                 self.db.query(sql, [])
         self.db.update_database_structure()
+
+        # TODO: Check for existence 
+        try:
+            self.db.query("ALTER TABLE checkins DROP INDEX repositoryid", [])
+        except:
+            pass
+        
+        try:
+            self.db.query("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)", [])
+        except:
+            pass
+        
         print("OK: Completed database structure check and update")
 
     def print_apache_help(self):
