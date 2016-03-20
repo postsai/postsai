@@ -63,6 +63,7 @@ class PostsaiDB:
         cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
         self.is_viewvc_database = (cursor.rowcount == 1)
+        cursor.execute("SET SESSION innodb_lock_wait_timeout = 500")
         cursor.close()
         self.conn.begin();
 
@@ -191,7 +192,7 @@ class PostsaiDB:
 
         data, extra_column, extra_data = self.extra_data_for_key_tables(cursor, column, row, value)
 
-        sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s FOR UPDATE"
+        sql = "SELECT id FROM " + self.column_table_mapping[column] + " WHERE " + column + " = %s"
         cursor.execute(sql, [value])
         rows = cursor.fetchall()
         if len(rows) > 0:
@@ -469,13 +470,16 @@ class PostsaiImporter:
 
     def import_from_webhook(self):
         rows = []
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         for commit in self.data['commits']:
+            if ("replay" in self.data and self.data["replay"]):
+                timestamp = commit["timestamp"]
             for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
-                    "ci_when" : datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+                    "ci_when" : timestamp,
                     "co_when" : commit["timestamp"],
                     "who" : commit["author"]["email"],
                     "url" : self.extract_url(),
