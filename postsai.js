@@ -168,6 +168,7 @@ function initTable() {
 			alert(data);
 			return;
 		}
+		$("span.waitmessage").text("Please stand by while the browser is working.")
 		window.config = data.config;
 		window.repositories = data.repositories;
 		hideRedundantColumns();

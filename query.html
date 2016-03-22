@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Postsai</title>
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src *">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src http://* https://* 'self' data:; style-src 'self' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-table/dist/bootstrap-table.min.css">
@@ -66,7 +66,7 @@
 	</tr>
 	</thead>
 </table>
-<div class="spinner"><br>Please stand by while the database is working.<br></div>
+<div class="spinner"><br><span class="waitmessage">Please stand by while the database is working.</span><br></div>
 
 <br>
 <div class="footer">Rendered by <a href="https://postsai.github.io">Postsai</a></div>
