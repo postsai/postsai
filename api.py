@@ -34,6 +34,13 @@ class Cache:
         return self.cache[entity_type][key];
 
 
+    def has(self, entity_type, key):
+        """checks whether an item is in the cache"""
+
+        if not entity_type in self.cache:
+            return False
+        return key in self.cache[entity_type]
+
 
 class PostsaiDB:
     """Database access for postsai"""
@@ -189,6 +196,9 @@ class PostsaiDB:
 
     def fill_id_cache(self, cursor, column, row, value):
         """fills the id-cache"""
+
+        if self.cache.has(column, value):
+            return
 
         data, extra_column, extra_data = self.extra_data_for_key_tables(cursor, column, row, value)
 
@@ -360,7 +370,7 @@ class Postsai:
             rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
             repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
             db.disconnect()
-            
+
             ui = {}
             if "ui" in vars(config):
                 ui = self.config['ui']

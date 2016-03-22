@@ -155,12 +155,12 @@ CREATE TABLE IF NOT EXISTS `commitids` (
                 self.db.query(sql, [])
         self.db.update_database_structure()
 
-        # TODO: Check for existence 
+        # TODO: Check for existence
         try:
             self.db.query("ALTER TABLE checkins DROP INDEX repositoryid", [])
         except:
             pass
-        
+
         try:
             self.db.query("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)", [])
         except:
