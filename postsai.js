@@ -307,11 +307,11 @@ function formatDiffLink(value, row, index) {
 
 function formatRepository(value, row, index) {
 	var prop = rowToProp(row);
-	var url = readRepositoryConfig(row[0], "icon_url", "resources/unknown.png");
-	if (!url) {
-		url = "resources/unknown.png";
+	var url = readRepositoryConfig(row[0], "icon_url", null);
+	if (url) {
+		return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
 	}
-	return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
+	return escapeHtml(value);
 }
 
 function hashWithCache(input) {
