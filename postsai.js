@@ -3,6 +3,8 @@ var $ = window.$ || {};
 (function() {
 "use strict";
 
+var hashCache = {};
+
 /**
  * areRowMergable?
  */
@@ -168,7 +170,7 @@ function initTable() {
 			alert(data);
 			return;
 		}
-		$("span.waitmessage").text("Please stand by while the browser is working.")
+		$("span.waitmessage").text("Please stand by while the browser is working.");
 		window.config = data.config;
 		window.repositories = data.repositories;
 		hideRedundantColumns();
@@ -310,6 +312,15 @@ function formatRepository(value, row, index) {
 		url = "resources/unknown.png";
 	}
 	return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
+}
+
+function hashWithCache(input) {
+	hash = hashCache[input];
+	if (!hash) {
+		hash = window.md5(input);
+		hashCache[input] = hash;
+	}
+	return hash;
 }
 
 function formatAuthor(value, row, index) {
