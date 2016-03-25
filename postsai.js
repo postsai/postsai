@@ -326,7 +326,7 @@ function hashWithCache(input) {
 function formatAuthor(value, row, index) {
 	var icon = "";
 	if (window.config.avatar) {
-		icon = "<img src='" + window.config.avatar + "/avatar/" + window.md5(value) + ".jpg?s=20&amp;d=mm'> ";
+		icon = "<img src='" + window.config.avatar + "/avatar/" + window.md5(value) + ".jpg?s=20&amp;d=wavatar'> ";
 	}
 	var text = value;
 	if (window.config.trim_email) {
