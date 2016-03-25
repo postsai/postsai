@@ -161,7 +161,7 @@ class PostsaiDB:
         elif base_url.find("://sourceforge.net") > -1:
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
-            icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
+            icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
 
 
         # CVS
@@ -300,7 +300,7 @@ class Postsai:
 
         self.create_where_for_date(form)
 
-        self.sql = self.sql + " ORDER BY checkins.ci_when DESC"
+        self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
 
 
     def create_where_for_column(self, column, form, internal_column):
