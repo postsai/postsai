@@ -309,7 +309,7 @@ function formatRepository(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "icon_url", null);
 	if (url) {
-		return "<img src='" + url + "' height='20px' width='20px'> " + escapeHtml(value);
+		return "<img src='" + argsubst(url, prop) + "' height='20px' width='20px'> " + escapeHtml(value);
 	}
 	return escapeHtml(value);
 }
