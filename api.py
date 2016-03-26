@@ -333,8 +333,6 @@ class Postsai:
             self.sql = self.sql + " AND " + internal_column + " " + self.convert_operator(matchtype) + " %s"
         self.data.append(value)
 
-    
-
 
     def create_where_for_date(self, form):
         """parses the date parameters and adds them to the database query"""

@@ -56,6 +56,15 @@ class PostsaiInstaller:
             sys.exit(1)
 
 
+    def has_index(self, table, name):
+        """checks whether the specified index exists on the specified table"""
+
+        sql = "SHOW INDEX FROM " + table + " WHERE key_name = %s"
+        data = [name]
+        rows = self.db.query(self.db.rewrite_sql(sql), data)
+        return len(rows) > 0
+
+
     def convert_to_innodb(self, db):
         """Converts all database tables to InnoDB"""
 
@@ -65,6 +74,7 @@ class PostsaiInstaller:
         data = []
         for row in rows:
             db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
+
 
     def update_database_structure(self):
         structure = """
@@ -103,8 +113,7 @@ CREATE TABLE IF NOT EXISTS `descs` (
   `description` text,
   `hash` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `hash` (`hash`),
-  FULLTEXT INDEX `i_description` (`description`)
+  KEY `hash` (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `dirs` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -168,27 +177,20 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         self.convert_to_innodb(self.db)
         self.db.update_database_structure()
 
-        # TODO: Check for existence
-        try:
+        if self.has_index("checkins", "repository"):
             self.db.query(self.db.rewrite_sql("ALTER TABLE checkins DROP INDEX repositoryid"), [])
-        except:
-            pass
 
-        try:
+        if not self.has_index("checkins", "domainid"):
             self.db.query(self.db.rewrite_sql("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)"), [])
-        except:
-            pass
 
-        try:
-            self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
-        except:
-            pass
+        if not self.has_index("descs", "i_description"):
+            try:
+                self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
+            except:
+                print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
+                pass
 
         print("OK: Completed database structure check and update")
-
-    def print_apache_help(self):
-        # TODO
-        pass
 
 
     def main(self):
@@ -196,7 +198,6 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         self.check_db_config()
         self.connect()
         self.update_database_structure()
-        self.print_apache_help()
 
 
 

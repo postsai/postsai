@@ -315,7 +315,7 @@ function formatRepository(value, row, index) {
 }
 
 function hashWithCache(input) {
-	hash = hashCache[input];
+	var hash = hashCache[input];
 	if (!hash) {
 		hash = window.md5(input);
 		hashCache[input] = hash;
