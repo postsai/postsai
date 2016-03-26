@@ -303,6 +303,18 @@ class Postsai:
         self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
 
 
+    @staticmethod
+    def convert_operator(matchtype):
+        operator = '=';
+        if (matchtype == "match"):
+            operator = '='
+        elif (matchtype == "regexp"):
+            operator = "REGEXP"
+        elif (matchtype == "notregexp"):
+            operator = "NOT REGEXP"
+        return operator
+
+
     def create_where_for_column(self, column, form, internal_column):
         """create the where part for the specified column with data from the request"""
 
@@ -315,15 +327,13 @@ class Postsai:
             value = ""
 
         matchtype = form.getfirst(column+"type", "match")
-        operator = '=';
-        if (matchtype == "match"):
-            operator = '='
-        elif (matchtype == "regexp"):
-            operator = "REGEXP"
-        elif (matchtype == "notregexp"):
-            operator = "NOT REGEXP"
-        self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
+        if internal_column == "description" and matchtype == "search":
+            self.sql = self.sql + " AND MATCH (" + internal_column + ") AGAINST (%s)"
+        else:
+            self.sql = self.sql + " AND " + internal_column + " " + self.convert_operator(matchtype) + " %s"
         self.data.append(value)
+
+    
 
 
     def create_where_for_date(self, form):

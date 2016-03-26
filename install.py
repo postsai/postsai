@@ -56,6 +56,16 @@ class PostsaiInstaller:
             sys.exit(1)
 
 
+    def convert_to_innodb(self, db):
+        """Converts all database tables to InnoDB"""
+
+        sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND ENGINE = 'MyISAM'"
+        data = [self.config["db"]["database"]]
+        rows = db.query(sql, data);
+        data = []
+        for row in rows:
+            db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
+
     def update_database_structure(self):
         structure = """
 CREATE TABLE IF NOT EXISTS `branches` (
@@ -93,7 +103,8 @@ CREATE TABLE IF NOT EXISTS `descs` (
   `description` text,
   `hash` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `hash` (`hash`)
+  KEY `hash` (`hash`),
+  FULLTEXT INDEX `i_description` (`description`)
 );
 CREATE TABLE IF NOT EXISTS `dirs` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -153,6 +164,8 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):
                 self.db.query(sql, [])
+
+        self.convert_to_innodb(self.db)
         self.db.update_database_structure()
 
         # TODO: Check for existence
@@ -165,7 +178,12 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             self.db.query("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)", [])
         except:
             pass
-        
+
+        try:
+            self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
+        except:
+            pass
+
         print("OK: Completed database structure check and update")
 
     def print_apache_help(self):
