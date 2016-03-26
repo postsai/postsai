@@ -163,19 +163,19 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):
-                self.db.query(sql, [])
+                self.db.query(self.db.rewrite_sql(sql), [])
 
         self.convert_to_innodb(self.db)
         self.db.update_database_structure()
 
         # TODO: Check for existence
         try:
-            self.db.query("ALTER TABLE checkins DROP INDEX repositoryid", [])
+            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins DROP INDEX repositoryid"), [])
         except:
             pass
 
         try:
-            self.db.query("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)", [])
+            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)"), [])
         except:
             pass
 
