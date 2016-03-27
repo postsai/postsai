@@ -5,6 +5,21 @@ var $ = window.$ || {};
 
 var hashCache = {};
 
+
+//http://stackoverflow.com/a/12034334
+var entityMap = {
+	"&": "&amp;",
+	"<": "&lt;",
+	">": "&gt;",
+	"\"": "&quot;"
+};
+function escapeHtml(string) {
+	return String(string).replace(/[&<>"']/g, function (s) {
+		return entityMap[s];
+	});
+}
+
+
 /**
  * areRowMergable?
  */
@@ -93,17 +108,21 @@ function repositoryDatalist() {
 			alert(data);
 			return;
 		}
+
 		var list = [];
 		for (var repo in data.repositories) {
-			list.push(repo);
+			if (data.repositories.hasOwnProperty(repo)) {
+				list.push(repo);
+			}
 		}
+
 		list.sort();
-		var temp = ""
-		for (var repo in list) {
-			temp = temp + '<option value="' + escapeHtml(list[repo]) + '">';
+
+		var temp = "";
+		for (var i in list) {
+			temp = temp + '<option value="' + escapeHtml(list[i]) + '">';
 		}
-		var repositorylist = document.getElementById("repositorylist");
-		repositorylist.innerHTML = temp;
+		document.getElementById("repositorylist").innerHTML = temp;
 	});
 }
 
@@ -202,20 +221,6 @@ function initTable() {
 		$(".spinner").addClass("hidden");
 	});
 }
-
-// http://stackoverflow.com/a/12034334
-var entityMap = {
-	"&": "&amp;",
-	"<": "&lt;",
-	">": "&gt;",
-	"\"": "&quot;"
-};
-function escapeHtml(string) {
-	return String(string).replace(/[&<>"']/g, function (s) {
-		return entityMap[s];
-	});
-}
-
 
 function guessSCM(revision) {
 	if (revision.indexOf(".") >= 0) {
