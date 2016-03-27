@@ -65,28 +65,45 @@ class PostsaiInstaller:
         return len(rows) > 0
 
 
-    def convert_to_innodb(self, db):
+    def convert_to_innodb(self):
         """Converts all database tables to InnoDB"""
 
         sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND ENGINE = 'MyISAM'"
         data = [self.config["db"]["database"]]
-        rows = db.query(sql, data);
+        rows = self.db.query(sql, data);
         data = []
         for row in rows:
-            db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
+            self.db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
 
 
-    def convert_to_utf8(self, db):
+    def convert_to_utf8(self):
         """Converts all database tables to UTF-8"""
+
         query = """SELECT table_name
 FROM information_schema.tables, information_schema.collation_character_set_applicability
 WHERE collation_character_set_applicability.collation_name = tables.table_collation
 AND table_schema = %s AND character_set_name != 'utf8'"""
 
         data = [self.config["db"]["database"]]
-        tables = db.query(query, data);
+        tables = self.db.query(query, data);
         for table in tables:
-            db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", []);
+            self.db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", []);
+
+
+    def update_index_definitions(self):
+        """Updates the definition of indexes"""
+
+        if self.has_index("checkins", "repository"):
+            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins DROP INDEX repositoryid"), [])
+
+        if not self.has_index("checkins", "domainid"):
+            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)"), [])
+
+        if not self.has_index("descs", "i_description"):
+            try:
+                self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
+            except:
+                print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
 
 
     def update_database_structure(self):
@@ -188,21 +205,10 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             for sql in structure.split(";"):
                 self.db.query(self.db.rewrite_sql(sql), [])
 
-        self.convert_to_innodb(self.db)
-        self.convert_to_utf8(self.db)
+        self.convert_to_innodb()
+        self.convert_to_utf8()
         self.db.update_database_structure()
-
-        if self.has_index("checkins", "repository"):
-            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins DROP INDEX repositoryid"), [])
-
-        if not self.has_index("checkins", "domainid"):
-            self.db.query(self.db.rewrite_sql("ALTER TABLE checkins ADD UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`)"), [])
-
-        if not self.has_index("descs", "i_description"):
-            try:
-                self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
-            except:
-                print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
+        self.update_index_definitions()
 
         print("OK: Completed database structure check and update")
 
