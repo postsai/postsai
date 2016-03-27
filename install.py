@@ -76,8 +76,22 @@ class PostsaiInstaller:
             db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
 
 
+    def convert_to_utf8(self, db):
+        """Converts all database tables to UTF-8"""
+        query = """SELECT table_name
+FROM information_schema.tables, information_schema.collation_character_set_applicability
+WHERE collation_character_set_applicability.collation_name = tables.table_collation
+AND table_schema = %s AND character_set_name != 'utf8'"""
+
+        data = [self.config["db"]["database"]]
+        tables = db.query(query, data);
+        for table in tables:
+            db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", []);
+
+
     def update_database_structure(self):
         structure = """
+ALTER DATABASE """ + self.config["db"]["database"] + """ CHARSET 'UTF8';
 CREATE TABLE IF NOT EXISTS `branches` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `branch` varchar(200),
@@ -117,7 +131,7 @@ CREATE TABLE IF NOT EXISTS `descs` (
 );
 CREATE TABLE IF NOT EXISTS `dirs` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `dir` varchar(700) DEFAULT NULL,
+  `dir` varchar(254) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `dir` (`dir`)
 );
@@ -175,6 +189,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
                 self.db.query(self.db.rewrite_sql(sql), [])
 
         self.convert_to_innodb(self.db)
+        self.convert_to_utf8(self.db)
         self.db.update_database_structure()
 
         if self.has_index("checkins", "repository"):

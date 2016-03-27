@@ -63,8 +63,14 @@ class PostsaiDB:
 
 
     def connect(self):
-        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'],
-                           self.config['db']['password'], self.config['db']['database'])
+        self.conn = mdb.connect(
+            host    = self.config["db"]["host"],
+            user    = self.config["db"]["user"],
+            passwd  = self.config["db"]["password"],
+            db      = self.config["db"]["database"],
+            port    = self.config["db"].get("port", 3306),
+            use_unicode = True,
+            charset = "utf8")
 
         # checks whether this is a ViewVC database instead of a Bonsai database
         cursor = self.conn.cursor()
@@ -117,10 +123,7 @@ class PostsaiDB:
             tmp = []
             result.append(tmp);
             for col in row:
-                try:
-                    tmp.append(str(col).decode("UTF-8"))
-                except UnicodeDecodeError:
-                    tmp.append(str(col).decode("ISO-8859-1"))
+                tmp.append(col)
         return result
 
 
