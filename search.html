@@ -47,7 +47,9 @@
   <div class="form-group">
     <label for="repository" class="col-sm-2 control-label">Repository</label>
     <div class="col-sm-9">
-      <input type="text" class="form-control" name="repository" id="repository">
+      <input type="text" class="form-control" name="repository" id="repository" list="repositorylist">
+      <datalist id="repositorylist">
+      </datalist>
       <label class="radio-inline">
         <input type="radio" name="repositorytype" id="repositorymatch" value="match" checked> Match
       </label>

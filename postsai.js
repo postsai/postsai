@@ -85,6 +85,29 @@ function addValuesFromURLs() {
 }
 
 /**
+ * initializes a data list for auto complete
+ */
+function repositoryDatalist() {
+	$.getJSON( "api.py?date=none", function( data ) {
+		if (typeof data === "string") {
+			alert(data);
+			return;
+		}
+		var list = [];
+		for (var repo in data.repositories) {
+			list.push(repo);
+		}
+		list.sort();
+		var temp = ""
+		for (var repo in list) {
+			temp = temp + '<option value="' + escapeHtml(list[repo]) + '">';
+		}
+		var repositorylist = document.getElementById("repositorylist");
+		repositorylist.innerHTML = temp;
+	});
+}
+
+/**
  * Is this a primary paramter or a sub-paramter of a selected parent?
  */
 function isQueryParameterImportant(vars, key) {
@@ -271,7 +294,7 @@ function formatTrackerLink(value, row, index) {
 		return res;
 	}
 
-	return res.replace(/#([0-9]+)/g, "<a href='" + url + "'>#$1</a>");
+	return res.replace(/#([0-9]+)/g, '<a href="' + url + '">#$1</a>');
 }
 
 
@@ -284,7 +307,7 @@ function formatFileLink(value, row, index) {
 	if (!url) {
 		return escapeHtml(value);
 	}
-	return argsubst("<a href='" + url + "'>[file]</a>", prop);
+	return argsubst('<a href="' + url + '">[file]</a>', prop);
 }
 
 
@@ -297,14 +320,14 @@ function formatDiffLink(value, row, index) {
 	if (!url) {
 		return prop["[short_revision]"];
 	}
-	return argsubst("<a href='" + url + "'>[short_revision]</a>", prop);
+	return argsubst('<a href="' + url + '">[short_revision]</a>', prop);
 }
 
 function formatRepository(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "icon_url", null);
 	if (url) {
-		return "<img src='" + argsubst(url, prop) + "' height='20px' width='20px'> " + escapeHtml(value);
+		return '<img src="' + argsubst(url, prop) + '" height="20px" width="20px"> ' + escapeHtml(value);
 	}
 	return escapeHtml(value);
 }
@@ -321,7 +344,7 @@ function hashWithCache(input) {
 function formatAuthor(value, row, index) {
 	var icon = "";
 	if (window.config.avatar) {
-		icon = "<img src='" + window.config.avatar + "/avatar/" + window.md5(value) + ".jpg?s=20&amp;d=wavatar'> ";
+		icon = '<img src="' + window.config.avatar + '/avatar/' + window.md5(value) + '.jpg?s=20&amp;d=wavatar"> ';
 	}
 	var text = value;
 	if (window.config.trim_email) {
@@ -341,10 +364,12 @@ window["formatRepository"] = formatRepository;
 $("ready", function() {
 	window.config = {};
 	addQueryStringToLink();
-	addValuesFromURLs();
 	if (document.querySelector("body.page-searchresult")) {
 		renderQueryParameters();
 		initTable();
+	} else {
+		addValuesFromURLs();
+		repositoryDatalist();
 	}
 });
 }());

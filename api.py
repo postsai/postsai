@@ -341,8 +341,8 @@ class Postsai:
         """parses the date parameters and adds them to the database query"""
 
         datetype = form.getfirst("date", "day")
-        if (datetype == "all"):
-            return
+        if (datetype == "none"):
+            self.sql = self.sql + " AND 1 = 0"
         elif (datetype == "day"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)"
         elif (datetype == "week"):
