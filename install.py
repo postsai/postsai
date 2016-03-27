@@ -203,7 +203,6 @@ CREATE TABLE IF NOT EXISTS `commitids` (
                 self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
             except:
                 print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
-                pass
 
         print("OK: Completed database structure check and update")
 

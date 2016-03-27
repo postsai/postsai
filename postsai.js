@@ -89,13 +89,9 @@ function addValuesFromURLs() {
  */
 function isQueryParameterImportant(vars, key) {
 	if (key === "hours") {
-		if (vars["date"] !== "hours") {
-			return false;
-		}
+		return (vars["date"] === "hours");
 	} else if (key === "mindate" || key === "maxdate") {
-		if (vars["date"] !== "explicit") {
-			return false;
-		}
+		return (vars["date"] === "explicit");
 	} 	
 	return true;
 }
@@ -189,8 +185,7 @@ var entityMap = {
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
-	"\"": "&quot;",
-	"'": "&#39;"
+	"\"": "&quot;"
 };
 function escapeHtml(string) {
 	return String(string).replace(/[&<>"']/g, function (s) {
@@ -276,7 +271,7 @@ function formatTrackerLink(value, row, index) {
 		return res;
 	}
 
-	return res.replace(/#([0-9]*)/g, "<a href='" + url + "'>#$1</a>");
+	return res.replace(/#([0-9]+)/g, "<a href='" + url + "'>#$1</a>");
 }
 
 
