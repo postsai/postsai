@@ -104,11 +104,6 @@ function addValuesFromURLs() {
  */
 function repositoryDatalist() {
 	$.getJSON( "api.py?date=none", function( data ) {
-		if (typeof data === "string") {
-			alert(data);
-			return;
-		}
-
 		var list = [];
 		for (var repo in data.repositories) {
 			if (data.repositories.hasOwnProperty(repo)) {
@@ -119,7 +114,7 @@ function repositoryDatalist() {
 		list.sort();
 
 		var temp = "";
-		for (var i in list) {
+		for (var i = 0; i < list.length; i++) {
 			temp = temp + '<option value="' + escapeHtml(list[i]) + '">';
 		}
 		document.getElementById("repositorylist").innerHTML = temp;

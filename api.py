@@ -147,7 +147,8 @@ class PostsaiDB:
     def guess_repository_urls(row):
         """guesses the repository urls"""
 
-        base_url = row["url"]
+        base = row["url"]
+        base_url = base
         if (base_url.find(row["repository"]) == -1):
             base_url = base_url + "/" + row["repository"]
 
@@ -157,8 +158,8 @@ class PostsaiDB:
         icon_url = ""
 
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
-            file_url = base_url + "/blob/[revision]/[file]"
             commit_url = base_url + "/commit/[revision]"
+            file_url = base_url + "/blob/[revision]/[file]"
             tracker_url = base_url + "/issues/$1"
 
         elif base_url.find("://sourceforge.net") > -1:
@@ -166,15 +167,16 @@ class PostsaiDB:
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
 
+        elif row["revision"].find(".") > -1:  # CVS
+            commit_url = base + "/[repository]/[file]?r1=[old_revision]&r2=[revision]"
+            file_url = base + "/[repository]/[file]?revision=[revision]&view=markup"
 
-        # CVS
-            # file_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?revision=[revision]&view=markup',
-            # commit_url='http://cvs.example.com/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]',
+        else: # git instaweb
+            commit_url = base + "/?p=[repository];a=commitdiff;h=[revision]"
+            file_url = base + "/?p=[repository];a=blob;f=[file];hb=[revision]"
 
-        # git instaweb
-            # file_url="http://127.0.0.1:1234/?p=[repository];a=blob;f=[file];h=[revision]"
-            # commit_url="http://127.0.0.1:1234/?p=[repository];a=commitdiff;h=[revision]"
         return (base_url, file_url, commit_url, tracker_url, icon_url)
+
 
     def extra_data_for_key_tables(self, cursor, column, row, value):
         extra_column = ""
@@ -282,7 +284,7 @@ class Postsai:
         """creates the sql statement"""
 
         self.data = []
-        self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, concat(concat(dirs.dir, '/'), files.file),
+        self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
         checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
