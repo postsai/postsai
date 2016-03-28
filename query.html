@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Postsai</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src http://* https://* 'self' data:; style-src 'self' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='">
+	<title>Postsai Search</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-table/dist/bootstrap-table.min.css">
@@ -14,6 +15,7 @@
 	<script src="bower_components/bootstrap-table/dist/bootstrap-table.min.js"></script>
 	<script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
 	<script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
+	<script src="bower_components/bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 </head>
 <body class="page-searchresult">
 
@@ -52,6 +54,8 @@
 	data-pagination="true"
 	data-page-size="10000"
 	data-page-list="[1000, 10000, 100000, All]"
+	data-smart-display="true"
+	data-mobile-responsive="true"
 	class="hidden">
 
 	<thead>

@@ -38,8 +38,7 @@ class PostsaiDBTests(unittest.TestCase):
         res = api.PostsaiDB({}).fix_encoding_of_result(data)
 
         self.assertEqual(res[0][0], "a", "Normal character is unchanged")
-        self.assertEqual(res[0][1], u"\u00c4", "Special character is decoded")
-
+        self.assertEqual(res[0][1], u"\u00c4".encode("UTF-8"), "Special character is decoded")
 
 
 class PostsaiTests(unittest.TestCase):

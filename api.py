@@ -63,8 +63,14 @@ class PostsaiDB:
 
 
     def connect(self):
-        self.conn = mdb.connect(self.config['db']['host'], self.config['db']['user'],
-                           self.config['db']['password'], self.config['db']['database'])
+        self.conn = mdb.connect(
+            host    = self.config["db"]["host"],
+            user    = self.config["db"]["user"],
+            passwd  = self.config["db"]["password"],
+            db      = self.config["db"]["database"],
+            port    = self.config["db"].get("port", 3306),
+            use_unicode = True,
+            charset = "utf8")
 
         # checks whether this is a ViewVC database instead of a Bonsai database
         cursor = self.conn.cursor()
@@ -117,10 +123,7 @@ class PostsaiDB:
             tmp = []
             result.append(tmp);
             for col in row:
-                try:
-                    tmp.append(str(col).decode("UTF-8"))
-                except UnicodeDecodeError:
-                    tmp.append(str(col).decode("ISO-8859-1"))
+                tmp.append(col)
         return result
 
 
@@ -161,7 +164,7 @@ class PostsaiDB:
         elif base_url.find("://sourceforge.net") > -1:
             commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
             file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
-            icon_url = "https://a.fsdn.com/allura/p/[repository]/../icon"
+            icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
 
 
         # CVS
@@ -300,7 +303,19 @@ class Postsai:
 
         self.create_where_for_date(form)
 
-        self.sql = self.sql + " ORDER BY checkins.ci_when DESC"
+        self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
+
+
+    @staticmethod
+    def convert_operator(matchtype):
+        operator = '=';
+        if (matchtype == "match"):
+            operator = '='
+        elif (matchtype == "regexp"):
+            operator = "REGEXP"
+        elif (matchtype == "notregexp"):
+            operator = "NOT REGEXP"
+        return operator
 
 
     def create_where_for_column(self, column, form, internal_column):
@@ -315,14 +330,10 @@ class Postsai:
             value = ""
 
         matchtype = form.getfirst(column+"type", "match")
-        operator = '=';
-        if (matchtype == "match"):
-            operator = '='
-        elif (matchtype == "regexp"):
-            operator = "REGEXP"
-        elif (matchtype == "notregexp"):
-            operator = "NOT REGEXP"
-        self.sql = self.sql + " AND " + internal_column + " " + operator + " %s"
+        if internal_column == "description" and matchtype == "search":
+            self.sql = self.sql + " AND MATCH (" + internal_column + ") AGAINST (%s)"
+        else:
+            self.sql = self.sql + " AND " + internal_column + " " + self.convert_operator(matchtype) + " %s"
         self.data.append(value)
 
 
@@ -330,8 +341,8 @@ class Postsai:
         """parses the date parameters and adds them to the database query"""
 
         datetype = form.getfirst("date", "day")
-        if (datetype == "all"):
-            return
+        if (datetype == "none"):
+            self.sql = self.sql + " AND 1 = 0"
         elif (datetype == "day"):
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)"
         elif (datetype == "week"):
