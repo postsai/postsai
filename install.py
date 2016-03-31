@@ -68,6 +68,9 @@ class PostsaiInstaller:
     def convert_to_innodb(self):
         """Converts all database tables to InnoDB"""
 
+        sql = "ALTER TABLE `dirs` MODIFY COLUMN `dir` VARCHAR(254)"
+        rows = self.db.query(sql, []);
+
         sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND ENGINE = 'MyISAM'"
         data = [self.config["db"]["database"]]
         rows = self.db.query(sql, data);
@@ -83,11 +86,45 @@ class PostsaiInstaller:
 FROM information_schema.tables, information_schema.collation_character_set_applicability
 WHERE collation_character_set_applicability.collation_name = tables.table_collation
 AND table_schema = %s AND character_set_name != 'utf8'"""
-
         data = [self.config["db"]["database"]]
         tables = self.db.query(query, data);
+
         for table in tables:
             self.db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", []);
+            cursor = self.db.conn.cursor()
+            cursor.execute("SELECT * FROM " + table[0] + " WHERE 1=0")
+            for column in cursor.description:
+                #print(table[0], column[0], column[1]) 
+                if column[1] >= 252:
+                    try:
+                        cursor.execute("update " + table[0] + " set " + column[0] + " = @txt where char_length(" + column[0] + ") = length(@txt := convert(binary convert(" + column[0] + " using latin1) using utf8));")
+                    except:
+                        #print("E")
+                        pass
+            cursor.close()
+
+
+    def update_database_structure(self):
+        """alters the database structure"""
+
+        cursor = self.db.conn.cursor()
+
+        # increase column width of checkins
+        cursor.execute(self.db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"))
+        size = cursor.description[0][3]
+        if size < 50:
+            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+
+        # add columns to repositories table
+        cursor.execute("SELECT * FROM repositories WHERE 1=0")
+        if len(cursor.description) < 3:
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
+
+        cursor.execute(self.db.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
+        if len(cursor.description) < 13:
+            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (`id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id))"))
+
+        cursor.close()
 
 
     def update_index_definitions(self):
@@ -106,7 +143,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
                 print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
 
 
-    def update_database_structure(self):
+    def create_database_structure(self):
         structure = """
 ALTER DATABASE """ + self.config["db"]["database"] + """ CHARSET 'UTF8';
 CREATE TABLE IF NOT EXISTS `branches` (
@@ -207,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
         self.convert_to_innodb()
         self.convert_to_utf8()
-        self.db.update_database_structure()
+        self.update_database_structure()
         self.update_index_definitions()
 
         print("OK: Completed database structure check and update")
@@ -217,7 +254,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         self.import_config()
         self.check_db_config()
         self.connect()
-        self.update_database_structure()
+        self.create_database_structure()
 
 
 

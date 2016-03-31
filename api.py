@@ -92,28 +92,6 @@ class PostsaiDB:
         return sql
 
 
-    def update_database_structure(self):
-        """alters the database structure"""
-
-        cursor = self.conn.cursor()
-
-        # increase column width of checkins
-        cursor.execute(self.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"))
-        size = cursor.description[0][3]
-        if size < 50:
-            cursor.execute(self.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
-
-        # add columns to repositories table
-        cursor.execute("SELECT * FROM repositories WHERE 1=0")
-        if len(cursor.description) < 3:
-            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
-
-        cursor.execute(self.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
-        if len(cursor.description) < 13:
-            cursor.execute(self.rewrite_sql("ALTER TABLE checkins ADD (commitid mediumint(9), key commitid(commitid))"))
-
-        cursor.close()
-
     @staticmethod
     def fix_encoding_of_result(rows):
         """ Workaround UTF-8 data in an ISO-8859-1 column"""
@@ -223,7 +201,6 @@ class PostsaiDB:
 
         self.connect()
         self.cache = Cache()
-        self.update_database_structure()
         cursor = self.conn.cursor()
 
         for row in rows:
