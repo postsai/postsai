@@ -283,7 +283,9 @@ class Postsai:
         self.create_where_for_date(form)
 
         self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
-
+        limit = form.getfirst("limit", None)
+        if limit:
+            self.sql = self.sql + " LIMIT " + str(int(limit)) 
 
     @staticmethod
     def convert_operator(matchtype):
