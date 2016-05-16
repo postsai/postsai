@@ -7,12 +7,21 @@
 		padding: 0 .2em;
 	}
 }
-.file {width: 20%}
 .hidden {display: none}
 .footer {text-align: right}
 .spinner {text-align: center}
-.breakword { 
+
+.who, .file, .branch { 
 	word-break: break-all;
 }
+.file {width: 30%}
 
-ul.filelist, ul.filelist li {padding-left: 0; margin-left: 0.3em}
+@media (min-width: 1200px) {
+	.repository, .when, .who {white-space: nowrap}
+}
+
+
+ul.filelist, ul.filelist li {
+	padding-left: 0; margin-left: 0.3em; 
+	padding-bottom: 0; margin-bottom: 0
+}
