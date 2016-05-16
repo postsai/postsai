@@ -287,6 +287,7 @@ class Postsai:
         if limit:
             self.sql = self.sql + " LIMIT " + str(int(limit)) 
 
+
     @staticmethod
     def convert_operator(matchtype):
         operator = '=';
@@ -426,7 +427,7 @@ class PostsaiImporter:
 
     @staticmethod
     def filter_out_folders(files):
-        """Sourceforge includes folders in the file list"""
+        """Sourceforge includes folders in the file list, but we do not want them"""
 
         result = {}
         for file_to_test, value in files.items():
@@ -440,6 +441,8 @@ class PostsaiImporter:
 
     @staticmethod
     def extract_files(commit):
+        """Extracts a file list from the commit information"""
+
         result = {}
         actionMap = {
             "added" : "Add",
@@ -469,6 +472,7 @@ class PostsaiImporter:
             return commit["committer"]
         else:
             return commit["author"]
+
 
     def import_from_webhook(self):
         rows = []
