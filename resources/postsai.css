@@ -14,3 +14,5 @@
 .breakword { 
 	word-break: break-all;
 }
+
+ul.filelist, ul.filelist li {padding-left: 0; margin-left: 0.3em}
