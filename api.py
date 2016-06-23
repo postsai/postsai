@@ -169,11 +169,21 @@ class PostsaiDB:
             extra_data = ", %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
         elif column == "hash":
-            extra_column = ", authorid, committerid, co_when"
-            extra_data = ", %s, %s, %s"
+            extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
+            extra_data = ", %s, %s, %s, %s, %s"
+            remote_addr = "";
+            if environ.has_key("REMOTE_ADDR"):
+                remote_addr = environ["REMOTE_ADDR"]
+            remote_user = "";
+            if environ.has_key("REMOTE_USER"):
+                remote_user = environ["REMOTE_USER"]
             self.fill_id_cache(cursor, "who", row, row["author"])
             self.fill_id_cache(cursor, "who", row, row["committer"])
-            data.extend((self.cache.get("who", row["author"]), self.cache.get("who", row["committer"]), row["co_when"]))
+            data.extend((self.cache.get("who", row["author"]), 
+                         self.cache.get("who", row["committer"]), 
+                         row["co_when"],
+                         remote_addr,
+                         remote_user))
         return data, extra_column, extra_data
 
 
