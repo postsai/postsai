@@ -94,7 +94,6 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
             cursor = self.db.conn.cursor()
             cursor.execute("SELECT * FROM " + table[0] + " WHERE 1=0")
             for column in cursor.description:
-                #print(table[0], column[0], column[1]) 
                 if column[1] >= 252:
                     try:
                         cursor.execute("update " + table[0] + " set " + column[0] + " = @txt where char_length(" + column[0] + ") = length(@txt := convert(binary convert(" + column[0] + " using latin1) using utf8));")
