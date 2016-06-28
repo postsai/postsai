@@ -5,7 +5,6 @@ var $ = window.$ || {};
 
 var hashCache = {};
 
-
 //http://stackoverflow.com/a/12034334
 var entityMap = {
 	"&": "&amp;",
@@ -31,6 +30,14 @@ function areRowsMergable(data, lastGroupStart, index) {
 		&& (data[index][7] === data[lastGroupStart][7]);
 }
 
+function areRowsPreMergable(data, pre) {
+	return (data[0] === pre[0])
+		&& (data[1].substring(0, 10) === data[1].substring(0, 10))
+		&& (data[2] === pre[2])
+		&& (data[5] === pre[5])
+		&& (data[7] === pre[7]);
+}
+
 /**
  * merges commit messages on files committed together
  */
@@ -51,6 +58,26 @@ function mergeCells(data) {
 			$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
 		}
 	}
+}
+
+function preMerge(data) {
+	if (data.length <= 1) {
+		return data;
+	}
+	var res = [];
+	var j = 0;
+	res.push(data[0]);
+	res[j][3] = [data[0][3]];
+	for (var i = 1; i < data.length; i++) {
+		if (areRowsPreMergable(data[i], res[j])) {
+			res[j][3].push(data[i][3]);
+		} else {
+			j++;
+			res.push(data[i]);
+			res[j][3] = [data[i][3]];
+		}
+	}
+	return res;
 }
 
 /**
@@ -208,8 +235,11 @@ function initTable() {
 		window.repositories = data.repositories;
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
+		if (window.config.pre_merge) {
+			data.data = preMerge(data.data);
+		}
 		$("#table").bootstrapTable("load", {data: data.data});
-		if (data.data.length > 0) {
+		if (data.data.length > 0 && !window.config.pre_merge) {
 			mergeCells(data.data);
 		}
 		$("#table").removeClass("hidden");
@@ -298,16 +328,44 @@ function formatTrackerLink(value, row, index) {
 }
 
 
-function formatFileLink(value, row, index) {
-	if (!value) {
-		return "-";
-	}
+function formatFileLinkString(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "file_url", null);
 	if (!url) {
 		return escapeHtml(value);
 	}
 	return argsubst('<a href="' + url + '">[file]</a>', prop);
+}
+
+function formatFileLinkArray(value, row, index) {
+	var prop = rowToProp(row);
+	var url = readRepositoryConfig(row[0], "file_url", null);
+
+	if (value.length == 0) {
+		return "-";
+	}
+
+	var res = [];
+	for (var i = 0; i < value.length; i++) {
+		if (!url) {
+			res.push(escapeHtml(value[i]));
+		} else {
+			prop['[file]'] = value[i];
+			res.push(argsubst('<a href="' + url + '">[file]</a>', prop));
+		}
+	}
+	return "<ul class=\"filelist\"><li>" + res.join("<li>") + "</ul>";
+}
+
+function formatFileLink(value, row, index) {
+	if (!value) {
+		return "-";
+	}
+	if (value instanceof Array) {
+		return formatFileLinkArray(value, row, index);
+	} else {
+		return formatFileLinkString(value, row, index);
+	}
 }
 
 

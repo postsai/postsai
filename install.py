@@ -120,6 +120,11 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         if len(cursor.description) < 3:
             cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
 
+        # add columns to commitids table
+        cursor.execute("SELECT * FROM commitids WHERE 1=0")
+        if len(cursor.description) < 6:
+            cursor.execute("ALTER TABLE commitids ADD (remote_addr VARCHAR(255), remote_user VARCHAR(255))")
+
         cursor.execute(self.db.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
         if len(cursor.description) < 13:
             cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (`id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id))"))
@@ -232,6 +237,8 @@ CREATE TABLE IF NOT EXISTS `commitids` (
   `co_when` datetime NOT NULL,
   `authorid` mediumint(9) NOT NULL,
   `committerid` mediumint(9) NOT NULL,
+  `remote_addr` varchar(255),
+  `remote_user` varchar(255),
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`)
 )  

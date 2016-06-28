@@ -135,20 +135,28 @@ class PostsaiDB:
         tracker_url = ""
         icon_url = ""
 
+        # GitHub, Gitlab
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
             commit_url = base_url + "/commit/[revision]"
             file_url = base_url + "/blob/[revision]/[file]"
             tracker_url = base_url + "/issues/$1"
 
+        # SourceForge
         elif base_url.find("://sourceforge.net") > -1:
-            commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
-            file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+            if row["revision"].find(".") == -1 and len(row["revision"]) < 30:  # Subversion
+                commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
+                file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+            else: # CVS, Git
+                commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
+                file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
 
+        # CVS
         elif row["revision"].find(".") > -1:  # CVS
             commit_url = base + "/[repository]/[file]?r1=[old_revision]&r2=[revision]"
             file_url = base + "/[repository]/[file]?revision=[revision]&view=markup"
 
+        # Git
         else: # git instaweb
             commit_url = base + "/?p=[repository];a=commitdiff;h=[revision]"
             file_url = base + "/?p=[repository];a=blob;f=[file];hb=[revision]"
@@ -157,6 +165,8 @@ class PostsaiDB:
 
 
     def extra_data_for_key_tables(self, cursor, column, row, value):
+        """provides additional data that should be stored in lookup tables"""
+
         extra_column = ""
         extra_data = ""
         data = [value]
@@ -169,11 +179,15 @@ class PostsaiDB:
             extra_data = ", %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
         elif column == "hash":
-            extra_column = ", authorid, committerid, co_when"
-            extra_data = ", %s, %s, %s"
+            extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
+            extra_data = ", %s, %s, %s, %s, %s"
             self.fill_id_cache(cursor, "who", row, row["author"])
             self.fill_id_cache(cursor, "who", row, row["committer"])
-            data.extend((self.cache.get("who", row["author"]), self.cache.get("who", row["committer"]), row["co_when"]))
+            data.extend((self.cache.get("who", row["author"]), 
+                         self.cache.get("who", row["committer"]), 
+                         row["co_when"],
+                         environ.get("REMOTE_ADDR"),
+                         environ.get["REMOTE_USER"]))
         return data, extra_column, extra_data
 
 
@@ -283,6 +297,9 @@ class Postsai:
         self.create_where_for_date(form)
 
         self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
+        limit = form.getfirst("limit", None)
+        if limit:
+            self.sql = self.sql + " LIMIT " + str(int(limit)) 
 
 
     @staticmethod
@@ -416,6 +433,11 @@ class PostsaiImporter:
 
 
     def extract_branch(self):
+        """Extracts the branch name, master/HEAD are converted to an empty string."""
+
+        if not "ref" in self.data:
+            return ""
+
         branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
         if branch == "master" or branch == "HEAD":
             return ""
@@ -424,7 +446,7 @@ class PostsaiImporter:
 
     @staticmethod
     def filter_out_folders(files):
-        """Sourceforge includes folders in the file list"""
+        """Sourceforge includes folders in the file list, but we do not want them"""
 
         result = {}
         for file_to_test, value in files.items():
@@ -438,6 +460,8 @@ class PostsaiImporter:
 
     @staticmethod
     def extract_files(commit):
+        """Extracts a file list from the commit information"""
+
         result = {}
         actionMap = {
             "added" : "Add",
@@ -458,7 +482,11 @@ class PostsaiImporter:
         if "revisions" in commit:
             return commit["revisions"][full_path]
         else:
-            return commit["id"]
+            id = commit["id"]
+            # For Subversion, remove leading r
+            if id[0] == "r":
+                id = id[1:]
+            return id
 
 
     @staticmethod
@@ -467,6 +495,17 @@ class PostsaiImporter:
             return commit["committer"]
         else:
             return commit["author"]
+
+
+    @staticmethod
+    def extract_email(author):
+        """Use name as replacement for missing or empty email property (Sourceforge Subversion)"""
+
+        if "email" in author and author["email"] != "":
+            return author["email"]
+        else:
+            return author["name"]
+
 
     def import_from_webhook(self):
         rows = []
@@ -481,7 +520,7 @@ class PostsaiImporter:
                     "type" : change_type,
                     "ci_when" : timestamp,
                     "co_when" : commit["timestamp"],
-                    "who" : commit["author"]["email"],
+                    "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
                     "repository" : self.extract_repo_name(),
                     "dir" : folder,
@@ -493,8 +532,8 @@ class PostsaiImporter:
                     "description" : commit["message"],
                     "commitid" : commit["id"],
                     "hash" : commit["id"],
-                    "author" : commit["author"]["email"],
-                    "committer" : self.extract_committer(commit)["email"]
+                    "author" : self.extract_email(commit["author"]),
+                    "committer" : self.extract_email(self.extract_committer(commit))
                 }
                 rows.append(row)
         db = PostsaiDB(self.config)
