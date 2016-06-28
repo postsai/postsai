@@ -142,6 +142,13 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertNotIn("content/game", res, "folder was removed from list")
 
 
+    def test_file_revision(self):
+        postsai = api.PostsaiImporter({}, {})
+        self.assertEqual(postsai.file_revision({"id" : "r2"}, {}), "2", "Subversion version without r")
+        self.assertEqual(postsai.file_revision({"id" : "eef37d923574175c5606d04af19793f63c056f82"}, {}), "eef37d923574175c5606d04af19793f63c056f82", "Git revision")
+        self.assertEqual(postsai.file_revision({"revisions" : {"bla" : "1.1"}}, "bla"), "1.1", "CVS file revision")
+
+
+
 if __name__ == '__main__':
     unittest.main()
-
