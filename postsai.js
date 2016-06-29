@@ -341,7 +341,7 @@ function formatFileLinkArray(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "file_url", null);
 
-	if (value.length == 0) {
+	if (value.length === 0) {
 		return "-";
 	}
 

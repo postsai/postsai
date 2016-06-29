@@ -144,8 +144,8 @@ class PostsaiDB:
         # SourceForge
         elif base_url.find("://sourceforge.net") > -1:
             if row["revision"].find(".") == -1 and len(row["revision"]) < 30:  # Subversion
-                commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
-                file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+                commit_url = "https://sourceforge.net/[repository]/[revision]/"
+                file_url = "https://sourceforge.net/[repository]/[revision]/tree/[file]"
             else: # CVS, Git
                 commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
                 file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
@@ -183,8 +183,8 @@ class PostsaiDB:
             extra_data = ", %s, %s, %s, %s, %s"
             self.fill_id_cache(cursor, "who", row, row["author"])
             self.fill_id_cache(cursor, "who", row, row["committer"])
-            data.extend((self.cache.get("who", row["author"]), 
-                         self.cache.get("who", row["committer"]), 
+            data.extend((self.cache.get("who", row["author"]),
+                         self.cache.get("who", row["committer"]),
                          row["co_when"],
                          environ.get("REMOTE_ADDR"),
                          environ.get["REMOTE_USER"]))
@@ -299,7 +299,7 @@ class Postsai:
         self.sql = self.sql + " ORDER BY checkins.ci_when DESC, checkins.branchid DESC, checkins.descid DESC, checkins.id DESC"
         limit = form.getfirst("limit", None)
         if limit:
-            self.sql = self.sql + " LIMIT " + str(int(limit)) 
+            self.sql = self.sql + " LIMIT " + str(int(limit))
 
 
     @staticmethod
@@ -482,11 +482,11 @@ class PostsaiImporter:
         if "revisions" in commit:
             return commit["revisions"][full_path]
         else:
-            id = commit["id"]
+            rev = commit["id"]
             # For Subversion, remove leading r
-            if id[0] == "r":
-                id = id[1:]
-            return id
+            if rev[0] == "r":
+                rev = rev[1:]
+            return rev
 
 
     @staticmethod
