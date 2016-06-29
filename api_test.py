@@ -6,12 +6,20 @@ import unittest
 class CacheTests(unittest.TestCase):
     """tests for the cache"""
 
-    def cache(self):
-        cache = postsai.Cache()
+    def test_cache(self):
+        cache = api.Cache()
         self.assertIsNone(cache.get("file", "stendhal.java"), "entry not in cache")
 
         cache.put("file", "stendhal.java", "1")
-        self.assertEqual(cache.get("file", "stendhal.java"), "1", "created entry does in cache")
+        self.assertEqual(cache.get("file", "stendhal.java"), "1", "created entry in cache")
+
+        cache.put("file", "stendhal.java", "2")
+        self.assertEqual(cache.get("file", "stendhal.java"), "2", "update entry does in cache")
+
+        self.assertTrue(cache.has("file", "stendhal.java"), "has")
+        self.assertFalse(cache.has("file", "none"), "has not")
+        self.assertFalse(cache.has("dir", "stendhal.java"), "has not group")
+
 
 
 class PostsaiDBTests(unittest.TestCase):
