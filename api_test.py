@@ -99,7 +99,7 @@ class PostsaiTests(unittest.TestCase):
             self.data = data
 
         def getfirst(self, key, default=None):
-            return self.data[key]
+            return self.data.get(key, default)
 
 
     def test_validate_input(self):
@@ -117,6 +117,9 @@ class PostsaiTests(unittest.TestCase):
         form = self.FormMock({"who" : "^cvsscript$"})
         self.assertEqual(postsai.validate_input(form), "", "^cvsscript$ is a permitted user")
 
+        form = self.FormMock({})
+        self.assertEqual(postsai.validate_input(form), "", "parameter is not present")
+
 
     def test_create_where_for_column(self):
         postsai = api.Postsai({})
@@ -125,21 +128,38 @@ class PostsaiTests(unittest.TestCase):
         postsai.data = []
         form = self.FormMock({"file" : "config.py", "filetype" : "",
                               "branch" : "HEAD", "branchtype" : "match",
-                              "dir": "webapps.*", "dirtype" : "regexp"})
+                              "dir": "webapps.*", "dirtype" : "regexp",
+                              "repository" : "stendhal", "repositorytype" : "notregexp",
+                              "description" : "bla", "descriptiontype" : "search"})
+
+        postsai.create_where_for_column("who", form, "who")
+        self.assertEqual(postsai.sql, "", "undefined parameter")
 
         postsai.create_where_for_column("file", form, "file")
-        self.assertEqual(postsai.sql, " AND file = %s")
+        self.assertEqual(postsai.sql, " AND file = %s", "file with empty match type")
 
         postsai.create_where_for_column("branch", form, "branch")
-        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s")
+        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s", "branch with match")
 
         postsai.create_where_for_column("dir", form, "dir")
-        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s")
+        self.assertEqual(postsai.sql, " AND file = %s AND branch = %s AND dir REGEXP %s", "dir with regexp")
+
+        postsai.sql = ""
+        postsai.create_where_for_column("repository", form, "repository")
+        self.assertEqual(postsai.sql, " AND repository NOT REGEXP %s", "repository with not regexp")
+
+        postsai.sql = ""
+        postsai.create_where_for_column("description", form, "description")
+        self.assertEqual(postsai.sql, " AND MATCH (description) AGAINST (%s)", "description matching")
 
 
     def test_create_where_for_date(self):
         postsai = api.Postsai({})
         postsai.data = []
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "none"}))
+        self.assertEqual(postsai.sql, " AND 1 = 0")
 
         postsai.sql = ""
         postsai.create_where_for_date(self.FormMock({"date" : "day"}))
@@ -160,6 +180,14 @@ class PostsaiTests(unittest.TestCase):
         postsai.sql = ""
         postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "2016-02-22", "maxdate" : ""}))
         self.assertEqual(postsai.sql, " AND ci_when >= %s")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "", "maxdate" : "2016-02-22"}))
+        self.assertEqual(postsai.sql, " AND ci_when <= %s")
+
+        postsai.sql = ""
+        postsai.create_where_for_date(self.FormMock({"date" : "invalid21345"}))
+        self.assertEqual(postsai.sql, "")
 
 
 
