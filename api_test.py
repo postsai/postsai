@@ -233,6 +233,43 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(postsai.file_revision({"revisions" : {"bla" : "1.1"}}, "bla"), "1.1", "CVS file revision")
 
 
+    def test_extract_branch(self):
+        importer = api.PostsaiImporter({}, {})
+        self.assertEqual(importer.extract_branch(), "", "no branch")
+
+        importer.data["ref"] = "HEAD"
+        self.assertEqual(importer.extract_branch(), "", "HEAD branch")
+
+        importer.data["ref"] = "refs/heads/master"
+        self.assertEqual(importer.extract_branch(), "", "master branch")
+
+        importer.data["ref"] = "refs/heads/dev"
+        self.assertEqual(importer.extract_branch(), "dev", "master branch")
+
+
+    def test_extract_repo_name(self):
+        importer = api.PostsaiImporter({}, {"repository" : { "full_name" : "arianne/stendhal"}})
+        self.assertEqual(importer.extract_repo_name(), "arianne/stendhal", "GitHub repository")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "full_name" : "/p/arianne/stendhal-website/"}})
+        self.assertEqual(importer.extract_repo_name(), "p/arianne/stendhal-website", "SourceForge repository")
+
+        importer = api.PostsaiImporter({}, {"project" : { "path_with_namespace" : "cs.sys/cs.sys.portal"},
+                                            "repository": { "name": "cs.sys.portal"}})
+        self.assertEqual(importer.extract_repo_name(), "cs.sys/cs.sys.portal", "Gitlab repository")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "name" : "gittest"}})
+        self.assertEqual(importer.extract_repo_name(), "gittest", "Git repository")
+
+
+    def test_extract_url(self):
+        importer = api.PostsaiImporter({}, {"repository" : { "url" : "https://github.com/arianne/stendhal"}})
+        self.assertEqual(importer.extract_url(), "https://github.com/arianne/stendhal", "GitHub repository")
+
+        importer.data = {"project": { "web_url":"https://example.com/arianne/stendhal" }}
+        self.assertEqual(importer.extract_url(), "https://example.com/arianne/stendhal", "Gitlab repository")
+
+
 
 if __name__ == '__main__':
     unittest.main()
