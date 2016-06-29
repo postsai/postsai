@@ -144,8 +144,8 @@ class PostsaiDB:
         # SourceForge
         elif base_url.find("://sourceforge.net") > -1:
             if row["revision"].find(".") == -1 and len(row["revision"]) < 30:  # Subversion
-                commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
-                file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
+                commit_url = "https://sourceforge.net/[repository]/[revision]/"
+                file_url = "https://sourceforge.net/[repository]/[revision]/tree/[file]"
             else: # CVS, Git
                 commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
                 file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"

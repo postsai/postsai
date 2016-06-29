@@ -41,6 +41,54 @@ class PostsaiDBTests(unittest.TestCase):
         self.assertEqual(res[0][1], u"\u00c4".encode("UTF-8"), "Special character is decoded")
 
 
+    def test_guess_repository_urls(self):
+        db = api.PostsaiDB({})
+
+        self.assertEqual(
+            db.guess_repository_urls({
+                "url" : "https://github.com/postsai/postsai",
+                "repository": "postsai/postsai"
+            })[2],
+            "https://github.com/postsai/postsai/commit/[revision]",
+            "Github")
+
+        self.assertEqual(
+            db.guess_repository_urls({
+                "url" : "https://sourceforge.net",
+                "repository" : "/p/arianne/stendhal/",
+                "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
+            })[2],
+            "https://sourceforge.net/[repository]/ci/[revision]/",
+            "SourceForge Git")
+
+        self.assertEqual(
+            db.guess_repository_urls({
+                "url" : "https://sourceforge.net",
+                "repository" : "/p/testsf2/svn/",
+                "revision" : "r4"
+            })[2],
+            "https://sourceforge.net/[repository]/[revision]/",
+            "SourceForge Subversion")
+
+        self.assertEqual(
+            db.guess_repository_urls({
+                "url" : "http://localhost/cgi-bin/viewvc.cgi",
+                "repository" : "myrepo",
+                "revision" : "1.1"
+            })[2],
+            "http://localhost/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]",
+            "CVS")
+
+        self.assertEqual(
+            db.guess_repository_urls({
+                "url" : "http://localhost",
+                "repository" : "myrepo",
+                "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
+            })[2],
+            "http://localhost/?p=[repository];a=commitdiff;h=[revision]",
+            "Git")
+
+
 class PostsaiTests(unittest.TestCase):
     "test for the api"
 
