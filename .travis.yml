@@ -6,5 +6,5 @@ install:
 before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
   - echo "#!/usr/bin/python" > config.py
-script: nosetests -v --with-coverage --cover-branch
+script: nosetests -v --with-coverage --cover-branch --cover-erase --cover-package api.py
 
