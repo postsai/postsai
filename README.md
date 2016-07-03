@@ -31,6 +31,6 @@ Legal
 <!--
 Building
 -
-zip -r /tmp/postsai-0.3.zip postsai --exclude postsai/.travis.yml --exclude "postsai/.g*" --exclude "postsai/.p*" --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*"
+zip -r /tmp/postsai-0.6.zip postsai --exclude postsai/.travis.yml --exclude "postsai/.g*" --exclude "postsai/.p*" --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*" --exclude "postsai/.coverage"
 
 -->
