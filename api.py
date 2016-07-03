@@ -187,7 +187,7 @@ class PostsaiDB:
                          self.cache.get("who", row["committer"]),
                          row["co_when"],
                          environ.get("REMOTE_ADDR"),
-                         environ.get["REMOTE_USER"]))
+                         environ.get("REMOTE_USER")))
         return data, extra_column, extra_data
 
 
