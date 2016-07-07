@@ -420,6 +420,9 @@ window["formatDiffLink"] = formatDiffLink;
 window["formatRepository"] = formatRepository;
 
 $("ready", function() {
+	if (navigator.serviceWorker) {
+		navigator.serviceWorker.register('service-worker.js');
+	}
 	window.config = {};
 	addQueryStringToLink();
 	if (document.querySelector("body.page-searchresult")) {
