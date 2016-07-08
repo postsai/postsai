@@ -276,7 +276,8 @@ class Postsai:
 
         self.data = []
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-        checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository
+        checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, 
+        commitids.hash
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
         JOIN descs ON checkins.descid = descs.id
@@ -284,6 +285,7 @@ class Postsai:
         JOIN files ON checkins.fileid = files.id
         JOIN people ON checkins.whoid = people.id
         JOIN repositories ON checkins.repositoryid = repositories.id
+        LEFT JOIN commitids ON checkins.commitid = commitids.id
         WHERE 1=1 """
 
         self.create_where_for_column("branch", form, "branch")
@@ -293,6 +295,7 @@ class Postsai:
         self.create_where_for_column("who", form, "who")
         self.create_where_for_column("cvsroot", form, "repository")
         self.create_where_for_column("repository", form, "repository")
+        self.create_where_for_column("commit", form, "commitids.hash")
 
         self.create_where_for_date(form)
 

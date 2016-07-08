@@ -178,7 +178,7 @@ function typeToOperator(type) {
  */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
-		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Date", "Hours", "MinDate", "MaxDate"];
+		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Date", "Hours", "MinDate", "MaxDate"];
 		var text = "";
 		var title = "";
 		var vars = getUrlVars();
