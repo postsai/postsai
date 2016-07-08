@@ -92,19 +92,6 @@ class PostsaiDB:
         return sql
 
 
-    @staticmethod
-    def fix_encoding_of_result(rows):
-        """ Workaround UTF-8 data in an ISO-8859-1 column"""
-
-        result = []
-        for row in rows:
-            tmp = []
-            result.append(tmp);
-            for col in row:
-                tmp.append(col)
-        return result
-
-
     def query(self, sql, data, cursor_type=None):
         cursor = self.conn.cursor(cursor_type)
         cursor.execute(self.rewrite_sql(sql), data)
@@ -276,8 +263,7 @@ class Postsai:
 
         self.data = []
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-        checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, 
-        commitids.hash
+        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, commitids.hash 
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
         JOIN descs ON checkins.descid = descs.id
@@ -361,6 +347,43 @@ class Postsai:
                 self.sql = self.sql + " AND ci_when <= %s"
                 self.data.append(maxdate)
 
+    @staticmethod
+    def are_rows_in_same_commit(data, pre):
+        return data[9] == pre[9]
+
+
+
+    @staticmethod
+    def convert_database_row_to_array(row):
+        tmp = []
+        for col in row:
+            tmp.append(col)
+        return tmp
+
+
+    @staticmethod
+    def extract_commits(rows):
+        """Merges query result rows to extract commits"""
+
+        result = []
+        lastRow = None
+        for row in rows:
+            tmp = Postsai.convert_database_row_to_array(row)
+            tmp[3] = [tmp[3]]
+            tmp[4] = [tmp[4]]
+            if (lastRow == None):
+                lastRow = tmp
+                result.append(tmp)
+            else:
+                if Postsai.are_rows_in_same_commit(lastRow, tmp):
+                    lastRow[3].append(tmp[3][0])
+                    lastRow[4].append(tmp[4][0])
+                else:
+                    result.append(tmp)
+                    lastRow = tmp
+
+        return result
+
 
     def process(self):
         """processes an API request"""
@@ -377,7 +400,7 @@ class Postsai:
 
             db = PostsaiDB(self.config)
             db.connect()
-            rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
+            rows = self.extract_commits(db.query(self.sql, self.data))
             repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
             db.disconnect()
 
