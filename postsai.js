@@ -18,68 +18,6 @@ function escapeHtml(string) {
 	});
 }
 
-
-/**
- * areRowMergable?
- */
-function areRowsMergable(data, lastGroupStart, index) {
-	return (data[index][0] === data[lastGroupStart][0])
-		&& (data[index][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
-		&& (data[index][2] === data[lastGroupStart][2])
-		&& (data[index][5] === data[lastGroupStart][5])
-		&& (data[index][7] === data[lastGroupStart][7]);
-}
-
-function areRowsPreMergable(data, pre) {
-	return (data[0] === pre[0])
-		&& (data[1].substring(0, 10) === data[1].substring(0, 10))
-		&& (data[2] === pre[2])
-		&& (data[5] === pre[5])
-		&& (data[7] === pre[7]);
-}
-
-/**
- * merges commit messages on files committed together
- */
-function mergeCells(data) {
-	var lastGroupStart = 0;
-	for (var i = 1; i < data.length; i++) {
-		if (!areRowsMergable(data, i, lastGroupStart)) {
-			if (lastGroupStart + 1 !== i) {
-				$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
-			}
-			
-			lastGroupStart = i;
-		}
-	}
-	var index = data.length - 1;
-	if (areRowsMergable(data, index, lastGroupStart)) {
-		if (lastGroupStart !== index) {
-			$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
-		}
-	}
-}
-
-function preMerge(data) {
-	if (data.length <= 1) {
-		return data;
-	}
-	var res = [];
-	var j = 0;
-	res.push(data[0]);
-	res[j][3] = [data[0][3]];
-	for (var i = 1; i < data.length; i++) {
-		if (areRowsPreMergable(data[i], res[j])) {
-			res[j][3].push(data[i][3]);
-		} else {
-			j++;
-			res.push(data[i]);
-			res[j][3] = [data[i][3]];
-		}
-	}
-	return res;
-}
-
 /**
  * rewrites the links to include the query string
  */
@@ -235,13 +173,7 @@ function initTable() {
 		window.repositories = data.repositories;
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
-		if (window.config.pre_merge) {
-			data.data = preMerge(data.data);
-		}
 		$("#table").bootstrapTable("load", {data: data.data});
-		if (data.data.length > 0 && !window.config.pre_merge) {
-			mergeCells(data.data);
-		}
 		$("#table").removeClass("hidden");
 		$(".spinner").addClass("hidden");
 	});
@@ -269,19 +201,20 @@ function calculatePreviousCvsRevision(revision) {
 }
 
 function rowToProp(row) {
-	var scm = guessSCM(row[4]);
+	var scm = guessSCM(row[4][0]);
 	var prop = {
 		"[repository]": escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/")),
 		"[file]" : escapeHtml(row[3]),
 		"[revision]": escapeHtml(row[4]),
-		"[short_revision]": escapeHtml(row[4]),
+		"[commit]": escapeHtml(row[9]),
+		"[short_commit]": escapeHtml(row[9]),
 		"[scm]": scm
 	};
 	if (scm === "cvs") {
-		prop["[old_revision]"] = escapeHtml(calculatePreviousCvsRevision(row[4]));
+		prop["[short_commit]"] = escapeHtml(row[9].substring(row[9].length - 8, row[9].length));
 	}
 	if (scm === "git") {
-		prop["[short_revision]"] = escapeHtml(row[4].substring(0, 8));
+		prop["[short_commit]"] = escapeHtml(row[9].substring(0, 8));
 	}
 	return prop;
 }
@@ -351,6 +284,7 @@ function formatFileLinkArray(value, row, index) {
 			res.push(escapeHtml(value[i]));
 		} else {
 			prop['[file]'] = value[i];
+			prop['[revision]'] = row[4][i];
 			res.push(argsubst('<a href="' + url + '">[file]</a>', prop));
 		}
 	}
@@ -376,9 +310,9 @@ function formatDiffLink(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "commit_url", null);
 	if (!url) {
-		return prop["[short_revision]"];
+		return prop["[short_commit]"];
 	}
-	return argsubst('<a href="' + url + '">[short_revision]</a>', prop);
+	return argsubst('<a href="' + url + '">[short_commit]</a>', prop);
 }
 
 function formatRepository(value, row, index) {
