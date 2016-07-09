@@ -493,7 +493,7 @@ class PostsaiCommitViewer:
     def process(self):
         """Returns information about a commit"""
 
-        print("Content-Type: text/json; charset='utf-8'\r")
+        print("Content-Type: text/plain; charset='utf-8'\r")
         print("Cache-Control: max-age=60\r")
         print("\r")
 

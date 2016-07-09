@@ -158,6 +158,21 @@ function hideRedundantColumns() {
 	}
 }
 
+/**
+ * loads the commit information from the server
+ */
+function renderCommit() {
+	var prop = getUrlVars()
+	$.ajax({
+		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
+		success: function(data) {
+			document.querySelector("div.content").innerHTML = "<pre>" + escapeHtml(data) + "</pre>";
+		},
+		error: function(data) {
+			console.log(data);
+		}
+	});
+}
 
 /**
  * loads the search result from the server
@@ -186,18 +201,6 @@ function guessSCM(revision) {
 		return "subversion";
 	}
 	return "git";
-}
-
-function calculatePreviousCvsRevision(revision) {
-	var split = revision.split(".");
-	var last = split[split.length - 1];
-	if (last === "1" && split.length > 2) {
-		split.pop();
-		split.pop();
-	} else {
-		split[split.length - 1] = parseInt(last) - 1;
-	}
-	return split.join(".");	
 }
 
 function rowToProp(row) {
@@ -362,6 +365,8 @@ $("ready", function() {
 	if (document.querySelector("body.page-searchresult")) {
 		renderQueryParameters();
 		initTable();
+	} else if (document.querySelector("body.page-commit")) {
+		renderCommit();
 	} else {
 		addValuesFromURLs();
 		repositoryDatalist();
