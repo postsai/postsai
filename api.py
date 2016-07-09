@@ -5,6 +5,7 @@ import json
 import MySQLdb as mdb
 import re
 import sys
+import subprocess
 import datetime
 from os import environ
 
@@ -418,6 +419,93 @@ class Postsai:
 
 
 
+class PostsaiCommitViewer:
+    """Reads a commit from a repository"""
+
+
+    def __init__(self, config):
+        """Creates a PostsaiCommitViewer instance"""
+
+        self.config = config
+
+
+    def read_commit(self, form):
+        db = PostsaiDB(self.config)
+        db.connect()
+        sql = """SELECT repositories.repository, checkins.ci_when, people.who, 
+            trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
+            revision, descs.description, commitids.hash, commitids.co_when,
+            '/tmp/postsaitest/cvsserver' As repository_url /* TODO */
+            FROM checkins 
+            JOIN descs ON checkins.descid = descs.id
+            JOIN dirs ON checkins.dirid = dirs.id
+            JOIN files ON checkins.fileid = files.id
+            JOIN people ON checkins.whoid = people.id
+            JOIN repositories ON checkins.repositoryid = repositories.id
+            JOIN commitids ON checkins.commitid = commitids.id
+            WHERE repositories.repository = %s AND commitids.hash = %s """
+        data = [form.getfirst("repository", ""), form.getfirst("commit", "")]
+        result = db.query(sql, data)
+        db.disconnect()
+        return result
+
+
+    def format_commit_header(self, commit):
+        """Extracts the commit meta information"""
+
+        result = {
+            "repository": commit[0][0],
+            "published": commit[0][1],
+            "author": commit[0][2],
+            "description": commit[0][5],
+            "commit": commit[0][6],
+            "timestamp": commit[0][7]
+        }
+        return result
+
+
+    @staticmethod
+    def calculate_previous_cvs_revision(revision):
+        split = revision.split(".")
+        last = split[len(split) - 1]
+        if (last == "1" and split.length > 2):
+            split.pop();
+            split.pop();
+        else:
+            split[len(split) - 1] = str(int(last) - 1);
+        return ".".join(split);    
+
+
+
+    def dump_commit_diff(self, commit):
+        for file in commit:
+            subprocess.call([
+                "cvs",
+                "-d",
+                file[8],
+                "rdiff",
+                "-r",
+                PostsaiCommitViewer.calculate_previous_cvs_revision(file[4]),
+                "-r",
+                file[4],
+                file[3]])
+
+    def process(self):
+        """Returns information about a commit"""
+
+        print("Content-Type: text/json; charset='utf-8'\r")
+        print("Cache-Control: max-age=60\r")
+        print("\r")
+
+        form = cgi.FieldStorage()
+        commit = self.read_commit(form)
+
+        print(json.dumps(self.format_commit_header(commit), default=convert_to_builtin_type))
+        sys.stdout.flush()
+        self.dump_commit_diff(commit)        
+
+
+
 class PostsaiImporter:
     """Imports commits from a webhook"""
 
@@ -574,4 +662,9 @@ if __name__ == '__main__':
     if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
         PostsaiImporter(vars(config), json.loads(sys.stdin.read())).import_from_webhook()
     else:
-        Postsai(vars(config)).process()
+        form = cgi.FieldStorage()
+        if form.getfirst("method", "") == "commit":
+            PostsaiCommitViewer(vars(config)).process()
+        else:
+            Postsai(vars(config)).process()
+            
