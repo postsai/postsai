@@ -266,19 +266,23 @@ function guessSCM(revision) {
 
 function rowToProp(row) {
 	var scm = guessSCM(row[4][0]);
+	var commit = row[9];
+	if (!commit) {
+		commit = row[4][0];
+	}
 	var prop = {
 		"[repository]": escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/")),
 		"[file]" : escapeHtml(row[3]),
 		"[revision]": escapeHtml(row[4]),
-		"[commit]": escapeHtml(row[9]),
-		"[short_commit]": escapeHtml(row[9]),
+		"[commit]": escapeHtml(commit),
+		"[short_commit]": escapeHtml(commit),
 		"[scm]": scm
 	};
 	if (scm === "cvs") {
-		prop["[short_commit]"] = escapeHtml(row[9].substring(row[9].length - 8, row[9].length));
+		prop["[short_commit]"] = escapeHtml(commit.substring(commit.length - 8, commit.length));
 	}
 	if (scm === "git") {
-		prop["[short_commit]"] = escapeHtml(row[9].substring(0, 8));
+		prop["[short_commit]"] = escapeHtml(commit.substring(0, 8));
 	}
 	return prop;
 }

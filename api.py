@@ -351,7 +351,7 @@ class Postsai:
 
     @staticmethod
     def are_rows_in_same_commit(data, pre):
-        return data[9] == pre[9]
+        return data[9] == pre[9] and data[9] != None
 
 
 
