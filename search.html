@@ -43,8 +43,24 @@
 
 <div class="content">
 
-
 <form class="form-horizontal" method="GET" action="query.html">
+  
+  <div class="form-group">
+    <label for="description" class="col-sm-2 control-label">Description</label>
+    <div class="col-sm-9">
+      <input type="text" class="form-control" name="description" id="description" pattern="...+">
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptiontype" value="search" checked> Search words
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptionregexp" value="regexp"> Regular Expression
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="descriptiontype" id="descriptionnotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+
   <div class="form-group">
     <label for="repository" class="col-sm-2 control-label">Repository</label>
     <div class="col-sm-9">
@@ -126,19 +142,21 @@
       </label>
     </div>
   </div>
-  
+
   <div class="form-group">
-    <label for="description" class="col-sm-2 control-label">Description</label>
+    <label for="commit" class="col-sm-2 control-label">Commit</label>
     <div class="col-sm-9">
-      <input type="text" class="form-control" name="description" id="description" pattern="...+">
+      <input type="text" class="form-control" name="commit" id="commit">
+      <datalist id="repositorylist">
+      </datalist>
       <label class="radio-inline">
-        <input type="radio" name="descriptiontype" id="descriptiontype" value="search" checked> Search words
+        <input type="radio" name="committype" id="commitmatch" value="match" checked> Match
       </label>
       <label class="radio-inline">
-        <input type="radio" name="descriptiontype" id="descriptionregexp" value="regexp"> Regular Expression
+        <input type="radio" name="committype" id="commitregexp" value="regexp"> Regular Expression
       </label>
       <label class="radio-inline">
-        <input type="radio" name="descriptiontype" id="descriptionnotregexp" value="notregexp"> Not Regular Expression
+        <input type="radio" name="committype" id="commitnotregexp" value="notregexp"> Not Regular Expression
       </label>
     </div>
   </div>
@@ -199,7 +217,7 @@
 <div class="footer">Rendered by <a href="https://postsai.github.io">Postsai</a></div>
 
 </div>
-<script type="text/javascript" src="postsai.js"></script>
+<script type="text/javascript" src="resources/postsai.js"></script>
 
 </body>
 </html>

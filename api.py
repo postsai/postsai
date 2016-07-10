@@ -5,6 +5,7 @@ import json
 import MySQLdb as mdb
 import re
 import sys
+import subprocess
 import datetime
 from os import environ
 
@@ -16,22 +17,22 @@ def convert_to_builtin_type(obj):
 class Cache:
     """Cache"""
 
-    cache = {};
+    cache = {}
 
     def put(self, entity_type, key, value):
         """adds an entry to the cache"""
 
         if not entity_type in self.cache:
             self.cache[entity_type] = {}
-        self.cache[entity_type][key] = value;
+        self.cache[entity_type][key] = value
 
 
     def get(self, entity_type, key):
         """gets an entry from the cache"""
 
         if not entity_type in self.cache:
-            return None;
-        return self.cache[entity_type][key];
+            return None
+        return self.cache[entity_type][key]
 
 
     def has(self, entity_type, key):
@@ -78,7 +79,7 @@ class PostsaiDB:
         self.is_viewvc_database = (cursor.rowcount == 1)
         cursor.execute("SET SESSION innodb_lock_wait_timeout = 500")
         cursor.close()
-        self.conn.begin();
+        self.conn.begin()
 
 
     def disconnect(self):
@@ -90,19 +91,6 @@ class PostsaiDB:
         if self.is_viewvc_database:
             sql = sql.replace("checkins", "commits")
         return sql
-
-
-    @staticmethod
-    def fix_encoding_of_result(rows):
-        """ Workaround UTF-8 data in an ISO-8859-1 column"""
-
-        result = []
-        for row in rows:
-            tmp = []
-            result.append(tmp);
-            for col in row:
-                tmp.append(col)
-        return result
 
 
     def query(self, sql, data, cursor_type=None):
@@ -134,6 +122,7 @@ class PostsaiDB:
         commit_url = ""
         tracker_url = ""
         icon_url = ""
+        repository_url = row["repository_url"]
 
         # GitHub, Gitlab
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
@@ -153,7 +142,7 @@ class PostsaiDB:
 
         # CVS
         elif row["revision"].find(".") > -1:  # CVS
-            commit_url = base + "/[repository]/[file]?r1=[old_revision]&r2=[revision]"
+            commit_url = "commit.html?repository=[repository]&commit=[commit]"
             file_url = base + "/[repository]/[file]?revision=[revision]&view=markup"
 
         # Git
@@ -161,7 +150,7 @@ class PostsaiDB:
             commit_url = base + "/?p=[repository];a=commitdiff;h=[revision]"
             file_url = base + "/?p=[repository];a=blob;f=[file];hb=[revision]"
 
-        return (base_url, file_url, commit_url, tracker_url, icon_url)
+        return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
 
 
     def extra_data_for_key_tables(self, cursor, column, row, value):
@@ -175,8 +164,8 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_column = ", base_url, file_url, commit_url, tracker_url, icon_url"
-            extra_data = ", %s, %s, %s, %s, %s"
+            extra_column = ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url"
+            extra_data = ", %s, %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
         elif column == "hash":
             extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
@@ -276,7 +265,7 @@ class Postsai:
 
         self.data = []
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-        checkins.revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository
+        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, commitids.hash 
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
         JOIN descs ON checkins.descid = descs.id
@@ -284,6 +273,7 @@ class Postsai:
         JOIN files ON checkins.fileid = files.id
         JOIN people ON checkins.whoid = people.id
         JOIN repositories ON checkins.repositoryid = repositories.id
+        LEFT JOIN commitids ON checkins.commitid = commitids.id
         WHERE 1=1 """
 
         self.create_where_for_column("branch", form, "branch")
@@ -293,6 +283,7 @@ class Postsai:
         self.create_where_for_column("who", form, "who")
         self.create_where_for_column("cvsroot", form, "repository")
         self.create_where_for_column("repository", form, "repository")
+        self.create_where_for_column("commit", form, "commitids.hash")
 
         self.create_where_for_date(form)
 
@@ -304,7 +295,7 @@ class Postsai:
 
     @staticmethod
     def convert_operator(matchtype):
-        operator = '=';
+        operator = '='
         if (matchtype == "match"):
             operator = '='
         elif (matchtype == "regexp"):
@@ -358,6 +349,43 @@ class Postsai:
                 self.sql = self.sql + " AND ci_when <= %s"
                 self.data.append(maxdate)
 
+    @staticmethod
+    def are_rows_in_same_commit(data, pre):
+        return data[9] == pre[9]
+
+
+
+    @staticmethod
+    def convert_database_row_to_array(row):
+        tmp = []
+        for col in row:
+            tmp.append(col)
+        return tmp
+
+
+    @staticmethod
+    def extract_commits(rows):
+        """Merges query result rows to extract commits"""
+
+        result = []
+        lastRow = None
+        for row in rows:
+            tmp = Postsai.convert_database_row_to_array(row)
+            tmp[3] = [tmp[3]]
+            tmp[4] = [tmp[4]]
+            if (lastRow == None):
+                lastRow = tmp
+                result.append(tmp)
+            else:
+                if Postsai.are_rows_in_same_commit(lastRow, tmp):
+                    lastRow[3].append(tmp[3][0])
+                    lastRow[4].append(tmp[4][0])
+                else:
+                    result.append(tmp)
+                    lastRow = tmp
+
+        return result
+
 
     def process(self):
         """processes an API request"""
@@ -374,8 +402,9 @@ class Postsai:
 
             db = PostsaiDB(self.config)
             db.connect()
-            rows = db.fix_encoding_of_result(db.query(self.sql, self.data))
-            repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
+            rows = self.extract_commits(db.query(self.sql, self.data))
+            repositories = db.query_as_double_map(
+                "SELECT id, repository, base_url, file_url, commit_url, tracker_url, icon_url FROM repositories", "repository")
             db.disconnect()
 
             ui = {}
@@ -389,6 +418,93 @@ class Postsai:
             }
 
         print(json.dumps(result, default=convert_to_builtin_type))
+
+
+
+class PostsaiCommitViewer:
+    """Reads a commit from a repository"""
+
+
+    def __init__(self, config):
+        """Creates a PostsaiCommitViewer instance"""
+
+        self.config = config
+
+
+    def read_commit(self, form):
+        db = PostsaiDB(self.config)
+        db.connect()
+        sql = """SELECT repositories.repository, checkins.ci_when, people.who,
+            trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
+            revision, descs.description, commitids.hash, commitids.co_when, repository_url
+            FROM checkins 
+            JOIN descs ON checkins.descid = descs.id
+            JOIN dirs ON checkins.dirid = dirs.id
+            JOIN files ON checkins.fileid = files.id
+            JOIN people ON checkins.whoid = people.id
+            JOIN repositories ON checkins.repositoryid = repositories.id
+            JOIN commitids ON checkins.commitid = commitids.id
+            WHERE repositories.repository = %s AND commitids.hash = %s """
+        data = [form.getfirst("repository", ""), form.getfirst("commit", "")]
+        result = db.query(sql, data)
+        db.disconnect()
+        return result
+
+
+    @staticmethod
+    def format_commit_header(commit):
+        """Extracts the commit meta information"""
+
+        result = {
+            "repository": commit[0][0],
+            "published": commit[0][1],
+            "author": commit[0][2],
+            "description": commit[0][5],
+            "commit": commit[0][6],
+            "timestamp": commit[0][7]
+        }
+        return result
+
+
+    @staticmethod
+    def calculate_previous_cvs_revision(revision):
+        split = revision.split(".")
+        last = split[len(split) - 1]
+        if (last == "1" and len(split) > 2):
+            split.pop()
+            split.pop()
+        else:
+            split[len(split) - 1] = str(int(last) - 1)
+        return ".".join(split)
+
+    @staticmethod
+    def dump_commit_diff(commit):
+        for file in commit:
+            subprocess.call([
+                "cvs",
+                "-d",
+                file[8],
+                "rdiff",
+                "-u",
+                "-r",
+                PostsaiCommitViewer.calculate_previous_cvs_revision(file[4]),
+                "-r",
+                file[4],
+                file[3]])
+
+    def process(self):
+        """Returns information about a commit"""
+
+        print("Content-Type: text/plain; charset='utf-8'\r")
+        print("Cache-Control: max-age=60\r")
+        print("\r")
+
+        form = cgi.FieldStorage()
+        commit = self.read_commit(form)
+
+        print(json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))
+        sys.stdout.flush()
+        PostsaiCommitViewer.dump_commit_diff(commit)
 
 
 
@@ -424,9 +540,24 @@ class PostsaiImporter:
         return repo_name.strip("/") # sourceforge
 
 
+    def extract_repo_url(self):
+        repo = self.data['repository']
+        repository_url = ""
+
+        if "clone_url" in repo:  # github
+            repository_url = repo["clone_url"]
+        elif "git_ssh_url" in repo: # gitlab
+            repository_url = repo["git_ssh_url"]
+        elif "url" in repo: # sourceforge, notify-cvs-webhook
+            repository_url = repo["url"]
+        return repository_url
+
+
     def extract_url(self):
         if "project" in self.data and "web_url" in self.data["project"]: # gitlab
             url = self.data["project"]["web_url"]
+        elif "home_url" in self.data['repository']:
+            url = self.data['repository']["home_url"]
         else:
             url = self.data['repository']["url"]
         return url
@@ -523,6 +654,7 @@ class PostsaiImporter:
                     "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
                     "repository" : self.extract_repo_name(),
+                    "repository_url" : self.extract_repo_url(),
                     "dir" : folder,
                     "file" : file,
                     "revision" : self.file_revision(commit, full_path),
@@ -548,4 +680,9 @@ if __name__ == '__main__':
     if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
         PostsaiImporter(vars(config), json.loads(sys.stdin.read())).import_from_webhook()
     else:
-        Postsai(vars(config)).process()
+        form = cgi.FieldStorage()
+        if form.getfirst("method", "") == "commit":
+            PostsaiCommitViewer(vars(config)).process()
+        else:
+            Postsai(vars(config)).process()
+            

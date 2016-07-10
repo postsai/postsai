@@ -117,13 +117,17 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
         if len(cursor.description) < 3:
-            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), repository_url varchar(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
+        elif len(cursor.description) < 8:
+            cursor.execute("ALTER TABLE repositories ADD (repository_url varchar(255))")
+
 
         # add columns to commitids table
         cursor.execute("SELECT * FROM commitids WHERE 1=0")
         if len(cursor.description) < 6:
             cursor.execute("ALTER TABLE commitids ADD (remote_addr VARCHAR(255), remote_user VARCHAR(255))")
 
+        # add columns to checkins table
         cursor.execute(self.db.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
         if len(cursor.description) < 13:
             cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (`id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id))"))
@@ -209,6 +213,7 @@ CREATE TABLE IF NOT EXISTS `repositories` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `repository` varchar(64) NOT NULL,
   `base_url` varchar(255) DEFAULT NULL,
+  `repository_url` varchar(255) DEFAULT NULL,
   `file_url` varchar(255) DEFAULT NULL,
   `commit_url` varchar(255) DEFAULT NULL,
   `tracker_url` varchar(255) DEFAULT NULL,

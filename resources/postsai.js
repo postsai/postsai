@@ -1,4 +1,5 @@
 var $ = window.$ || {};
+var hljs = window.hljs || {};
 
 (function() {
 "use strict";
@@ -16,68 +17,6 @@ function escapeHtml(string) {
 	return String(string).replace(/[&<>"]/g, function (s) {
 		return entityMap[s];
 	});
-}
-
-
-/**
- * areRowMergable?
- */
-function areRowsMergable(data, lastGroupStart, index) {
-	return (data[index][0] === data[lastGroupStart][0])
-		&& (data[index][1].substring(0, 10) === data[lastGroupStart][1].substring(0, 10))
-		&& (data[index][2] === data[lastGroupStart][2])
-		&& (data[index][5] === data[lastGroupStart][5])
-		&& (data[index][7] === data[lastGroupStart][7]);
-}
-
-function areRowsPreMergable(data, pre) {
-	return (data[0] === pre[0])
-		&& (data[1].substring(0, 10) === data[1].substring(0, 10))
-		&& (data[2] === pre[2])
-		&& (data[5] === pre[5])
-		&& (data[7] === pre[7]);
-}
-
-/**
- * merges commit messages on files committed together
- */
-function mergeCells(data) {
-	var lastGroupStart = 0;
-	for (var i = 1; i < data.length; i++) {
-		if (!areRowsMergable(data, i, lastGroupStart)) {
-			if (lastGroupStart + 1 !== i) {
-				$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: i-lastGroupStart});
-			}
-			
-			lastGroupStart = i;
-		}
-	}
-	var index = data.length - 1;
-	if (areRowsMergable(data, index, lastGroupStart)) {
-		if (lastGroupStart !== index) {
-			$("#table").bootstrapTable("mergeCells", {index: lastGroupStart, field: 7, rowspan: index - lastGroupStart + 1});
-		}
-	}
-}
-
-function preMerge(data) {
-	if (data.length <= 1) {
-		return data;
-	}
-	var res = [];
-	var j = 0;
-	res.push(data[0]);
-	res[j][3] = [data[0][3]];
-	for (var i = 1; i < data.length; i++) {
-		if (areRowsPreMergable(data[i], res[j])) {
-			res[j][3].push(data[i][3]);
-		} else {
-			j++;
-			res.push(data[i]);
-			res[j][3] = [data[i][3]];
-		}
-	}
-	return res;
 }
 
 /**
@@ -178,7 +117,7 @@ function typeToOperator(type) {
  */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
-		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Date", "Hours", "MinDate", "MaxDate"];
+		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Date", "Hours", "MinDate", "MaxDate"];
 		var text = "";
 		var title = "";
 		var vars = getUrlVars();
@@ -220,6 +159,81 @@ function hideRedundantColumns() {
 	}
 }
 
+/**
+ * renders the header of commits
+ */
+function renderCommitHeader(header) {
+	var result = "<h2>Commit: " + escapeHtml(header.description) + "</h2>"
+		+ "<b>by " + escapeHtml(header.author)
+		+ " on "  + escapeHtml(header.timestamp) + "</b><br>";
+	return result;
+}
+
+/**
+ * renders the diff of a commit
+ */
+function renderDiff(data) {
+	var result = "<table class='diff'>";
+
+	var start = data.indexOf("\n") + 1;
+	var end = data.indexOf("\n", start);
+	var firstChunkInFile = true;
+	var filetype = "";
+	while (end > -1) {
+		var line = data.substring(start, end); 
+		var type = data.substring(start, start + 1);
+		if (type === "I") {
+			var file = line.substring(7);
+			result += "<tr class='difffile'><td colspan='2'>" + escapeHtml(file) + "</td></tr>";
+			filetype = file.substring(file.lastIndexOf(".") + 1, file.length);
+			firstChunkInFile = true;
+
+			// skip next three lines for non binary files
+			if (data.substring(end + 1, end + 6) !== "Index") {
+				end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
+			}
+		} else if (type === "+") {
+			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+		} else if (type === "-") {
+			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+		} else if (type === " ") {
+			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+		} else if (type === "@") {
+			if (!firstChunkInFile) {
+				result += "<tr class='diffsta'><td colspan='2'><hr></td></tr>";
+			}
+			firstChunkInFile = false;
+		}
+		start = end + 1;
+		end = data.indexOf("\n", start);
+	}
+
+	result += "</table>";
+	return result;
+}
+
+/**
+ * loads the commit information from the server
+ */
+function renderCommit() {
+	var prop = getUrlVars();
+	$.ajax({
+		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
+		success: function(data) {
+			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
+			document.querySelector("div.contentplaceholder").innerHTML
+				= renderCommitHeader(header)
+				+ renderDiff(data);
+
+			// start highlighting after giving a chance to breath
+			window.setTimeout(function() {
+				$('.hilight').each(function(i, block) {
+					hljs.highlightBlock(block);
+				});
+			}, 1);
+		}
+	});
+}
 
 /**
  * loads the search result from the server
@@ -235,13 +249,7 @@ function initTable() {
 		window.repositories = data.repositories;
 		hideRedundantColumns();
 		$("#table").bootstrapTable();
-		if (window.config.pre_merge) {
-			data.data = preMerge(data.data);
-		}
 		$("#table").bootstrapTable("load", {data: data.data});
-		if (data.data.length > 0 && !window.config.pre_merge) {
-			mergeCells(data.data);
-		}
 		$("#table").removeClass("hidden");
 		$(".spinner").addClass("hidden");
 	});
@@ -256,32 +264,21 @@ function guessSCM(revision) {
 	return "git";
 }
 
-function calculatePreviousCvsRevision(revision) {
-	var split = revision.split(".");
-	var last = split[split.length - 1];
-	if (last === "1" && split.length > 2) {
-		split.pop();
-		split.pop();
-	} else {
-		split[split.length - 1] = parseInt(last) - 1;
-	}
-	return split.join(".");	
-}
-
 function rowToProp(row) {
-	var scm = guessSCM(row[4]);
+	var scm = guessSCM(row[4][0]);
 	var prop = {
 		"[repository]": escapeHtml(row[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/")),
 		"[file]" : escapeHtml(row[3]),
 		"[revision]": escapeHtml(row[4]),
-		"[short_revision]": escapeHtml(row[4]),
+		"[commit]": escapeHtml(row[9]),
+		"[short_commit]": escapeHtml(row[9]),
 		"[scm]": scm
 	};
 	if (scm === "cvs") {
-		prop["[old_revision]"] = escapeHtml(calculatePreviousCvsRevision(row[4]));
+		prop["[short_commit]"] = escapeHtml(row[9].substring(row[9].length - 8, row[9].length));
 	}
 	if (scm === "git") {
-		prop["[short_revision]"] = escapeHtml(row[4].substring(0, 8));
+		prop["[short_commit]"] = escapeHtml(row[9].substring(0, 8));
 	}
 	return prop;
 }
@@ -351,6 +348,7 @@ function formatFileLinkArray(value, row, index) {
 			res.push(escapeHtml(value[i]));
 		} else {
 			prop['[file]'] = value[i];
+			prop['[revision]'] = row[4][i];
 			res.push(argsubst('<a href="' + url + '">[file]</a>', prop));
 		}
 	}
@@ -376,9 +374,9 @@ function formatDiffLink(value, row, index) {
 	var prop = rowToProp(row);
 	var url = readRepositoryConfig(row[0], "commit_url", null);
 	if (!url) {
-		return prop["[short_revision]"];
+		return prop["[short_commit]"];
 	}
-	return argsubst('<a href="' + url + '">[short_revision]</a>', prop);
+	return argsubst('<a href="' + url + '">[short_commit]</a>', prop);
 }
 
 function formatRepository(value, row, index) {
@@ -428,6 +426,8 @@ $("ready", function() {
 	if (document.querySelector("body.page-searchresult")) {
 		renderQueryParameters();
 		initTable();
+	} else if (document.querySelector("body.page-commit")) {
+		renderCommit();
 	} else {
 		addValuesFromURLs();
 		repositoryDatalist();
