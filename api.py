@@ -485,6 +485,7 @@ class PostsaiCommitViewer:
                 "-d",
                 file[8],
                 "rdiff",
+                "-u",
                 "-r",
                 PostsaiCommitViewer.calculate_previous_cvs_revision(file[4]),
                 "-r",

@@ -25,3 +25,14 @@ ul.filelist, ul.filelist li {
 	padding-left: 0; margin-left: 0.3em; 
 	padding-bottom: 0; margin-bottom: 0
 }
+
+table.diff {border: 1px solid #AAA; width: 100%}
+.diffsmall {width: 2em}
+.difffile {background-color: #CCC; font-weight: bold; line-height: 2em}
+.diffadd {background-color: #AFA}
+.diffdel {background-color: #FAA}
+.diffadd, .diffdel, .diffsta {
+	white-space: pre-wrap;
+	font-family: Consolas, "Liberation Mono", Courier, monospace;
+	tab-size: 4; -moz-tab-size: 4;	
+}

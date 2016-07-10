@@ -166,12 +166,62 @@ function renderCommit() {
 	$.ajax({
 		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
 		success: function(data) {
-			document.querySelector("div.content").innerHTML = "<pre>" + escapeHtml(data) + "</pre>";
+			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
+			document.querySelector("div.content").innerHTML
+				= renderCommitHeader(header)
+				+ renderDiff(data);
 		},
 		error: function(data) {
 			console.log(data);
 		}
 	});
+}
+
+/**
+ * renders the header of commits
+ */
+function renderCommitHeader(header) {
+	var result = "<h2>Commit: " + escapeHtml(header.description) + "</h2>"
+		+ "<b>by " + escapeHtml(header.author)
+		+ " on "  + escapeHtml(header.timestamp) + "</b><br>";
+	return result;
+}
+
+/**
+ * renders the diff of a commit
+ */
+function renderDiff(data) {
+	var result = "<table class='diff'>";
+
+	var start = data.indexOf("\n") + 1;
+	var end = data.indexOf("\n", start);
+	var firstChunkInFile = true;
+	while (end > -1) {
+		var line = data.substring(start, end); 
+		var type = data.substring(start, start + 1);
+		if (type == "I") {
+			result += "<tr class='difffile'><td colspan='2'>" + escapeHtml(line.substring(7)) + "</td></tr>";
+			// skip next three lines
+			end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
+			firstChunkInFile = true;
+		} else if (type == "+") {
+			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+		} else if (type == "-") {
+			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+		} else if (type == " ") {
+			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+		} else if (type == "@") {
+			if (!firstChunkInFile) {
+				result += "<tr class='diffsta'><td colspan='2'><hr></td></tr>";
+			}
+			firstChunkInFile = false;
+		}
+		start = end + 1;
+		end = data.indexOf("\n", start);
+	}
+
+	result += "</table>";
+	return result;
 }
 
 /**
