@@ -40,14 +40,6 @@ class PostsaiDBTests(unittest.TestCase):
             "SELECT revision FROM commits WHERE 1=0",
             "Rewriting on ViewVC databases")
 
-    def test_fix_encoding_of_result(self):
-        data = [["a", u"\u00c4".encode("UTF-8")]]
-
-        res = api.PostsaiDB({}).fix_encoding_of_result(data)
-
-        self.assertEqual(res[0][0], "a", "Normal character is unchanged")
-        self.assertEqual(res[0][1], u"\u00c4".encode("UTF-8"), "Special character is decoded")
-
 
     def test_guess_repository_urls(self):
         db = api.PostsaiDB({})
@@ -55,8 +47,9 @@ class PostsaiDBTests(unittest.TestCase):
         self.assertEqual(
             db.guess_repository_urls({
                 "url" : "https://github.com/postsai/postsai",
-                "repository": "postsai/postsai"
-            })[2],
+                "repository": "postsai/postsai",
+                "repository_url": ""
+            })[3],
             "https://github.com/postsai/postsai/commit/[revision]",
             "Github")
 
@@ -64,8 +57,9 @@ class PostsaiDBTests(unittest.TestCase):
             db.guess_repository_urls({
                 "url" : "https://sourceforge.net",
                 "repository" : "/p/arianne/stendhal/",
+                "repository_url": "",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
-            })[2],
+            })[3],
             "https://sourceforge.net/[repository]/ci/[revision]/",
             "SourceForge Git")
 
@@ -73,8 +67,9 @@ class PostsaiDBTests(unittest.TestCase):
             db.guess_repository_urls({
                 "url" : "https://sourceforge.net",
                 "repository" : "/p/testsf2/svn/",
+                "repository_url": "",
                 "revision" : "r4"
-            })[2],
+            })[3],
             "https://sourceforge.net/[repository]/[revision]/",
             "SourceForge Subversion")
 
@@ -82,17 +77,19 @@ class PostsaiDBTests(unittest.TestCase):
             db.guess_repository_urls({
                 "url" : "http://localhost/cgi-bin/viewvc.cgi",
                 "repository" : "myrepo",
+                "repository_url": "",
                 "revision" : "1.1"
-            })[2],
-            "http://localhost/cgi-bin/viewvc.cgi/[repository]/[file]?r1=[old_revision]&r2=[revision]",
+            })[3],
+            "commit.html?repository=[repository]&commit=[commit]",
             "CVS")
 
         self.assertEqual(
             db.guess_repository_urls({
                 "url" : "http://localhost",
                 "repository" : "myrepo",
+                "repository_url": "",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
-            })[2],
+            })[3],
             "http://localhost/?p=[repository];a=commitdiff;h=[revision]",
             "Git")
 
@@ -198,6 +195,19 @@ class PostsaiTests(unittest.TestCase):
         self.assertEqual(postsai.sql, "")
 
 
+    # TODO: create_query, extract_commits
+
+
+
+class PostsaiCommitViewerTest(unittest.TestCase):
+ 
+    def test_calculate_previous_cvs_revision(self):
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.2"),     "1.1")
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.4"), "1.3.2.3")
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.1"), "1.3")
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.1"),     "1.0")
+
+
 
 class PostsaiImporterTests(unittest.TestCase):
     "test for the importer"
@@ -262,9 +272,26 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(importer.extract_repo_name(), "gittest", "Git repository")
 
 
+    def test_extract_repo_url(self): 
+        importer = api.PostsaiImporter({}, {"repository" : {}})
+        self.assertEqual(importer.extract_repo_url(), "", "No repository url")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "clone_url": "https://github.com/arianne/stendhal.git"}})
+        self.assertEqual(importer.extract_repo_url(), "https://github.com/arianne/stendhal.git", "GitHub repository")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "git_ssh_url" : "git@example.com:cs.sys/cs.sys.portal.git"}})
+        self.assertEqual(importer.extract_repo_url(), "git@example.com:cs.sys/cs.sys.portal.git", "Gitlab repository")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "url" : ":pserver:anonymous:@cvs.example.com/srv/cvs/repository"}})
+        self.assertEqual(importer.extract_repo_url(), ":pserver:anonymous:@cvs.example.com/srv/cvs/repository", "CVS repository")
+
+
     def test_extract_url(self):
         importer = api.PostsaiImporter({}, {"repository" : { "url" : "https://github.com/arianne/stendhal"}})
         self.assertEqual(importer.extract_url(), "https://github.com/arianne/stendhal", "GitHub repository")
+
+        importer = api.PostsaiImporter({}, {"repository" : { "home_url" : "https://cvs.example.com/viewvc"}})
+        self.assertEqual(importer.extract_url(), "https://cvs.example.com/viewvc", "CVS")
 
         importer.data = {"project": { "web_url":"https://example.com/arianne/stendhal" }}
         self.assertEqual(importer.extract_url(), "https://example.com/arianne/stendhal", "Gitlab repository")

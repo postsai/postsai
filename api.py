@@ -468,7 +468,7 @@ class PostsaiCommitViewer:
     def calculate_previous_cvs_revision(revision):
         split = revision.split(".")
         last = split[len(split) - 1]
-        if (last == "1" and split.length > 2):
+        if (last == "1" and len(split) > 2):
             split.pop();
             split.pop();
         else:
@@ -542,10 +542,10 @@ class PostsaiImporter:
         repo = self.data['repository']
         repository_url = ""
 
-        if "clone_url" in repo:  # github, sourceforge
-            repository_url = repo["full_name"]
+        if "clone_url" in repo:  # github
+            repository_url = repo["clone_url"]
         elif "git_ssh_url" in repo: # gitlab
-            repository_url = self.data["project"]["git_ssh_url"]
+            repository_url = repo["git_ssh_url"]
         elif "url" in repo: # sourceforge, notify-cvs-webhook
             repository_url = repo["url"] 
         return repository_url
