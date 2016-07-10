@@ -2,11 +2,12 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src http://* https://* 'self' data:; style-src 'self' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='">
+	<meta http-equiv="XContent-Security-Policy" content="default-src 'self'; img-src http://* https://* 'self' data:; style-src 'self' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='">
 	<title>Postsai Commit</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-table/dist/bootstrap-table.min.css">
+	<link rel="stylesheet" href="bower_components/highlightjs/styles/default.css">
 	<link rel="stylesheet" href="resources/postsai.css">
 	<link rel="icon" href="resources/postsai-64.png">
 	<link rel="manifest" href="resources/manifest.json">
@@ -16,6 +17,7 @@
 	<script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
 	<script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
 	<script src="bower_components/bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
+	<script src="bower_components/highlightjs/highlight.pack.min.js"></script>
 </head>
 <body class="page-commit">
 
@@ -34,14 +36,14 @@
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav">
 			<li><a class="action-add-querystring" href="search.html">Search</a></li>
-			<li class="active" ><a href="query.html">Result <span class="sr-only">(current)</span></a></li>
+			<li><a href="query.html">Result <span class="sr-only"></span></a></li>
 			</ul>
 		</div><!-- /.navbar-collapse -->
 	</div><!-- /.container-fluid -->
 </nav>
 
 <div class="content">
-
+<div class="contentplaceholder"></div>
 
 <br>
 <div class="footer">Rendered by <a href="https://postsai.github.io">Postsai</a></div>

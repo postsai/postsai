@@ -27,12 +27,13 @@ ul.filelist, ul.filelist li {
 }
 
 table.diff {border: 1px solid #AAA; width: 100%}
-.diffsmall {width: 2em}
+.diffsmall {width: 2em; text-align: center}
 .difffile {background-color: #CCC; font-weight: bold; line-height: 2em}
-.diffadd {background-color: #AFA}
-.diffdel {background-color: #FAA}
+.diffadd {background-color: #CFC !important}
+.diffdel {background-color: #FCC !important}
 .diffadd, .diffdel, .diffsta {
 	white-space: pre-wrap;
 	font-family: Consolas, "Liberation Mono", Courier, monospace;
 	tab-size: 4; -moz-tab-size: 4;	
 }
+.hljs {padding:0; background: inherit}

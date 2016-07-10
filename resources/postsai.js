@@ -167,12 +167,15 @@ function renderCommit() {
 		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
 		success: function(data) {
 			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
-			document.querySelector("div.content").innerHTML
+			document.querySelector("div.contentplaceholder").innerHTML
 				= renderCommitHeader(header)
 				+ renderDiff(data);
-		},
-		error: function(data) {
-			console.log(data);
+			// start highlighting after giving a chance to breath
+			window.setTimeout(function() {
+				$('.hilight').each(function(i, block) {
+					  hljs.highlightBlock(block);
+				})
+			}, 1);
 		}
 	});
 }
@@ -205,11 +208,11 @@ function renderDiff(data) {
 			end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
 			firstChunkInFile = true;
 		} else if (type == "+") {
-			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == "-") {
-			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == " ") {
-			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td>" + escapeHtml(line.substring(1)) + "</td></tr>";
+			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == "@") {
 			if (!firstChunkInFile) {
 				result += "<tr class='diffsta'><td colspan='2'><hr></td></tr>";
