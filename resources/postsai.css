@@ -26,11 +26,11 @@ ul.filelist, ul.filelist li {
 	padding-bottom: 0; margin-bottom: 0
 }
 
-table.diff {border: 1px solid #AAA; width: 100%}
+.diff {border: 1px solid #AAA; width: 100%}
 .diffsmall {width: 2em; text-align: center}
 .difffile {background-color: #CCC; font-weight: bold; line-height: 2em}
-.diffadd {background-color: #CFC !important}
-.diffdel {background-color: #FCC !important}
+.diffadd {background-color: #CFC}
+.diffdel {background-color: #FCC}
 .diffadd, .diffdel, .diffsta {
 	white-space: pre-wrap;
 	font-family: Consolas, "Liberation Mono", Courier, monospace;

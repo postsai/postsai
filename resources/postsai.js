@@ -1,4 +1,5 @@
 var $ = window.$ || {};
+var hljs = window.hljs || {};
 
 (function() {
 "use strict";
@@ -159,29 +160,6 @@ function hideRedundantColumns() {
 }
 
 /**
- * loads the commit information from the server
- */
-function renderCommit() {
-	var prop = getUrlVars()
-	$.ajax({
-		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
-		success: function(data) {
-			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
-			document.querySelector("div.contentplaceholder").innerHTML
-				= renderCommitHeader(header)
-				+ renderDiff(data);
-
-			// start highlighting after giving a chance to breath
-			window.setTimeout(function() {
-				$('.hilight').each(function(i, block) {
-					  hljs.highlightBlock(block);
-				})
-			}, 1);
-		}
-	});
-}
-
-/**
  * renders the header of commits
  */
 function renderCommitHeader(header) {
@@ -204,7 +182,7 @@ function renderDiff(data) {
 	while (end > -1) {
 		var line = data.substring(start, end); 
 		var type = data.substring(start, start + 1);
-		if (type == "I") {
+		if (type === "I") {
 			var file = line.substring(7);
 			result += "<tr class='difffile'><td colspan='2'>" + escapeHtml(file) + "</td></tr>";
 			filetype = file.substring(file.lastIndexOf(".") + 1, file.length);
@@ -214,13 +192,13 @@ function renderDiff(data) {
 			if (data.substring(end + 1, end + 6) != "Index") {
 				end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
 			}
-		} else if (type == "+") {
+		} else if (type === "+") {
 			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
-		} else if (type == "-") {
+		} else if (type === "-") {
 			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
-		} else if (type == " ") {
+		} else if (type === " ") {
 			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
-		} else if (type == "@") {
+		} else if (type === "@") {
 			if (!firstChunkInFile) {
 				result += "<tr class='diffsta'><td colspan='2'><hr></td></tr>";
 			}
@@ -232,6 +210,29 @@ function renderDiff(data) {
 
 	result += "</table>";
 	return result;
+}
+
+/**
+ * loads the commit information from the server
+ */
+function renderCommit() {
+	var prop = getUrlVars();
+	$.ajax({
+		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
+		success: function(data) {
+			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
+			document.querySelector("div.contentplaceholder").innerHTML
+				= renderCommitHeader(header)
+				+ renderDiff(data);
+
+			// start highlighting after giving a chance to breath
+			window.setTimeout(function() {
+				$('.hilight').each(function(i, block) {
+					hljs.highlightBlock(block);
+				});
+			}, 1);
+		}
+	});
 }
 
 /**

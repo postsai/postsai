@@ -17,22 +17,22 @@ def convert_to_builtin_type(obj):
 class Cache:
     """Cache"""
 
-    cache = {};
+    cache = {}
 
     def put(self, entity_type, key, value):
         """adds an entry to the cache"""
 
         if not entity_type in self.cache:
             self.cache[entity_type] = {}
-        self.cache[entity_type][key] = value;
+        self.cache[entity_type][key] = value
 
 
     def get(self, entity_type, key):
         """gets an entry from the cache"""
 
         if not entity_type in self.cache:
-            return None;
-        return self.cache[entity_type][key];
+            return None
+        return self.cache[entity_type][key]
 
 
     def has(self, entity_type, key):
@@ -79,7 +79,7 @@ class PostsaiDB:
         self.is_viewvc_database = (cursor.rowcount == 1)
         cursor.execute("SET SESSION innodb_lock_wait_timeout = 500")
         cursor.close()
-        self.conn.begin();
+        self.conn.begin()
 
 
     def disconnect(self):
@@ -295,7 +295,7 @@ class Postsai:
 
     @staticmethod
     def convert_operator(matchtype):
-        operator = '=';
+        operator = '='
         if (matchtype == "match"):
             operator = '='
         elif (matchtype == "regexp"):
@@ -434,7 +434,7 @@ class PostsaiCommitViewer:
     def read_commit(self, form):
         db = PostsaiDB(self.config)
         db.connect()
-        sql = """SELECT repositories.repository, checkins.ci_when, people.who, 
+        sql = """SELECT repositories.repository, checkins.ci_when, people.who,
             trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
             revision, descs.description, commitids.hash, commitids.co_when, repository_url
             FROM checkins 
@@ -451,7 +451,8 @@ class PostsaiCommitViewer:
         return result
 
 
-    def format_commit_header(self, commit):
+    @staticmethod
+    def format_commit_header(commit):
         """Extracts the commit meta information"""
 
         result = {
@@ -470,15 +471,14 @@ class PostsaiCommitViewer:
         split = revision.split(".")
         last = split[len(split) - 1]
         if (last == "1" and len(split) > 2):
-            split.pop();
-            split.pop();
+            split.pop()
+            split.pop()
         else:
-            split[len(split) - 1] = str(int(last) - 1);
-        return ".".join(split);    
+            split[len(split) - 1] = str(int(last) - 1)
+        return ".".join(split)
 
-
-
-    def dump_commit_diff(self, commit):
+    @staticmethod
+    def dump_commit_diff(commit):
         for file in commit:
             subprocess.call([
                 "cvs",
@@ -502,9 +502,9 @@ class PostsaiCommitViewer:
         form = cgi.FieldStorage()
         commit = self.read_commit(form)
 
-        print(json.dumps(self.format_commit_header(commit), default=convert_to_builtin_type))
+        print(json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))
         sys.stdout.flush()
-        self.dump_commit_diff(commit)        
+        PostsaiCommitViewer.dump_commit_diff(commit)
 
 
 
@@ -549,9 +549,9 @@ class PostsaiImporter:
         elif "git_ssh_url" in repo: # gitlab
             repository_url = repo["git_ssh_url"]
         elif "url" in repo: # sourceforge, notify-cvs-webhook
-            repository_url = repo["url"] 
+            repository_url = repo["url"]
         return repository_url
-        
+
 
     def extract_url(self):
         if "project" in self.data and "web_url" in self.data["project"]: # gitlab

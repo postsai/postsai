@@ -208,17 +208,17 @@ class PostsaiTests(unittest.TestCase):
         commit3 = ["", "", "", "file 3", "1.3", "", "", "", "", "commitid 2"]
 
         self.assertEqual(
-            api.Postsai.extract_commits([commit1]), 
+            api.Postsai.extract_commits([commit1]),
             [["", "", "", ["file 1"], ["1.1"], "", "", "", "", "commitid"]],
             "one row")
 
         self.assertEqual(
-            api.Postsai.extract_commits([commit1, commit2]), 
+            api.Postsai.extract_commits([commit1, commit2]),
             [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"]],
             "one commit")
 
         self.assertEqual(
-            api.Postsai.extract_commits([commit1, commit2, commit3]), 
+            api.Postsai.extract_commits([commit1, commit2, commit3]),
             [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"],
              ["", "", "", ["file 3"], ["1.3"], "", "", "", "", "commitid 2"]],
             "two commits")
@@ -226,9 +226,9 @@ class PostsaiTests(unittest.TestCase):
 
 
 class PostsaiCommitViewerTest(unittest.TestCase):
- 
+
     def test_calculate_previous_cvs_revision(self):
-        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.2"),     "1.1")
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.2"), "1.1")
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.4"), "1.3.2.3")
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.1"), "1.3")
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.1"),     "1.0")
@@ -298,7 +298,7 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(importer.extract_repo_name(), "gittest", "Git repository")
 
 
-    def test_extract_repo_url(self): 
+    def test_extract_repo_url(self):
         importer = api.PostsaiImporter({}, {"repository" : {}})
         self.assertEqual(importer.extract_repo_url(), "", "No repository url")
 
