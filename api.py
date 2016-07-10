@@ -122,6 +122,7 @@ class PostsaiDB:
         commit_url = ""
         tracker_url = ""
         icon_url = ""
+        repository_url = row["repository_url"]
 
         # GitHub, Gitlab
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
@@ -141,7 +142,7 @@ class PostsaiDB:
 
         # CVS
         elif row["revision"].find(".") > -1:  # CVS
-            commit_url = base + "/[repository]/[file]?r1=[old_revision]&r2=[revision]"
+            commit_url = "commit.html?repository=[repository]&commit=[commit]"
             file_url = base + "/[repository]/[file]?revision=[revision]&view=markup"
 
         # Git
@@ -149,7 +150,7 @@ class PostsaiDB:
             commit_url = base + "/?p=[repository];a=commitdiff;h=[revision]"
             file_url = base + "/?p=[repository];a=blob;f=[file];hb=[revision]"
 
-        return (base_url, file_url, commit_url, tracker_url, icon_url)
+        return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
 
 
     def extra_data_for_key_tables(self, cursor, column, row, value):
@@ -163,8 +164,8 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_column = ", base_url, file_url, commit_url, tracker_url, icon_url"
-            extra_data = ", %s, %s, %s, %s, %s"
+            extra_column = ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url"
+            extra_data = ", %s, %s, %s, %s, %s, %s"
             data.extend(self.guess_repository_urls(row))
         elif column == "hash":
             extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
@@ -434,8 +435,7 @@ class PostsaiCommitViewer:
         db.connect()
         sql = """SELECT repositories.repository, checkins.ci_when, people.who, 
             trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-            revision, descs.description, commitids.hash, commitids.co_when,
-            '/tmp/postsaitest/cvsserver' As repository_url /* TODO */
+            revision, descs.description, commitids.hash, commitids.co_when, repository_url
             FROM checkins 
             JOIN descs ON checkins.descid = descs.id
             JOIN dirs ON checkins.dirid = dirs.id
@@ -538,9 +538,24 @@ class PostsaiImporter:
         return repo_name.strip("/") # sourceforge
 
 
+    def extract_repo_url(self):
+        repo = self.data['repository']
+        repository_url = ""
+
+        if "clone_url" in repo:  # github, sourceforge
+            repository_url = repo["full_name"]
+        elif "git_ssh_url" in repo: # gitlab
+            repository_url = self.data["project"]["git_ssh_url"]
+        elif "url" in repo: # sourceforge, notify-cvs-webhook
+            repository_url = repo["url"] 
+        return repository_url
+        
+
     def extract_url(self):
         if "project" in self.data and "web_url" in self.data["project"]: # gitlab
             url = self.data["project"]["web_url"]
+        elif "home_url" in self.data['repository']:
+            url = self.data['repository']["home_url"]
         else:
             url = self.data['repository']["url"]
         return url
@@ -637,6 +652,7 @@ class PostsaiImporter:
                     "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
                     "repository" : self.extract_repo_name(),
+                    "repository_url" : self.extract_repo_url(),
                     "dir" : folder,
                     "file" : file,
                     "revision" : self.file_revision(commit, full_path),
