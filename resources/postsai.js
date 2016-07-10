@@ -189,7 +189,7 @@ function renderDiff(data) {
 			firstChunkInFile = true;
 
 			// skip next three lines for non binary files
-			if (data.substring(end + 1, end + 6) != "Index") {
+			if (data.substring(end + 1, end + 6) !== "Index") {
 				end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
 			}
 		} else if (type === "+") {

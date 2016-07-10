@@ -26,7 +26,7 @@ ul.filelist, ul.filelist li {
 	padding-bottom: 0; margin-bottom: 0
 }
 
-.diff {border: 1px solid #AAA; width: 100%}
+.diff {border: 1px solid #AAA; width: 99%}
 .diffsmall {width: 2em; text-align: center}
 .difffile {background-color: #CCC; font-weight: bold; line-height: 2em}
 .diffadd {background-color: #CFC}
@@ -34,6 +34,6 @@ ul.filelist, ul.filelist li {
 .diffadd, .diffdel, .diffsta {
 	white-space: pre-wrap;
 	font-family: Consolas, "Liberation Mono", Courier, monospace;
-	tab-size: 4; -moz-tab-size: 4;	
+	tab-size: 4; -moz-tab-size: 4; -o-tab-size: 4;
 }
 .hljs {padding:0; background: inherit}
