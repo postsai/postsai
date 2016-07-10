@@ -403,7 +403,8 @@ class Postsai:
             db = PostsaiDB(self.config)
             db.connect()
             rows = self.extract_commits(db.query(self.sql, self.data))
-            repositories = db.query_as_double_map("SELECT * FROM repositories", "repository")
+            repositories = db.query_as_double_map(
+                "SELECT id, repository, base_url, file_url, commit_url, tracker_url, icon_url FROM repositories", "repository")
             db.disconnect()
 
             ui = {}
