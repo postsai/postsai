@@ -195,7 +195,33 @@ class PostsaiTests(unittest.TestCase):
         self.assertEqual(postsai.sql, "")
 
 
-    # TODO: create_query, extract_commits
+    def test_create_query(self):
+        postsai = api.Postsai({})
+        postsai.create_query(self.FormMock({"limit" : "10"}))
+        self.assertTrue("LIMIT 10" in postsai.sql, "Limit")
+
+
+    def test_extract_commits(self):
+        self.assertEqual(api.Postsai.extract_commits([]), [], "empty result")
+        commit1 = ["", "", "", "file 1", "1.1", "", "", "", "", "commitid"]
+        commit2 = ["", "", "", "file 2", "1.2", "", "", "", "", "commitid"]
+        commit3 = ["", "", "", "file 3", "1.3", "", "", "", "", "commitid 2"]
+
+        self.assertEqual(
+            api.Postsai.extract_commits([commit1]), 
+            [["", "", "", ["file 1"], ["1.1"], "", "", "", "", "commitid"]],
+            "one row")
+
+        self.assertEqual(
+            api.Postsai.extract_commits([commit1, commit2]), 
+            [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"]],
+            "one commit")
+
+        self.assertEqual(
+            api.Postsai.extract_commits([commit1, commit2, commit3]), 
+            [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"],
+             ["", "", "", ["file 3"], ["1.3"], "", "", "", "", "commitid 2"]],
+            "two commits")
 
 
 
@@ -296,6 +322,15 @@ class PostsaiImporterTests(unittest.TestCase):
         importer.data = {"project": { "web_url":"https://example.com/arianne/stendhal" }}
         self.assertEqual(importer.extract_url(), "https://example.com/arianne/stendhal", "Gitlab repository")
 
+
+    def test_extract_files(self):
+        self.assertEqual(api.PostsaiImporter.extract_files(
+            {
+                "added": [],
+                "removed": [],
+                "modified": ["README.md"]
+            }),
+            {'README.md': 'Change'})
 
 
 if __name__ == '__main__':
