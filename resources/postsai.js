@@ -170,6 +170,7 @@ function renderCommit() {
 			document.querySelector("div.contentplaceholder").innerHTML
 				= renderCommitHeader(header)
 				+ renderDiff(data);
+
 			// start highlighting after giving a chance to breath
 			window.setTimeout(function() {
 				$('.hilight').each(function(i, block) {
@@ -199,20 +200,26 @@ function renderDiff(data) {
 	var start = data.indexOf("\n") + 1;
 	var end = data.indexOf("\n", start);
 	var firstChunkInFile = true;
+	var filetype = "";
 	while (end > -1) {
 		var line = data.substring(start, end); 
 		var type = data.substring(start, start + 1);
 		if (type == "I") {
-			result += "<tr class='difffile'><td colspan='2'>" + escapeHtml(line.substring(7)) + "</td></tr>";
-			// skip next three lines
-			end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
+			var file = line.substring(7);
+			result += "<tr class='difffile'><td colspan='2'>" + escapeHtml(file) + "</td></tr>";
+			filetype = file.substring(file.lastIndexOf(".") + 1, file.length);
 			firstChunkInFile = true;
+
+			// skip next three lines for non binary files
+			if (data.substring(end + 1, end + 6) != "Index") {
+				end = data.indexOf("\n", data.indexOf("\n", data.indexOf("\n", end + 1) + 1) + 1);
+			}
 		} else if (type == "+") {
-			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+			result += "<tr class='diffadd'><td class='diffsmall'>+</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == "-") {
-			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+			result += "<tr class='diffdel'><td class='diffsmall'>-</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == " ") {
-			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td class='hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
+			result += "<tr class='diffsta'><td class='diffsmall'>&nbsp;</td><td class='" + filetype + " hilight'>" + escapeHtml(line.substring(1)) + "&nbsp;</td></tr>";
 		} else if (type == "@") {
 			if (!firstChunkInFile) {
 				result += "<tr class='diffsta'><td colspan='2'><hr></td></tr>";
