@@ -250,11 +250,14 @@ function initTable() {
 		hideRedundantColumns();
 		$("#table").bootstrapTable({
 	    onClickRow: function (row, $element) {
-				var prop = rowToProp(row);
-				var url = readRepositoryConfig(row[0], "commit_url", null);
-				if (url) {
-					var diffLink = argsubst(url, prop);
-					window.document.location = diffLink;
+				// only react on clicks in the whole row iff on mobile devices
+				if(isCardView()) {
+					var prop = rowToProp(row);
+					var url = readRepositoryConfig(row[0], "commit_url", null);
+					if (url) {
+						var diffLink = argsubst(url, prop);
+						window.document.location = diffLink;
+					}
 				}
 			}
 		});
@@ -262,6 +265,10 @@ function initTable() {
 		$("#table").removeClass("hidden");
 		$(".spinner").addClass("hidden");
 	});
+}
+
+function isCardView() {
+	return $("#table").find('div.card-view').length > 0;
 }
 
 function guessSCM(revision) {
