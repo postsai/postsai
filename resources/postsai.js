@@ -37,7 +37,7 @@ function addQueryStringToLink() {
 // http://stackoverflow.com/a/20097994
 function getUrlVars() {
 	var vars = {};
-	window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+	window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
 		function(m,key,value) {
 			vars[key] = decodeURIComponent(value.replace("+", " "));
 		});
@@ -95,7 +95,7 @@ function isQueryParameterImportant(vars, key) {
 		return (vars["date"] === "hours");
 	} else if (key === "mindate" || key === "maxdate") {
 		return (vars["date"] === "explicit");
-	} 	
+	}
 	return true;
 }
 
@@ -180,7 +180,7 @@ function renderDiff(data) {
 	var firstChunkInFile = true;
 	var filetype = "";
 	while (end > -1) {
-		var line = data.substring(start, end); 
+		var line = data.substring(start, end);
 		var type = data.substring(start, start + 1);
 		if (type === "I") {
 			var file = line.substring(7);
@@ -248,11 +248,27 @@ function initTable() {
 		window.config = data.config;
 		window.repositories = data.repositories;
 		hideRedundantColumns();
-		$("#table").bootstrapTable();
+		$("#table").bootstrapTable({
+	    onClickRow: function (row, $element) {
+				// only react on clicks in the whole row iff on mobile devices
+				if(isCardView()) {
+					var prop = rowToProp(row);
+					var url = readRepositoryConfig(row[0], "commit_url", null);
+					if (url) {
+						var diffLink = argsubst(url, prop);
+						window.document.location = diffLink;
+					}
+				}
+			}
+		});
 		$("#table").bootstrapTable("load", {data: data.data});
 		$("#table").removeClass("hidden");
 		$(".spinner").addClass("hidden");
 	});
+}
+
+function isCardView() {
+	return $("#table").find('div.card-view').length > 0;
 }
 
 function guessSCM(revision) {
@@ -305,7 +321,7 @@ function formatTimestamp(value, row, index) {
 
 function readRepositoryConfig(repo, key, fallback) {
 	var repoConfig = window.repositories ? window.repositories[repo] : null;
-	return repoConfig ? repoConfig[key] : fallback;	
+	return repoConfig ? repoConfig[key] : fallback;
 }
 
 /**
