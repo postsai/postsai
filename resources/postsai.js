@@ -235,38 +235,6 @@ function renderCommit() {
 	});
 }
 
-/**
- * loads the search result from the server
- */
-function initTable() {
-	$.getJSON( "api.py" + window.location.search, function( data ) {
-		if (typeof data === "string") {
-			alert(data);
-			return;
-		}
-		$("span.waitmessage").text("Please stand by while the browser is working.");
-		window.config = data.config;
-		window.repositories = data.repositories;
-		hideRedundantColumns();
-		$("#table").bootstrapTable({
-	    onClickRow: function (row, $element) {
-				// only react on clicks in the whole row iff on mobile devices
-				if(isCardView()) {
-					var prop = rowToProp(row);
-					var url = readRepositoryConfig(row[0], "commit_url", null);
-					if (url) {
-						var diffLink = argsubst(url, prop);
-						window.document.location = diffLink;
-					}
-				}
-			}
-		});
-		$("#table").bootstrapTable("load", {data: data.data});
-		$("#table").removeClass("hidden");
-		$(".spinner").addClass("hidden");
-	});
-}
-
 function isCardView() {
 	return $("#table").find('div.card-view').length > 0;
 }
@@ -428,6 +396,39 @@ function formatAuthor(value, row, index) {
 	}
     return icon + escapeHtml(text);
 }
+
+/**
+ * loads the search result from the server
+ */
+function initTable() {
+	$.getJSON( "api.py" + window.location.search, function( data ) {
+		if (typeof data === "string") {
+			alert(data);
+			return;
+		}
+		$("span.waitmessage").text("Please stand by while the browser is working.");
+		window.config = data.config;
+		window.repositories = data.repositories;
+		hideRedundantColumns();
+		$("#table").bootstrapTable({
+			onClickRow: function (row, $element) {
+				// only react on clicks in the whole row iff on mobile devices
+				if (isCardView()) {
+					var prop = rowToProp(row);
+					var url = readRepositoryConfig(row[0], "commit_url", null);
+					if (url) {
+						var diffLink = argsubst(url, prop);
+						window.document.location = diffLink;
+					}
+				}
+			}
+		});
+		$("#table").bootstrapTable("load", {data: data.data});
+		$("#table").removeClass("hidden");
+		$(".spinner").addClass("hidden");
+	});
+}
+
 
 // export functions
 window["formatAuthor"] = formatAuthor;
