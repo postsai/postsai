@@ -50,7 +50,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "repository": "postsai/postsai",
                 "repository_url": ""
             })[3],
-            "https://github.com/postsai/postsai/commit/[revision]",
+            "https://github.com/postsai/postsai/commit/[commit]",
             "Github")
 
         self.assertEqual(
@@ -60,7 +60,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "repository_url": "",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
-            "https://sourceforge.net/[repository]/ci/[revision]/",
+            "https://sourceforge.net/[repository]/ci/[commit]/",
             "SourceForge Git")
 
         self.assertEqual(
@@ -70,7 +70,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "repository_url": "",
                 "revision" : "r4"
             })[3],
-            "https://sourceforge.net/[repository]/[revision]/",
+            "https://sourceforge.net/[repository]/[commit]/",
             "SourceForge Subversion")
 
         self.assertEqual(
@@ -90,7 +90,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "repository_url": "",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
-            "http://localhost/?p=[repository];a=commitdiff;h=[revision]",
+            "http://localhost/?p=[repository];a=commitdiff;h=[commit]",
             "Git")
 
 

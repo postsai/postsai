@@ -126,17 +126,17 @@ class PostsaiDB:
 
         # GitHub, Gitlab
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
-            commit_url = base_url + "/commit/[revision]"
-            file_url = base_url + "/blob/[revision]/[file]"
+            commit_url = base_url + "/commit/[commit]"
+            file_url = base_url + "/blob/[commit]/[file]"
             tracker_url = base_url + "/issues/$1"
 
         # SourceForge
         elif base_url.find("://sourceforge.net") > -1:
             if row["revision"].find(".") == -1 and len(row["revision"]) < 30:  # Subversion
-                commit_url = "https://sourceforge.net/[repository]/[revision]/"
-                file_url = "https://sourceforge.net/[repository]/[revision]/tree/[file]"
+                commit_url = "https://sourceforge.net/[repository]/[commit]/"
+                file_url = "https://sourceforge.net/[repository]/[commit]/tree/[file]"
             else: # CVS, Git
-                commit_url = "https://sourceforge.net/[repository]/ci/[revision]/"
+                commit_url = "https://sourceforge.net/[repository]/ci/[commit]/"
                 file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
 
@@ -147,8 +147,8 @@ class PostsaiDB:
 
         # Git
         else: # git instaweb
-            commit_url = base + "/?p=[repository];a=commitdiff;h=[revision]"
-            file_url = base + "/?p=[repository];a=blob;f=[file];hb=[revision]"
+            commit_url = base + "/?p=[repository];a=commitdiff;h=[commit]"
+            file_url = base + "/?p=[repository];a=blob;f=[file];hb=[commit]"
 
         return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
 
@@ -351,7 +351,7 @@ class Postsai:
 
     @staticmethod
     def are_rows_in_same_commit(data, pre):
-        return data[9] == pre[9]
+        return data[9] == pre[9] and data[9] != None
 
 
 
@@ -685,4 +685,4 @@ if __name__ == '__main__':
             PostsaiCommitViewer(vars(config)).process()
         else:
             Postsai(vars(config)).process()
-            
+
