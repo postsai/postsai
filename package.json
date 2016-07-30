@@ -1,0 +1,37 @@
+{
+  "name": "postsai",
+  "version": "0.8.0",
+  "description": "The Commit Database",
+  "scripts": {
+    "test:server": "nosetests -v --with-coverage --cover-branch --cover-erase --cover-package api.py",
+    "clean": "rm -rf dist",
+    "dist": "/bin/sh resources/build.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/postsai/postsai.git"
+  },
+  "keywords": [
+    "postsai",
+    "commit",
+    "git",
+    "cvs",
+    "database",
+    "bonsai"
+  ],
+  "author": "Hendrik Brummermann <nhnb@users.sourceforge.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/postsai/postsai/issues"
+  },
+  "homepage": "https://github.com/postsai/postsai#readme",
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "bootstrap-table": "^1.11.0",
+    "highlightjs": "^8.7.0",
+    "jquery": "^2.2.0",
+    "js-md5": "^0.4.1",
+    "sw-toolbox": "^3.2.1",
+    "tableExport.jquery.plugin": "git+https://github.com/hhurz/tableExport.jquery.plugin.git"
+  }
+}
