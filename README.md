@@ -27,10 +27,3 @@ Legal
 -
 (C) Copyright 2016 Postsai. Postsai is released as Free and Open Source Software under [MIT](https://raw.githubusercontent.com/postsai/postsai/master/LICENSE.txt) license.
 
-
-<!--
-Building
--
-zip -r /tmp/postsai-0.6.zip postsai --exclude postsai/.travis.yml --exclude "postsai/.g*" --exclude "postsai/.p*" --exclude "*.pyc" --exclude "postsai/config.*" --exclude "postsai/.git/*" --exclude "postsai/.settings/*" --exclude "postsai/.coverage"
-
--->

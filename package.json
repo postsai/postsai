@@ -5,7 +5,7 @@
   "scripts": {
     "test:server": "nosetests -v --with-coverage --cover-branch --cover-erase --cover-package api.py",
     "clean": "rm -rf dist",
-    "dist": "npm run clean; mkdir -p dist/postsai; cp -ax *.py *.html resources node_modules dist/postsai; rm dist/postsai/config.py*; cd dist; zip -r postsai-$npm_package_version.zip postsai"
+    "dist": "/bin/sh resources/build.sh"
   },
   "repository": {
     "type": "git",
