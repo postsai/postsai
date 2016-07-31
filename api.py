@@ -259,11 +259,18 @@ class Postsai:
         return ""
 
 
+    def get_read_permission_pattern(self):
+        """get read permissions pattern"""
+
+        if not "get_read_permission_pattern" in self.config:
+            return ".*"
+        return self.config["get_read_permission_pattern"]()
+
 
     def create_query(self, form):
         """creates the sql statement"""
 
-        self.data = []
+        self.data = [self.get_read_permission_pattern()]
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
         revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, commitids.hash 
         FROM checkins 
@@ -274,7 +281,7 @@ class Postsai:
         JOIN people ON checkins.whoid = people.id
         JOIN repositories ON checkins.repositoryid = repositories.id
         LEFT JOIN commitids ON checkins.commitid = commitids.id
-        WHERE 1=1 """
+        WHERE repositories.repository REGEXP %s """
 
         self.create_where_for_column("branch", form, "branch")
         self.create_where_for_column("dir", form, "dir")
@@ -404,7 +411,9 @@ class Postsai:
             db.connect()
             rows = self.extract_commits(db.query(self.sql, self.data))
             repositories = db.query_as_double_map(
-                "SELECT id, repository, base_url, file_url, commit_url, tracker_url, icon_url FROM repositories", "repository")
+                "SELECT id, repository, base_url, file_url, commit_url, tracker_url, icon_url FROM repositories WHERE repositories.repository REGEXP %s",
+                "repository",
+                [self.get_read_permission_pattern()])
             db.disconnect()
 
             ui = {}
@@ -514,6 +523,15 @@ class PostsaiImporter:
     def __init__(self, config, data):
         self.config = config
         self.data = data
+
+
+    def check_permission(self, repo_name):
+        """checks writes write permissions"""
+
+        if not "get_write_permission_pattern" in self.config:
+            return True
+        regex = self.config["get_write_permission_pattern"]()
+        return not re.match(regex, repo_name) == None
 
 
     @staticmethod
@@ -639,6 +657,13 @@ class PostsaiImporter:
 
 
     def import_from_webhook(self):
+        repo_name = self.extract_repo_name()
+        if not self.check_permission(repo_name):
+            print("Status: 403 Forbidden\r")
+            print("Content-Type: text/html; charset='utf-8'\r")
+            print("\r")
+            print("<html><body>Missing permission</body></html>")
+
         rows = []
         timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
@@ -653,7 +678,7 @@ class PostsaiImporter:
                     "co_when" : commit["timestamp"],
                     "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
-                    "repository" : self.extract_repo_name(),
+                    "repository" : repo_name,
                     "repository_url" : self.extract_repo_url(),
                     "dir" : folder,
                     "file" : file,
