@@ -3,6 +3,9 @@
 import api
 import unittest
 
+def get_permission_pattern():
+    return "^test$"
+
 class CacheTests(unittest.TestCase):
     """tests for the cache"""
 
@@ -124,6 +127,14 @@ class PostsaiTests(unittest.TestCase):
 
         form = self.FormMock({})
         self.assertEqual(postsai.validate_input(form), "", "parameter is not present")
+
+
+    def test_get_read_permission_pattern(self):
+        postsai = api.Postsai({})
+        self.assertEqual(postsai.get_read_permission_pattern(), ".*", "no read permission function")
+
+        postsai = api.Postsai({"get_read_permission_pattern" : get_permission_pattern})
+        self.assertEqual(postsai.get_read_permission_pattern(), "^test$", "read permission function defined")
 
 
     def test_create_where_for_column(self):
@@ -331,6 +342,15 @@ class PostsaiImporterTests(unittest.TestCase):
                 "modified": ["README.md"]
             }),
             {'README.md': 'Change'})
+
+
+    def test_check_permission(self):
+        importer = api.PostsaiImporter({}, {})
+        self.assertTrue(importer.check_permission("something"), "no permission pattern defined")
+
+        importer = api.PostsaiImporter({"get_write_permission_pattern" : get_permission_pattern}, {})
+        self.assertTrue(importer.check_permission("test"), "matching permission pattern defined")
+        self.assertFalse(importer.check_permission("something"), "not matching permission defined")
 
 
 if __name__ == '__main__':

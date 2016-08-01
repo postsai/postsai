@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
 import sys
-import api
 import warnings
+
+try:
+    import api
+except ImportError:
+    pass
+
 
 class PostsaiInstaller:
     """Installer for Postsai"""
@@ -12,12 +17,31 @@ class PostsaiInstaller:
         help_config_file = """
     Please create a file called config.py with this content an run install.py again: 
 
+    import os
+
     db = {
         "host" : "localhost",
         "user" : "postsaiuser",
         "password" : "postsaipassword",
         "database" : "postsaidb"
     }
+
+    ui = {
+        "avatar" : "https://gravatar.com",
+        "trim_email" : True
+    }
+
+    def get_read_permission_pattern():
+        \"""return a regular expression of repository names that may be read\"""
+
+        # return os.environ.get("AUTHENTICATE_POSTSAI_READ_PATTERN", "^$")
+        return ".*"
+
+    def get_write_permission_pattern():
+        \"""return a regular expression of repository names that may be written to\"""
+
+        # return os.environ.get("AUTHENTICATE_POSTSAI_WRITE_PATTERN", "^$")
+        return ".*"
     """
         print(help_config_file)
         sys.exit(1)
