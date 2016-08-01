@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
 import sys
-import api
 import warnings
+
+try:
+    import api
+except ImportError:
+    pass
+
 
 class PostsaiInstaller:
     """Installer for Postsai"""
