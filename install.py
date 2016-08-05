@@ -285,32 +285,50 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
         print("OK: Completed database structure check and update")
 
+    @staticmethod
+    def are_rows_in_same_commit(row, last_row):
+        """checks whether the modifications belong to the same commit"""
+
+        #id, ci_when, whoid, repositoryid, branchid, descid
+        for i in range(2, 6):
+            if (row[i] != last_row[i]):
+                return False
+        return True
+
 
     def synthesize_cvs_commit_ids(self):
         """generates cvs commitid for checkins without one"""
-        rows = self.db.query("SELECT count(*) FROM checkins WHERE commitid IS NULL", []);
+
+        rows = self.db.query(self.db.rewrite_sql("SELECT count(*) FROM checkins WHERE commitid IS NULL"), []);
         count = rows[0][0]
         if (count == 0):
             return
 
         print("Updating " + str(count) + " legacy CVS entries")
-        rows = self.db.query("SELECT id, ci_when, whoid FROM checkins WHERE commitid IS NULL LIMIT 1000", []);
+        select = self.db.rewrite_sql("SELECT id, ci_when, whoid, repositoryid, branchid, descid FROM checkins WHERE commitid IS NULL ORDER BY repositoryid, branchid, whoid, ci_when LIMIT 1000")
+        rows = self.db.query(select, [])
 
         i = 0
+        commitid = 0
+        last_row = [0, 0, 0, 0, 0, 0]
         while len(rows) > 0:
             cursor = self.db.conn.cursor()
             for row in rows:
-                cursor.execute("INSERT INTO commitids (hash, co_when, authorid, committerid) VALUES (%s, %s, %s, %s)", ["s" + str(i) + str(time.time()), row[1], row[2], row[2]])
-                cursor.execute("UPDATE checkins SET commitid=%s WHERE id=%s", [cursor.lastrowid, row[0]])
+                if not self.are_rows_in_same_commit(row, last_row):
+                    cursor.execute("INSERT INTO commitids (hash, co_when, authorid, committerid) VALUES (%s, %s, %s, %s)", ["s" + str(i) + str(time.time()), row[1], row[2], row[2]])
+                    commitid = cursor.lastrowid
+                cursor.execute(self.db.rewrite_sql("UPDATE checkins SET commitid=%s WHERE id=%s"), [commitid, row[0]])
                 i = i + 1
+                last_row = row
+
             cursor.close()
             self.db.conn.commit()
             self.db.conn.begin()
             print("    Updated " + str(i) + " / " + str(count))
-            rows = self.db.query("SELECT id, ci_when, whoid FROM checkins WHERE commitid IS NULL LIMIT 1000", []);
+            rows = self.db.query(select, []);
         cursor.close()
         self.db.conn.commit()
-        
+        print("OK: Converted CVS legacy entries")
 
 
     def main(self):
