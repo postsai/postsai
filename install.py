@@ -134,10 +134,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         cursor = self.db.conn.cursor()
 
         # increase column width of checkins
-        cursor.execute(self.db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"))
-        size = cursor.description[0][3]
-        if size < 50:
-            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50);"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50) NOT NULL;"))
 
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
@@ -305,7 +302,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             return
 
         print("Updating " + str(count) + " legacy CVS entries")
-        select = self.db.rewrite_sql("SELECT id, ci_when, whoid, repositoryid, branchid, descid FROM checkins WHERE commitid IS NULL ORDER BY repositoryid, branchid, whoid, ci_when LIMIT 1000")
+        select = self.db.rewrite_sql("SELECT id, ci_when, whoid, repositoryid, branchid, descid FROM checkins WHERE commitid IS NULL ORDER BY repositoryid, branchid, whoid, ci_when LIMIT 100000")
         rows = self.db.query(select, [])
 
         i = 0
