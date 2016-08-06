@@ -153,6 +153,14 @@ class PostsaiDB:
         return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
 
 
+    def call_setup_repository(self, row, guess):
+        """let the configruation overwrite guessed repository info"""
+
+        if not "setup_repository" in self.config:
+            return guess
+        return self.config["setup_repository"](row, *guess)
+
+
     def extra_data_for_key_tables(self, cursor, column, row, value):
         """provides additional data that should be stored in lookup tables"""
 
@@ -166,7 +174,7 @@ class PostsaiDB:
         elif column == "repository":
             extra_column = ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url"
             extra_data = ", %s, %s, %s, %s, %s, %s"
-            data.extend(self.guess_repository_urls(row))
+            data.extend(self.call_setup_repository(row, self.guess_repository_urls(row)))
         elif column == "hash":
             extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
             extra_data = ", %s, %s, %s, %s, %s"
