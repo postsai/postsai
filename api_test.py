@@ -97,6 +97,31 @@ class PostsaiDBTests(unittest.TestCase):
             "Git")
 
 
+    def test_extra_data_for_key_tables(self):
+        """test for extra_data_for_key_tables"""
+
+        db = api.PostsaiDB({})
+        row = {"repository": "repo", "url": "http://example.com", "repository_url": "", "revision": "1.1"}
+
+        self.assertEqual(
+            db.extra_data_for_key_tables(None, "column", row, "value"),
+            (["value"], "", ""),
+            "No extra data for unknown column")
+
+        self.assertEqual(
+            db.extra_data_for_key_tables(None, "description", row, "value"),
+            (["value", 5], ", hash", ", %s"),
+            "Extra data for description column")
+
+        self.assertEqual(
+            db.extra_data_for_key_tables(None, "repository", row, "value"),
+            (["value", "http://example.com/repo", "", "http://example.com/[repository]/[file]?revision=[revision]&view=markup", "commit.html?repository=[repository]&commit=[commit]", "", ""],
+             ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url",
+             ", %s, %s, %s, %s, %s, %s"),
+            "Extra data for repository column")
+
+
+
 class PostsaiTests(unittest.TestCase):
     "test for the api"
 
