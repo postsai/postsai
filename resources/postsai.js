@@ -293,7 +293,10 @@ function formatTimestamp(value, row, index) {
 
 function readRepositoryConfig(repo, key, fallback) {
 	var repoConfig = window.repositories ? window.repositories[repo] : null;
-	return repoConfig ? repoConfig[key] : fallback;
+	if (!repoConfig || !repoConfig[key]) {
+		return fallback;
+	}
+	return (repoConfig[key] !== "") ? repoConfig[key] : fallback;
 }
 
 /**

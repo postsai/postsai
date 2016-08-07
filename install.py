@@ -133,6 +133,9 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
 
         cursor = self.db.conn.cursor()
 
+        # fixed invalid default for ci_when, which prevents the next ALTER statement
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE commits CHANGE ci_when ci_when datetime NOT NULL DEFAULT current_timestamp;"))
+
         # increase column width of checkins
         cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50) NOT NULL;"))
 
@@ -312,7 +315,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             cursor = self.db.conn.cursor()
             for row in rows:
                 if not self.are_rows_in_same_commit(row, last_row):
-                    cursor.execute("INSERT INTO commitids (hash, co_when, authorid, committerid) VALUES (%s, %s, %s, %s)", ["s" + str(i) + str(time.time()), row[1], row[2], row[2]])
+                    cursor.execute("INSERT INTO commitids (hash, co_when, authorid, committerid) VALUES (%s, %s, %s, %s)", ["s" + str(time.time()) + str(i), row[1], row[2], row[2]])
                     commitid = cursor.lastrowid
                 cursor.execute(self.db.rewrite_sql("UPDATE checkins SET commitid=%s WHERE id=%s"), [commitid, row[0]])
                 i = i + 1
