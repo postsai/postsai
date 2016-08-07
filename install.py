@@ -133,6 +133,9 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
 
         cursor = self.db.conn.cursor()
 
+        # fixed invalid default for ci_when, which prevents the next ALTER statement
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE commits CHANGE ci_when ci_when datetime NOT NULL DEFAULT current_timestamp;"))
+
         # increase column width of checkins
         cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50) NOT NULL;"))
 
