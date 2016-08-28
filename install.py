@@ -134,7 +134,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         cursor = self.db.conn.cursor()
 
         # fixed invalid default for ci_when, which prevents the next ALTER statement
-        cursor.execute(self.db.rewrite_sql("ALTER TABLE commits CHANGE ci_when ci_when datetime NOT NULL DEFAULT current_timestamp;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE ci_when ci_when timestamp NOT NULL DEFAULT current_timestamp;"))
 
         # increase column width of checkins
         cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50) NOT NULL;"))
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `branches` (
 CREATE TABLE IF NOT EXISTS `checkins` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `type` enum('Change','Add','Remove') DEFAULT NULL,
-  `ci_when` datetime NOT NULL,
+  `ci_when`  timestamp NOT NULL DEFAULT current_timestamp,
   `whoid` mediumint(9) NOT NULL,
   `repositoryid` mediumint(9) NOT NULL,
   `dirid` mediumint(9) NOT NULL,
@@ -263,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `tags` (
 CREATE TABLE IF NOT EXISTS `commitids` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `hash` varchar(60),
-  `co_when` datetime NOT NULL,
+  `co_when` timestamp NOT NULL default current_timestamp,
   `authorid` mediumint(9) NOT NULL,
   `committerid` mediumint(9) NOT NULL,
   `remote_addr` varchar(255),
