@@ -1,6 +1,6 @@
 {
   "name": "postsai",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "The Commit Database",
   "scripts": {
     "test:server": "nosetests -v --with-coverage --cover-branch --cover-erase --cover-package api.py",
