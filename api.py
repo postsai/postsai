@@ -497,17 +497,22 @@ class PostsaiCommitViewer:
     @staticmethod
     def dump_commit_diff(commit):
         for file in commit:
-            subprocess.call([
-                "cvs",
-                "-d",
-                file[8],
-                "rdiff",
-                "-u",
-                "-r",
-                PostsaiCommitViewer.calculate_previous_cvs_revision(file[4]),
-                "-r",
-                file[4],
-                file[3]])
+            if file[4] == "" or "." not in file[4]:
+                sys.stdout.flush()
+                print("Index: " + file[3] + " deleted\r")
+                sys.stdout.flush()
+            else:
+                subprocess.call([
+                    "cvs",
+                    "-d",
+                    file[8],
+                    "rdiff",
+                    "-u",
+                    "-r",
+                    PostsaiCommitViewer.calculate_previous_cvs_revision(file[4]),
+                    "-r",
+                    file[4],
+                    file[3]])
 
     def process(self):
         """Returns information about a commit"""
