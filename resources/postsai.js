@@ -241,7 +241,7 @@ function isCardView() {
 }
 
 function guessSCM(revision) {
-	if (revision.indexOf(".") >= 0) {
+	if ((revision === "") || revision.indexOf(".") >= 0) {
 		return "cvs";
 	} else if (revision.length < 40) {
 		return "subversion";
