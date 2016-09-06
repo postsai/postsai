@@ -494,6 +494,7 @@ class PostsaiCommitViewer:
             split[len(split) - 1] = str(int(last) - 1)
         return ".".join(split)
 
+
     @staticmethod
     def dump_commit_diff(commit):
         for file in commit:
@@ -513,6 +514,7 @@ class PostsaiCommitViewer:
                     "-r",
                     file[4],
                     file[3]])
+
 
     def process(self):
         """Returns information about a commit"""
@@ -664,9 +666,10 @@ class PostsaiImporter:
         """Use name as replacement for missing or empty email property (Sourceforge Subversion)"""
 
         if "email" in author and author["email"] != "":
-            return author["email"]
-        else:
-            return author["name"]
+            return author["email"].lower()
+        elif "name" in author:
+            return author["name"].lower()
+        return ""
 
 
     def import_from_webhook(self):
