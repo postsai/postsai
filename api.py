@@ -558,9 +558,9 @@ class PostsaiImporter:
 
         parsed = datetime.datetime.strptime(t[0:19],'%Y-%m-%dT%H:%M:%S')
         if t[19]=='+':
-            parsed -= datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+            parsed -= datetime.timedelta(hours=int(t[20:22]))
         elif t[19]=='-':
-            parsed += datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+            parsed += datetime.timedelta(hours=int(t[20:22]))
         return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
 
 
