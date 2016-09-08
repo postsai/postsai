@@ -147,15 +147,13 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
             cursor.execute("ALTER TABLE repositories ADD (repository_url varchar(255))")
 
 
-        # add columns to commitids table
-        cursor.execute("SELECT * FROM commitids WHERE 1=0")
-        if len(cursor.description) < 6:
-            cursor.execute("ALTER TABLE commitids ADD (remote_addr VARCHAR(255), remote_user VARCHAR(255))")
-
         # add columns to checkins table
         cursor.execute(self.db.rewrite_sql("SELECT * FROM checkins WHERE 1=0"))
-        if len(cursor.description) < 13:
-            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (`id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id))"))
+        if len(cursor.description) <= 14:
+            columns_to_add = ""
+            if len(cursor.description) < 13:
+                columns_to_add = ", `id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id)"
+            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (importactionid mediumint(9) " + columns_to_add + ")"))
 
         cursor.close()
 
@@ -199,6 +197,7 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   `removedlines` int(11) NOT NULL,
   `descid` mediumint(9) NOT NULL,
   `commitid` mediumint(9),
+  `importaction` mediumint(9),
   PRIMARY KEY(`id`),
   UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`),
   KEY `ci_when` (`ci_when`),
@@ -208,6 +207,15 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   KEY `fileid` (`fileid`),
   KEY `branchid` (`branchid`),
   KEY `descid` (`descid`)
+);
+CREATE TABLE IF NOT EXISTS `importactions` (
+  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `remote_addr` varchar(255),
+  `remote_user` varchar(255),
+  `sender_addr` varchar(255),
+  `sender_user` varchar(255),
+  `ia_when`  timestamp NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY(`id`)
 );
 CREATE TABLE IF NOT EXISTS `descs` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -266,13 +274,13 @@ CREATE TABLE IF NOT EXISTS `commitids` (
   `co_when` timestamp NOT NULL default current_timestamp,
   `authorid` mediumint(9) NOT NULL,
   `committerid` mediumint(9) NOT NULL,
-  `remote_addr` varchar(255),
-  `remote_user` varchar(255),
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`)
 )  
         """
         print("OK: Starting database structure check and update")
+        print("      (Depending on the version and size of the database, ")
+        print("      this take anything for less than a second to several hours)")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):

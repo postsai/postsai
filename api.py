@@ -1,5 +1,6 @@
 #! /usr/bin/python
 
+import calendar
 import cgi
 import json
 import MySQLdb as mdb
@@ -176,15 +177,14 @@ class PostsaiDB:
             extra_data = ", %s, %s, %s, %s, %s, %s"
             data.extend(self.call_setup_repository(row, self.guess_repository_urls(row)))
         elif column == "hash":
-            extra_column = ", authorid, committerid, co_when, remote_addr, remote_user"
-            extra_data = ", %s, %s, %s, %s, %s"
+            extra_column = ", authorid, committerid, co_when"
+            extra_data = ", %s, %s, %s"
             self.fill_id_cache(cursor, "who", row, row["author"])
             self.fill_id_cache(cursor, "who", row, row["committer"])
             data.extend((self.cache.get("who", row["author"]),
                          self.cache.get("who", row["committer"]),
-                         row["co_when"],
-                         environ.get("REMOTE_ADDR"),
-                         environ.get("REMOTE_USER")))
+                         row["co_when"]))
+
         return data, extra_column, extra_data
 
 
@@ -207,20 +207,28 @@ class PostsaiDB:
             self.cache.put(column, value, cursor.lastrowid)
 
 
-    def import_data(self, rows):
+    def import_data(self, head, rows):
         """Imports data"""
 
         self.connect()
         self.cache = Cache()
         cursor = self.conn.cursor()
+        
+        sql = """INSERT INTO importactions (remote_addr, remote_user, sender_addr, sender_user, ia_when) VALUES (%s, %s, %s, %s, %s)"""
+        cursor.execute(sql, [
+            environ.get("REMOTE_ADDR", ""), environ.get("REMOTE_USER", ""), 
+            head["sender_addr"],head["sender_user"], 
+            datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        ])
+        importactionid = cursor.lastrowid
 
         for row in rows:
             for key in self.column_table_mapping:
                 self.fill_id_cache(cursor, key, row, row[key])
 
         for row in rows:
-            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag, commitid)
-                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            sql = """INSERT IGNORE INTO checkins(type, ci_when, whoid, repositoryid, dirid, fileid, revision, branchid, addedlines, removedlines, descid, stickytag, commitid, importactionid)
+                 VALUE (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             cursor.execute(self.rewrite_sql(sql), [
                 row["type"],
                 row["ci_when"],
@@ -234,7 +242,8 @@ class PostsaiDB:
                 row["removedlines"],
                 self.cache.get("description", row["description"]),
                 "",
-                self.cache.get("hash", row["commitid"])
+                self.cache.get("hash", row["commitid"]),
+                str(importactionid)
                 ])
 
         cursor.close()
@@ -540,6 +549,22 @@ class PostsaiImporter:
         self.data = data
 
 
+    @staticmethod
+    def parse_timestamp(t):
+        """Parses a timestamp with optional timezone into local time"""
+
+        if len(t) <= 19:
+            return t
+
+        parsed = datetime.datetime.strptime(t[0:19],'%Y-%m-%dT%H:%M:%S')
+        if t[19]=='+':
+            parsed -= datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+        elif t[19]=='-':
+            parsed += datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+        return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
+
+
+
     def check_permission(self, repo_name):
         """checks writes write permissions"""
 
@@ -672,6 +697,27 @@ class PostsaiImporter:
         return ""
 
 
+    def extract_sender_addr(self):
+        if "sender" in self.data:
+            if "addr" in self.data["sender"]:
+                return self.data["sender"]["addr"]
+        return ""
+
+
+    def extract_sender_user(self):
+        if "sender" in self.data:
+            if "login" in self.data["sender"]:
+                return self.data["sender"]["login"]
+        if "user_email" in self.data:
+            return self.data["user_email"]
+        if "user_id" in self.data:
+            return self.data["user_id"]
+        if "user_name" in self.data:
+            return self.data["user_name"]
+
+        return ""
+
+    
     def import_from_webhook(self):
         repo_name = self.extract_repo_name()
         if not self.check_permission(repo_name):
@@ -680,18 +726,23 @@ class PostsaiImporter:
             print("\r")
             print("<html><body>Missing permission</body></html>")
 
+        head = {
+            "sender_addr": self.extract_sender_addr(),
+            "sender_user": self.extract_sender_user()
+        }
+
         rows = []
         timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
         for commit in self.data['commits']:
             if ("replay" in self.data and self.data["replay"]):
-                timestamp = commit["timestamp"]
+                timestamp = self.parse_timestamp(commit["timestamp"])
             for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
                     "ci_when" : timestamp,
-                    "co_when" : commit["timestamp"],
+                    "co_when" : self.parse_timestamp(commit["timestamp"]),
                     "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
                     "repository" : repo_name,
@@ -710,7 +761,7 @@ class PostsaiImporter:
                 }
                 rows.append(row)
         db = PostsaiDB(self.config)
-        db.import_data(rows)
+        db.import_data(head, rows)
         print("Content-Type: text/plain; charset='utf-8'\r")
         print("\r")
         print("Completed")
