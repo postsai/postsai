@@ -275,6 +275,17 @@ class PostsaiImporterTests(unittest.TestCase):
     "test for the importer"
 
 
+    def test_parse_timestamp(self):
+        postsai = api.PostsaiImporter({}, {})
+
+        a = postsai.parse_timestamp("2015-05-05T19:40:15+04:00")
+        b = postsai.parse_timestamp("2015-05-05T19:40:15")
+        c = postsai.parse_timestamp("2015-05-05T19:40:15-04:00")
+
+        self.assertLess(a, b)
+        self.assertLess(b, c)
+
+
     def test_split_full_path(self):
         postsai = api.PostsaiImporter({}, {})
         folder, file = postsai.split_full_path("README.md")
