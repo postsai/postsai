@@ -1,5 +1,6 @@
 #! /usr/bin/python
 
+import calendar
 import cgi
 import json
 import MySQLdb as mdb
@@ -213,7 +214,7 @@ class PostsaiDB:
         self.connect()
         self.cache = Cache()
         cursor = self.conn.cursor()
-
+        
         for row in rows:
             for key in self.column_table_mapping:
                 self.fill_id_cache(cursor, key, row, row[key])
@@ -540,6 +541,22 @@ class PostsaiImporter:
         self.data = data
 
 
+    @staticmethod
+    def parse_timestamp(t):
+        """Parses a timestamp with optional timezone into local time"""
+
+        if len(t) <= 19:
+            return t
+
+        parsed = datetime.datetime.strptime(t[0:19],'%Y-%m-%dT%H:%M:%S')
+        if t[19]=='+':
+            parsed -= datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+        elif t[19]=='-':
+            parsed += datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+        return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
+
+
+
     def check_permission(self, repo_name):
         """checks writes write permissions"""
 
@@ -671,7 +688,7 @@ class PostsaiImporter:
             return author["name"].lower()
         return ""
 
-
+    
     def import_from_webhook(self):
         repo_name = self.extract_repo_name()
         if not self.check_permission(repo_name):
@@ -685,13 +702,13 @@ class PostsaiImporter:
 
         for commit in self.data['commits']:
             if ("replay" in self.data and self.data["replay"]):
-                timestamp = commit["timestamp"]
+                timestamp = self.parse_timestamp(commit["timestamp"])
             for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
                     "ci_when" : timestamp,
-                    "co_when" : commit["timestamp"],
+                    "co_when" : self.parse_timestamp(commit["timestamp"]),
                     "who" : self.extract_email(commit["author"]),
                     "url" : self.extract_url(),
                     "repository" : repo_name,
