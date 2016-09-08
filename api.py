@@ -213,11 +213,11 @@ class PostsaiDB:
         self.connect()
         self.cache = Cache()
         cursor = self.conn.cursor()
-        
+
         sql = """INSERT INTO importactions (remote_addr, remote_user, sender_addr, sender_user, ia_when) VALUES (%s, %s, %s, %s, %s)"""
         cursor.execute(sql, [
-            environ.get("REMOTE_ADDR", ""), environ.get("REMOTE_USER", ""), 
-            head["sender_addr"],head["sender_user"], 
+            environ.get("REMOTE_ADDR", ""), environ.get("REMOTE_USER", ""),
+            head["sender_addr"],head["sender_user"],
             datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         ])
         importactionid = cursor.lastrowid
@@ -558,9 +558,9 @@ class PostsaiImporter:
 
         parsed = datetime.datetime.strptime(t[0:19],'%Y-%m-%dT%H:%M:%S')
         if t[19]=='+':
-            parsed -= datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+            parsed -= datetime.timedelta(hours=int(t[20:22]))
         elif t[19]=='-':
-            parsed += datetime.timedelta(hours=int(t[20:22]),minutes=int(t[22:]))
+            parsed += datetime.timedelta(hours=int(t[20:22]))
         return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
 
 
@@ -717,14 +717,9 @@ class PostsaiImporter:
 
         return ""
 
-    
-    def import_from_webhook(self):
-        repo_name = self.extract_repo_name()
-        if not self.check_permission(repo_name):
-            print("Status: 403 Forbidden\r")
-            print("Content-Type: text/html; charset='utf-8'\r")
-            print("\r")
-            print("<html><body>Missing permission</body></html>")
+
+    def parse_data(self):
+        """parse webhook data"""
 
         head = {
             "sender_addr": self.extract_sender_addr(),
@@ -733,6 +728,7 @@ class PostsaiImporter:
 
         rows = []
         timestamp = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        repo_name = self.extract_repo_name()
 
         for commit in self.data['commits']:
             if ("replay" in self.data and self.data["replay"]):
@@ -760,10 +756,26 @@ class PostsaiImporter:
                     "committer" : self.extract_email(self.extract_committer(commit))
                 }
                 rows.append(row)
-        db = PostsaiDB(self.config)
-        db.import_data(head, rows)
+
+        return head, rows
+
+    
+    def import_from_webhook(self):
+        """Import this webhook invokation into the database"""
+
+        repo_name = self.extract_repo_name()
+        if not self.check_permission(repo_name):
+            print("Status: 403 Forbidden\r")
+            print("Content-Type: text/html; charset='utf-8'\r")
+            print("\r")
+            print("<html><body>Missing permission</body></html>")
+
         print("Content-Type: text/plain; charset='utf-8'\r")
         print("\r")
+
+        head, rows = self.parse_data()
+        db = PostsaiDB(self.config)
+        db.import_data(head, rows)
         print("Completed")
 
 

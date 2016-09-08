@@ -280,7 +280,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         """
         print("OK: Starting database structure check and update")
         print("      (Depending on the version and size of the database, ")
-        print("      this take anything for less than a second to several hours)")
+        print("      this takes anything for less than a second to several hours)")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):

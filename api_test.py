@@ -275,6 +275,17 @@ class PostsaiImporterTests(unittest.TestCase):
     "test for the importer"
 
 
+    def test_parse_timestamp(self):
+        postsai = api.PostsaiImporter({}, {})
+
+        a = postsai.parse_timestamp("2015-05-05T19:40:15+04:00")
+        b = postsai.parse_timestamp("2015-05-05T19:40:15")
+        c = postsai.parse_timestamp("2015-05-05T19:40:15-04:00")
+
+        self.assertLess(a, b)
+        self.assertLess(b, c)
+
+
     def test_split_full_path(self):
         postsai = api.PostsaiImporter({}, {})
         folder, file = postsai.split_full_path("README.md")
@@ -377,6 +388,81 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertTrue(importer.check_permission("test"), "matching permission pattern defined")
         self.assertFalse(importer.check_permission("something"), "not matching permission defined")
 
+
+    def test_extract_email(self):
+        importer = api.PostsaiImporter({}, {})
+        self.assertEqual(importer.extract_email({"email": "Name@example.com"}), "name@example.com")
+        self.assertEqual(importer.extract_email({"email": "", "name": "bla"}), "bla")
+        self.assertEqual(importer.extract_email({"name": "Name@example.com"}), "name@example.com")
+        self.assertEqual(importer.extract_email({}), "")
+
+
+    def test_parse_data(self):
+        importer = api.PostsaiImporter({},
+            {
+                "ref": "refs/heads/HEAD",
+                "after": "10056E40FB51177B8D0",
+                "commits": [
+                    {
+                        "id": "10056E40FB51177B8D0",
+                        "distinct": "true",
+                        "message": "this is the commit message",
+                        "timestamp": "2016-03-12T13:46:45",
+                        "author": {
+                           "name": "myself",
+                            "email": "myself@example.com",
+                            "username": "myself"
+                        },
+                        "committer": {
+                            "name": "myself",
+                            "email": "myself@example.com",
+                            "username": "myself"
+                        },
+                        "added": [],
+                        "removed": [],
+                        "modified": ["mymodule/myfile"],
+                        "revisions": {
+                            "mymodule/myfile": "1.9"
+                        }
+                    }
+                ],
+                "head_commit": {
+                    "id": "10056E40FB51177B8D0",
+                    "distinct": "true",
+                    "message": "this is the commit message",
+                    "timestamp": "2016-03-12T13:46:45",
+                    "author": {
+                        "name": "myself",
+                        "email": "myself@example.com",
+                        "username": "myself"
+                    },
+                    "committer": {
+                        "name": "myself",
+                        "email": "myself@example.com",
+                        "username": "myself"
+                    },
+                    "added": [],
+                    "removed": [],
+                    "modified": ["mymodule/myfile"],
+                    "revisions": {
+                        "mymodule/myfile": "1.9"
+                    }
+                },
+                "repository": {
+                     "name": "local",
+                     "full_name": "local",
+                     "home_url": "https://cvs.example.com/viewvc/",
+                     "url": ":pserver:username:password@cvs.example.com/repository"
+                },
+                "sender": {
+                    "login": "username",
+                    "addr": "127.0.0.1"
+                }
+            })
+        head, rows = importer.parse_data()
+        self.assertEqual(head["sender_user"], "username")
+        self.assertEqual(head["sender_addr"], "127.0.0.1")
+        self.assertEqual(len(rows), 1)
 
 if __name__ == '__main__':
     unittest.main()
