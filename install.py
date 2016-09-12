@@ -136,8 +136,12 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         # fixed invalid default for ci_when, which prevents the next ALTER statement
         cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE ci_when ci_when timestamp NOT NULL DEFAULT current_timestamp;"))
 
-        # increase column width of checkins
+        # increase column width of several tables
         cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins CHANGE revision revision VARCHAR(50) NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE branches CHANGE branch branch VARCHAR(254) NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE files    CHANGE file file VARCHAR(254) NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE repositories CHANGE repository repository VARCHAR(254) NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE people   CHANGE who who VARCHAR(254) NOT NULL;"))
 
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
@@ -179,7 +183,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
 ALTER DATABASE """ + self.config["db"]["database"] + """ CHARSET 'UTF8';
 CREATE TABLE IF NOT EXISTS `branches` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `branch` varchar(200),
+  `branch` varchar(254),
   PRIMARY KEY (`id`), UNIQUE KEY `branch` (`branch`)
 );
 CREATE TABLE IF NOT EXISTS `checkins` (
@@ -232,7 +236,7 @@ CREATE TABLE IF NOT EXISTS `dirs` (
 );
 CREATE TABLE IF NOT EXISTS `files` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `file` varchar(128) NOT NULL,
+  `file` varchar(254) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `file` (`file`)
 );
@@ -244,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `people` (
 );
 CREATE TABLE IF NOT EXISTS `repositories` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `repository` varchar(64) NOT NULL,
+  `repository` varchar(254) NOT NULL,
   `base_url` varchar(255) DEFAULT NULL,
   `repository_url` varchar(255) DEFAULT NULL,
   `file_url` varchar(255) DEFAULT NULL,
@@ -280,7 +284,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         """
         print("OK: Starting database structure check and update")
         print("      (Depending on the version and size of the database, ")
-        print("      this takes anything for less than a second to several hours)")
+        print("      this may take anything for less than a second to several hours)")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):
