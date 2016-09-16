@@ -760,7 +760,7 @@ class PostsaiImporter:
 
         return head, rows
 
-    
+
     def import_from_webhook(self):
         """Import this webhook invokation into the database"""
 
