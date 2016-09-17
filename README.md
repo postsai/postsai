@@ -12,7 +12,9 @@ Features
 - Database upgrade from Bonsai or ViewVC-query possible
 - Mobile friendly view
 - Multi repository support
-- Enhanced privacy controls
+- Git push accountability
+- Optional support for Gravatar
+ 
 
 Screenshot
 -
