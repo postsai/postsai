@@ -342,7 +342,7 @@ class Postsai:
             value = ""
 
         matchtype = form.getfirst(column+"type", "match")
-        if internal_column == "description" and matchtype == "search" and not self.config["db"].get("old_mysql_version", False):
+        if internal_column == "description" and matchtype == "search" and not self.config.get("db", {}).get("old_mysql_version", False):
             self.sql = self.sql + " AND MATCH (" + internal_column + ") AGAINST (%s)"
         else:
             self.sql = self.sql + " AND " + internal_column + " " + self.convert_operator(matchtype) + " %s"
