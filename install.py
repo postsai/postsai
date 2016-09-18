@@ -122,7 +122,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
                 if column[1] >= 252:
                     try:
                         cursor.execute("update " + table[0] + " set " + column[0] + " = @txt where char_length(" + column[0] + ") = length(@txt := convert(binary convert(" + column[0] + " using latin1) using utf8));")
-                    except mysql.connector.Error as err:
+                    except:
                         pass
             cursor.close()
 
@@ -173,7 +173,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         if not self.has_index("descs", "i_description"):
             try:
                 self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
-            except mysql.connector.Error as err:
+            except:
                 print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
 
 
