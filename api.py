@@ -322,7 +322,8 @@ class Postsai:
         operator = '='
         if (matchtype == "match"):
             operator = '='
-        elif (matchtype == "regexp"):
+        elif (matchtype == "regexp" or matchtype == "search"):
+            # support for MySQL <= 5.5
             operator = "REGEXP"
         elif (matchtype == "notregexp"):
             operator = "NOT REGEXP"
@@ -341,7 +342,7 @@ class Postsai:
             value = ""
 
         matchtype = form.getfirst(column+"type", "match")
-        if internal_column == "description" and matchtype == "search":
+        if internal_column == "description" and matchtype == "search" and not self.config.get("db", {}).get("old_mysql_version", False):
             self.sql = self.sql + " AND MATCH (" + internal_column + ") AGAINST (%s)"
         else:
             self.sql = self.sql + " AND " + internal_column + " " + self.convert_operator(matchtype) + " %s"
@@ -759,7 +760,7 @@ class PostsaiImporter:
 
         return head, rows
 
-    
+
     def import_from_webhook(self):
         """Import this webhook invokation into the database"""
 

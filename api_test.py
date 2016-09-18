@@ -397,6 +397,21 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(importer.extract_email({}), "")
 
 
+    def test_extract_sender_user(self):
+        importer = api.PostsaiImporter({}, {"user_email": "me@example.com"})
+        self.assertEqual(importer.extract_sender_user(), "me@example.com")
+
+        importer = api.PostsaiImporter({}, {"user_id": "12345"})
+        self.assertEqual(importer.extract_sender_user(), "12345")
+
+        importer = api.PostsaiImporter({}, {"user_name": "username"})
+        self.assertEqual(importer.extract_sender_user(), "username")
+
+        importer = api.PostsaiImporter({}, {"sender": {}})
+        self.assertEqual(importer.extract_sender_user(), "")
+
+
+
     def test_parse_data(self):
         importer = api.PostsaiImporter({},
             {
@@ -463,6 +478,8 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(head["sender_user"], "username")
         self.assertEqual(head["sender_addr"], "127.0.0.1")
         self.assertEqual(len(rows), 1)
+
+
 
 if __name__ == '__main__':
     unittest.main()
