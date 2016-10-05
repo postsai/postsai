@@ -32,18 +32,25 @@ ui = {
     "trim_email" : True
 }
 
+
+def setup_repository(data, base_url, repository_url, file_url, commit_url, tracker_url, icon_url):
+    \"""custom rules for repository configuration\"""
+    return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
+
+
 def get_read_permission_pattern():
     \"""return a regular expression of repository names that may be read\"""
 
     # return os.environ.get("AUTHENTICATE_POSTSAI_READ_PATTERN", "^$")
     return ".*"
 
+
 def get_write_permission_pattern():
     \"""return a regular expression of repository names that may be written to\"""
 
     # return os.environ.get("AUTHENTICATE_POSTSAI_WRITE_PATTERN", "^$")
     return ".*"
-    """
+"""
         print(help_config_file)
         sys.exit(1)
 
