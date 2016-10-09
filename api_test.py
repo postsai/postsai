@@ -1,4 +1,4 @@
-#!/usr/bin/PYTHON
+#!/usr/bin/python
 
 import api
 import unittest

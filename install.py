@@ -4,6 +4,8 @@ import sys
 import time
 import warnings
 
+# Try to import the main program in order to use database access code
+# This will fail, if the database configuration does not exist or is invalid
 try:
     import api
 except ImportError:
@@ -15,6 +17,8 @@ class PostsaiInstaller:
 
     @staticmethod
     def print_config_help_and_exit():
+        """prints a stub configuration to stdout file and exist the installer"""
+
         help_config_file = """
     Please create a file called config.py with this content an run install.py again: 
 
@@ -56,6 +60,12 @@ def get_write_permission_pattern():
 
 
     def import_config(self):
+        """tries to import the configuration file.
+
+           If this fails, we assume the configuration file does not exist
+           and print out a sample configuration file to stdout before we exit
+           the installer."""
+
         try:
             import config
         except ImportError:
@@ -66,6 +76,11 @@ def get_write_permission_pattern():
 
 
     def check_db_config(self):
+        """checks the configuration file for the existance of a database configuration.
+        
+           If there is no complete database configuration, we print out a sample
+           configuration file to stdout before we exit the installer"""
+
         if not "db" in self.config:
             print("ERR: Missing parameter \"db\" in config file.")
             self.print_config_help_and_exit()
@@ -78,6 +93,8 @@ def get_write_permission_pattern():
 
 
     def connect(self):
+        """tries to connect to the database"""
+
         try:
             self.db = api.PostsaiDB(self.config)
             self.db.connect()
@@ -185,6 +202,8 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
 
 
     def create_database_structure(self):
+        """creates the database structure (tables and indexes)."""
+
         structure = """
 ALTER DATABASE """ + self.config["db"]["database"] + """ CHARSET 'UTF8';
 CREATE TABLE IF NOT EXISTS `branches` (
@@ -350,6 +369,8 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
 
     def main(self):
+        """executes the installer"""
+
         self.import_config()
         self.check_db_config()
         self.connect()

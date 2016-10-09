@@ -12,8 +12,13 @@ from os import environ
 
 import config
 
+
 def convert_to_builtin_type(obj):
+    """return a string representation for JSON conversation"""
+
     return str(obj)
+
+
 
 class Cache:
     """Cache"""
@@ -44,6 +49,7 @@ class Cache:
         return key in self.cache[entity_type]
 
 
+
 class PostsaiDB:
     """Database access for postsai"""
 
@@ -65,6 +71,8 @@ class PostsaiDB:
 
 
     def connect(self):
+        """connects to the database"""
+
         self.conn = mdb.connect(
             host    = self.config["db"]["host"],
             user    = self.config["db"]["user"],
@@ -84,17 +92,23 @@ class PostsaiDB:
 
 
     def disconnect(self):
+        """commits transactions and closes database connection"""
+
         self.conn.commit()
         self.conn.close()
 
 
     def rewrite_sql(self, sql):
+        """rewrites SQL statements for ViewVC-query databases"""
+
         if self.is_viewvc_database:
             sql = sql.replace("checkins", "commits")
         return sql
 
 
     def query(self, sql, data, cursor_type=None):
+        """queries the database"""
+
         cursor = self.conn.cursor(cursor_type)
         cursor.execute(self.rewrite_sql(sql), data)
         rows = cursor.fetchall()
@@ -103,6 +117,8 @@ class PostsaiDB:
 
 
     def query_as_double_map(self, sql, key, data=None):
+        """queries the database and returns a dict"""
+
         rows = self.query(sql, data, mdb.cursors.DictCursor)
         res = {}
         for row in rows:
@@ -319,6 +335,8 @@ class Postsai:
 
     @staticmethod
     def convert_operator(matchtype):
+        """convert the operator into a database operator"""
+
         operator = '='
         if (matchtype == "match"):
             operator = '='
@@ -374,14 +392,18 @@ class Postsai:
                 self.sql = self.sql + " AND ci_when <= %s"
                 self.data.append(maxdate)
 
+
     @staticmethod
     def are_rows_in_same_commit(data, pre):
-        return data[9] == pre[9] and data[9] != None
+        """determines if both database rows belong to the same SCM commit"""
 
+        return data[9] == pre[9] and data[9] != None
 
 
     @staticmethod
     def convert_database_row_to_array(row):
+        """converts a database result to an array"""
+
         tmp = []
         for col in row:
             tmp.append(col)
@@ -459,6 +481,8 @@ class PostsaiCommitViewer:
 
 
     def read_commit(self, form):
+        """reads a commmit from the database"""
+
         db = PostsaiDB(self.config)
         db.connect()
         sql = """SELECT repositories.repository, checkins.ci_when, people.who,
@@ -495,6 +519,8 @@ class PostsaiCommitViewer:
 
     @staticmethod
     def calculate_previous_cvs_revision(revision):
+        """determine the CVS revision of the previous commit
+           which might have been on a parent branch""" 
         split = revision.split(".")
         last = split[len(split) - 1]
         if (last == "1" and len(split) > 2):
@@ -507,6 +533,8 @@ class PostsaiCommitViewer:
 
     @staticmethod
     def dump_commit_diff(commit):
+        """dumps the diff generates by invoking CVS to the browser"""
+
         for file in commit:
             if file[4] == "" or "." not in file[4]:
                 sys.stdout.flush()
@@ -588,6 +616,8 @@ class PostsaiImporter:
 
 
     def extract_repo_name(self):
+        """extracts the name of the repository"""
+
         repo = self.data['repository']
 
         if "full_name" in repo:  # github, sourceforge
@@ -600,6 +630,8 @@ class PostsaiImporter:
 
 
     def extract_repo_url(self):
+        """extracts the url to the repository itself (not the web interface)"""
+
         repo = self.data['repository']
         repository_url = ""
 
@@ -613,6 +645,8 @@ class PostsaiImporter:
 
 
     def extract_url(self):
+        """extracts the url to the web interface"""
+
         if "project" in self.data and "web_url" in self.data["project"]: # gitlab
             url = self.data["project"]["web_url"]
         elif "home_url" in self.data['repository']:
@@ -669,6 +703,8 @@ class PostsaiImporter:
 
     @staticmethod
     def file_revision(commit, full_path):
+        """extracts the file version (mostly interesting for CVS)"""
+
         if "revisions" in commit:
             return commit["revisions"][full_path]
         else:
@@ -681,6 +717,8 @@ class PostsaiImporter:
 
     @staticmethod
     def extract_committer(commit):
+        """extracts the element of the commiter, falling back to the author"""
+
         if "committer" in commit:
             return commit["committer"]
         else:
@@ -699,6 +737,8 @@ class PostsaiImporter:
 
 
     def extract_sender_addr(self):
+        """extracts the client address of the push"""
+
         if "sender" in self.data:
             if "addr" in self.data["sender"]:
                 return self.data["sender"]["addr"]
@@ -706,6 +746,8 @@ class PostsaiImporter:
 
 
     def extract_sender_user(self):
+        """extracts the account of the user doing the push"""
+
         if "sender" in self.data:
             if "login" in self.data["sender"]:
                 return self.data["sender"]["login"]
