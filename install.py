@@ -77,7 +77,7 @@ def get_write_permission_pattern():
 
     def check_db_config(self):
         """checks the configuration file for the existance of a database configuration.
-        
+
            If there is no complete database configuration, we print out a sample
            configuration file to stdout before we exit the installer"""
 

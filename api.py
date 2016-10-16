@@ -520,7 +520,7 @@ class PostsaiCommitViewer:
     @staticmethod
     def calculate_previous_cvs_revision(revision):
         """determine the CVS revision of the previous commit
-           which might have been on a parent branch""" 
+           which might have been on a parent branch"""
         split = revision.split(".")
         last = split[len(split) - 1]
         if (last == "1" and len(split) > 2):
