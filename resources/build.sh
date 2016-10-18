@@ -4,7 +4,9 @@ cd `dirname $0`/..
 
 rm -rf dist
 mkdir -p dist/postsai
+
 cp -ax *.html *.js *.md *.py *.txt resources dist/postsai
+cp --parents backend/*.py                    dist/postsai
 cp --parents node_modules/bootstrap/dist/css/bootstrap.min.css node_modules/bootstrap/dist/js/bootstrap.min.js                    dist/postsai
 cp --parents node_modules/bootstrap/dist/fonts/* node_modules/bootstrap/LICENSE                           dist/postsai
 cp --parents node_modules/bootstrap-table/dist/bootstrap-table.min.css node_modules/bootstrap-table/dist/bootstrap-table.min.js   dist/postsai
