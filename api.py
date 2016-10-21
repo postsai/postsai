@@ -33,8 +33,6 @@ from os import environ
 
 import config
 
-from backend.cache import Cache
-from backend.db import PostsaiDB
 from backend.cvs import PostsaiCommitViewer
 from backend.query import Postsai
 from backend.importer import PostsaiImporter

@@ -22,6 +22,8 @@
 # DEALINGS IN THE SOFTWARE.
 
 
+from backend.cache import Cache
+from backend.db import PostsaiDB
 import api
 import unittest
 
@@ -32,7 +34,7 @@ class CacheTests(unittest.TestCase):
     """tests for the cache"""
 
     def test_cache(self):
-        cache = api.Cache()
+        cache = Cache()
         self.assertIsNone(cache.get("file", "stendhal.java"), "entry not in cache")
 
         cache.put("file", "stendhal.java", "1")
@@ -51,7 +53,7 @@ class PostsaiDBTests(unittest.TestCase):
     "test for he db access"
 
     def test_rewrite(self):
-        db = api.PostsaiDB({})
+        db = PostsaiDB({})
 
         db.is_viewvc_database = False
         self.assertEquals(
@@ -67,7 +69,7 @@ class PostsaiDBTests(unittest.TestCase):
 
 
     def test_guess_repository_urls(self):
-        db = api.PostsaiDB({})
+        db = PostsaiDB({})
 
         self.assertEqual(
             db.guess_repository_urls({
@@ -122,7 +124,7 @@ class PostsaiDBTests(unittest.TestCase):
     def test_extra_data_for_key_tables(self):
         """test for extra_data_for_key_tables"""
 
-        db = api.PostsaiDB({})
+        db = PostsaiDB({})
         row = {"repository": "repo", "url": "http://example.com", "repository_url": "", "revision": "1.1"}
 
         self.assertEqual(

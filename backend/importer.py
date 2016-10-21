@@ -21,14 +21,8 @@
 
 
 import calendar
-import cgi
-import json
-import MySQLdb as mdb
 import re
-import sys
-import subprocess
 import datetime
-from os import environ
 
 from db import PostsaiDB
 
