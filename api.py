@@ -21,14 +21,9 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import calendar
 import cgi
 import json
-import MySQLdb as mdb
-import re
 import sys
-import subprocess
-import datetime
 from os import environ
 
 import config
