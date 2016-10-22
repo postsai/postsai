@@ -1,5 +1,3 @@
-#! /usr/bin/python
-
 # The MIT License (MIT)
 # Copyright (c) 2016 Postsai
 #
@@ -21,26 +19,31 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-import cgi
-import json
-import sys
-from os import environ
 
-import config
+class Cache:
+    """Cache"""
 
-from backend.cvs import PostsaiCommitViewer
-from backend.query import Postsai
-from backend.importer import PostsaiImporter
+    cache = {}
+
+    def put(self, entity_type, key, value):
+        """adds an entry to the cache"""
+
+        if not entity_type in self.cache:
+            self.cache[entity_type] = {}
+        self.cache[entity_type][key] = value
 
 
+    def get(self, entity_type, key):
+        """gets an entry from the cache"""
 
-if __name__ == '__main__':
-    if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
-        PostsaiImporter(vars(config), json.loads(sys.stdin.read())).import_from_webhook()
-    else:
-        form = cgi.FieldStorage()
-        if form.getfirst("method", "") == "commit":
-            PostsaiCommitViewer(vars(config)).process()
-        else:
-            Postsai(vars(config)).process()
+        if not entity_type in self.cache:
+            return None
+        return self.cache[entity_type][key]
 
+
+    def has(self, entity_type, key):
+        """checks whether an item is in the cache"""
+
+        if not entity_type in self.cache:
+            return False
+        return key in self.cache[entity_type]
