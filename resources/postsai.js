@@ -444,7 +444,15 @@ window["formatRepository"] = formatRepository;
 
 $("ready", function() {
 	if (navigator.serviceWorker) {
-		navigator.serviceWorker.register('service-worker.js');
+		// navigator.serviceWorker.register('service-worker.js');
+		// Disable service worker for now because of 
+		// https://bugs.chromium.org/p/chromium/issues/detail?id=623464#
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=1291893
+		navigator.serviceWorker.getRegistrations().then(function(registrations) {
+			for(let registration of registrations) {
+				registration.unregister()
+			}
+		});
 	}
 	window.config = {};
 	addQueryStringToLink();
