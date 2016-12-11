@@ -22,3 +22,17 @@ class ExtensionManager:
             method_pointer = getattr(extension, method, None)
             if method_pointer != None:
                 method_pointer(*params)
+
+
+    def list_extension_files(self, filename):
+        """returns a list of all files with the specified name that exist in extensions"""
+
+        res = []
+        extensions_folder = "extensions"
+
+        for extension_folder in os.listdir(extensions_folder):
+            possible_filename = extensions_folder + "/" + extension_folder + "/" + filename
+            if os.path.isfile(possible_filename):
+                res.append(possible_filename)
+
+        return res

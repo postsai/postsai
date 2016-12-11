@@ -66,6 +66,19 @@ function addValuesFromURLs() {
 }
 
 /**
+ * loads additional scripts
+ *
+ * @param scripts array of javascript filenames
+ */
+function loadAdditionalScripts(scripts) {
+	for (var i = 0; i < scripts.length; i++) {
+		var script = document.createElement('script');
+		script.src = scripts[i];
+		document.head.appendChild(script)
+	};
+}
+
+/**
  * initializes a data list for auto complete
  */
 function repositoryDatalist() {
@@ -84,6 +97,7 @@ function repositoryDatalist() {
 			temp = temp + '<option value="' + escapeHtml(list[i]) + '">';
 		}
 		document.getElementById("repositorylist").innerHTML = temp;
+		loadAdditionalScripts(data.additional_scripts);
 	});
 }
 
@@ -413,6 +427,7 @@ function initTable() {
 		$("span.waitmessage").text("Please stand by while the browser is working.");
 		window.config = data.config;
 		window.repositories = data.repositories;
+		loadAdditionalScripts(data.additional_scripts);
 		hideRedundantColumns();
 		$("#table").bootstrapTable({
 			onClickRow: function (row, $element) {

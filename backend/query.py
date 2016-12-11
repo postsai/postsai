@@ -235,7 +235,8 @@ class Postsai:
                 "config" : ui,
                 "data" : rows,
                 "repositories": repositories,
-                "extension": {}
+                "extension": {},
+                "additional_scripts": self.extension_manager.list_extension_files("query.js")
             }
             self.extension_manager.call_all("query_post_process_result", [self, form, db, result])
 
