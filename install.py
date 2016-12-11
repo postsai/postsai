@@ -99,7 +99,7 @@ def get_write_permission_pattern():
 
         print("OK: Found config file")
         self.config = vars(config)
-        self.extension_manager.call_all("setup", [self.config])
+        self.extension_manager.call_all("install_extension_setup", [self.config])
 
 
     def check_db_config(self):
