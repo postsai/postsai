@@ -25,6 +25,8 @@ import sys
 import time
 import warnings
 
+import backend.extension
+
 # Try to import the main program in order to use database access code
 # This will fail, if the database configuration does not exist or is invalid
 try:
@@ -36,8 +38,10 @@ except ImportError:
 class PostsaiInstaller:
     """Installer for Postsai"""
 
-    @staticmethod
-    def print_config_help_and_exit():
+    def __init__(self):
+        self.extension_manager = backend.extension.ExtensionManager()
+
+    def print_config_help_and_exit(self):
         """prints a stub configuration to stdout file and exist the installer"""
 
         help_config_file = """
@@ -77,6 +81,7 @@ def get_write_permission_pattern():
     return ".*"
 """
         print(help_config_file)
+        self.extension_manager.call_all("install_print_config_stub", [])
         sys.exit(1)
 
 
@@ -94,6 +99,7 @@ def get_write_permission_pattern():
 
         print("OK: Found config file")
         self.config = vars(config)
+        self.extension_manager.call_all("install_extension_setup", [self.config])
 
 
     def check_db_config(self):
@@ -117,7 +123,8 @@ def get_write_permission_pattern():
         """tries to connect to the database"""
 
         try:
-            self.db = api.PostsaiDB(self.config)
+            from backend.db import PostsaiDB
+            self.db = PostsaiDB(self.config)
             self.db.connect()
             print("OK: Connected to database")
         except Exception as err:
@@ -338,8 +345,10 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
         self.convert_to_innodb()
         self.convert_to_utf8()
+        self.extension_manager.call_all("install_pre_database_structure_update", [])
         self.update_database_structure()
         self.update_index_definitions()
+        self.extension_manager.call_all("install_post_database_structure_update", [])
 
         print("OK: Completed database structure check and update")
 
@@ -397,7 +406,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         self.connect()
         self.create_database_structure()
         self.synthesize_cvs_commit_ids()
-
+        self.extension_manager.call_all("install_post", [])
 
 
 if __name__ == '__main__':

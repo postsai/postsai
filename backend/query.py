@@ -25,7 +25,7 @@ import json
 import re
 
 from db import PostsaiDB
-
+import extension
 
 
 def convert_to_builtin_type(obj):
@@ -41,6 +41,8 @@ class Postsai:
         """Creates a Postsai api instance"""
 
         self.config = config
+        self.extension_manager = extension.ExtensionManager()
+        self.extension_manager.call_all("query_extension_setup", [config])
 
 
     def validate_input(self, form):
@@ -99,6 +101,8 @@ class Postsai:
         limit = form.getfirst("limit", None)
         if limit:
             self.sql = self.sql + " LIMIT " + str(int(limit))
+
+        self.extension_manager.call_all("query_create_query", [self, form])
 
 
     @staticmethod
@@ -222,7 +226,6 @@ class Postsai:
                 "SELECT id, repository, base_url, file_url, commit_url, tracker_url, icon_url FROM repositories WHERE repositories.repository REGEXP %s",
                 "repository",
                 [self.get_read_permission_pattern()])
-            db.disconnect()
 
             ui = {}
             if "ui" in self.config:
@@ -231,7 +234,12 @@ class Postsai:
             result = {
                 "config" : ui,
                 "data" : rows,
-                "repositories": repositories
+                "repositories": repositories,
+                "extension": {},
+                "additional_scripts": self.extension_manager.list_extension_files("query.js")
             }
+            self.extension_manager.call_all("query_post_process_result", [self, form, db, result])
+
+            db.disconnect()
 
         print(json.dumps(result, default=convert_to_builtin_type))
