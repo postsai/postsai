@@ -121,13 +121,16 @@ class PostsaiCommitViewer:
     def process(self):
         """Returns information about a commit"""
 
-        print("Content-Type: text/plain; charset='utf-8'\r")
-        print("Cache-Control: max-age=60\r")
-        print("\r")
-
         form = cgi.FieldStorage()
         commit = self.read_commit(form)
 
-        print(json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))
+        print("Content-Type: text/plain; charset='utf-8'\r")
+        print("Cache-Control: max-age=60\r")
+        if form.getfirst("download", "false") == "true":
+            print("Content-Disposition: attachment; filename=\"patch.txt\"\r")
+            
+        print("\r")
+
+        print("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))
         sys.stdout.flush()
         PostsaiCommitViewer.dump_commit_diff(commit)

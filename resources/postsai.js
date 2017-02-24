@@ -176,10 +176,11 @@ function hideRedundantColumns() {
 /**
  * renders the header of commits
  */
-function renderCommitHeader(header) {
+function renderCommitHeader(url, header) {
 	var result = "<h2>Commit: " + escapeHtml(header.description) + "</h2>"
 		+ "<b>by " + escapeHtml(header.author)
-		+ " on "  + escapeHtml(header.timestamp) + "</b><br>";
+		+ " on "  + escapeHtml(header.timestamp) + ", "
+		+ "<a href=\"" + escapeHtml(url + "&download=true") + "\">Download Patch</a></b><br>";
 	return result;
 }
 
@@ -232,12 +233,13 @@ function renderDiff(data) {
  */
 function renderCommit() {
 	var prop = getUrlVars();
+	var url = "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"];
 	$.ajax({
-		url: "api.py?method=commit&repository=" + prop["repository"] + " &commit=" + prop["commit"],
+		url: url,
 		success: function(data) {
-			var header = JSON.parse(data.substring(0, data.indexOf("\n")));
+			var header = JSON.parse(data.substring(1, data.indexOf("\n")));
 			document.querySelector("div.contentplaceholder").innerHTML
-				= renderCommitHeader(header)
+				= renderCommitHeader(url, header)
 				+ renderDiff(data);
 
 			// start highlighting after giving a chance to breath
@@ -431,7 +433,7 @@ function initTable() {
 		hideRedundantColumns();
 		$("#table").bootstrapTable({
 			onClickRow: function (row, $element) {
-				// only react on clicks in the whole row iff on mobile devices
+				// only react on clicks in the whole row if on mobile devices
 				if (isCardView()) {
 					var prop = rowToProp(row);
 					var url = readRepositoryConfig(row[0], "commit_url", null);
