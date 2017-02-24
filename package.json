@@ -4,7 +4,7 @@
   "description": "The Commit Database",
   "scripts": {
     "test": "npm run test:server",
-    "test:server": "nosetests -v --with-coverage --cover-branch --cover-erase --cover-package api.py",
+    "test:server": "nosetests -v --with-coverage --cover-branch --cover-erase --cover-package backend",
     "clean": "rm -rf dist",
     "dist": "/bin/sh resources/build.sh"
   },
