@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016 Postsai
+# Copyright (c) 2016-2017 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -128,7 +128,7 @@ class PostsaiCommitViewer:
         print("Cache-Control: max-age=60\r")
         if form.getfirst("download", "false") == "true":
             print("Content-Disposition: attachment; filename=\"patch.txt\"\r")
-            
+
         print("\r")
 
         print("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))

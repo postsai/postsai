@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # The MIT License (MIT)
-# Copyright (c) 2016 Postsai
+# Copyright (c) 2016-2017 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -26,14 +26,6 @@ import time
 import warnings
 
 import backend.extension
-
-# Try to import the main program in order to use database access code
-# This will fail, if the database configuration does not exist or is invalid
-try:
-    import api
-except ImportError:
-    pass
-
 
 class PostsaiInstaller:
     """Installer for Postsai"""

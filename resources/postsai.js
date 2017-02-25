@@ -74,8 +74,8 @@ function loadAdditionalScripts(scripts) {
 	for (var i = 0; i < scripts.length; i++) {
 		var script = document.createElement('script');
 		script.src = scripts[i];
-		document.head.appendChild(script)
-	};
+		document.head.appendChild(script);
+	}
 }
 
 /**
@@ -248,6 +248,9 @@ function renderCommit() {
 					hljs.highlightBlock(block);
 				});
 			}, 1);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			$("span.waitmessage").text("An error occurred on communication with the backend.");
 		}
 	});
 }
@@ -360,7 +363,7 @@ function formatFileLinkArray(value, row, index) {
 			res.push(argsubst('<a href="' + url + '">[file]</a>', prop));
 		}
 	}
-	return "<ul class=\"filelist\"><li>" + res.join("<li>") + "</ul>";
+	return "<ul class=\"filelist\"><li>" + res.join("<span class=\"hidden\">, </span><li>") + "</ul>";
 }
 
 function formatFileLink(value, row, index) {
@@ -421,32 +424,39 @@ function formatAuthor(value, row, index) {
  * loads the search result from the server
  */
 function initTable() {
-	$.getJSON( "api.py" + window.location.search, function( data ) {
-		if (typeof data === "string") {
-			alert(data);
-			return;
-		}
-		$("span.waitmessage").text("Please stand by while the browser is working.");
-		window.config = data.config;
-		window.repositories = data.repositories;
-		loadAdditionalScripts(data.additional_scripts);
-		hideRedundantColumns();
-		$("#table").bootstrapTable({
-			onClickRow: function (row, $element) {
-				// only react on clicks in the whole row if on mobile devices
-				if (isCardView()) {
-					var prop = rowToProp(row);
-					var url = readRepositoryConfig(row[0], "commit_url", null);
-					if (url) {
-						var diffLink = argsubst(url, prop);
-						window.document.location = diffLink;
+	$.ajax({
+		dataType: "json",
+		url: "api.py" + window.location.search,
+		success: function( data ) {
+			if (typeof data === "string") {
+				alert(data);
+				return;
+			}
+			$("span.waitmessage").text("Please stand by while the browser is working.");
+			window.config = data.config;
+			window.repositories = data.repositories;
+			loadAdditionalScripts(data.additional_scripts);
+			hideRedundantColumns();
+			$("#table").bootstrapTable({
+				onClickRow: function (row, $element) {
+					// only react on clicks in the whole row if on mobile devices
+					if (isCardView()) {
+						var prop = rowToProp(row);
+						var url = readRepositoryConfig(row[0], "commit_url", null);
+						if (url) {
+							var diffLink = argsubst(url, prop);
+							window.document.location = diffLink;
+						}
 					}
 				}
-			}
-		});
-		$("#table").bootstrapTable("load", {data: data.data});
-		$("#table").removeClass("hidden");
-		$(".spinner").addClass("hidden");
+			});
+			$("#table").bootstrapTable("load", {data: data.data});
+			$("#table").removeClass("hidden");
+			$(".spinner").addClass("hidden");
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			$("span.waitmessage").text("An error occurred on communication with the backend.");
+		}
 	});
 }
 
@@ -467,7 +477,7 @@ $("ready", function() {
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=1291893
 		navigator.serviceWorker.getRegistrations().then(function(registrations) {
 			for(let registration of registrations) {
-				registration.unregister()
+				registration.unregister();
 			}
 		});
 	}
