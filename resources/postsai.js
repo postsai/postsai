@@ -248,6 +248,9 @@ function renderCommit() {
 					hljs.highlightBlock(block);
 				});
 			}, 1);
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			$("span.waitmessage").text("An error occurred on communication with the backend.");
 		}
 	});
 }
@@ -421,32 +424,39 @@ function formatAuthor(value, row, index) {
  * loads the search result from the server
  */
 function initTable() {
-	$.getJSON( "api.py" + window.location.search, function( data ) {
-		if (typeof data === "string") {
-			alert(data);
-			return;
-		}
-		$("span.waitmessage").text("Please stand by while the browser is working.");
-		window.config = data.config;
-		window.repositories = data.repositories;
-		loadAdditionalScripts(data.additional_scripts);
-		hideRedundantColumns();
-		$("#table").bootstrapTable({
-			onClickRow: function (row, $element) {
-				// only react on clicks in the whole row if on mobile devices
-				if (isCardView()) {
-					var prop = rowToProp(row);
-					var url = readRepositoryConfig(row[0], "commit_url", null);
-					if (url) {
-						var diffLink = argsubst(url, prop);
-						window.document.location = diffLink;
+	$.ajax({
+		dataType: "json",
+		url: "api.py" + window.location.search,
+		success: function( data ) {
+			if (typeof data === "string") {
+				alert(data);
+				return;
+			}
+			$("span.waitmessage").text("Please stand by while the browser is working.");
+			window.config = data.config;
+			window.repositories = data.repositories;
+			loadAdditionalScripts(data.additional_scripts);
+			hideRedundantColumns();
+			$("#table").bootstrapTable({
+				onClickRow: function (row, $element) {
+					// only react on clicks in the whole row if on mobile devices
+					if (isCardView()) {
+						var prop = rowToProp(row);
+						var url = readRepositoryConfig(row[0], "commit_url", null);
+						if (url) {
+							var diffLink = argsubst(url, prop);
+							window.document.location = diffLink;
+						}
 					}
 				}
-			}
-		});
-		$("#table").bootstrapTable("load", {data: data.data});
-		$("#table").removeClass("hidden");
-		$(".spinner").addClass("hidden");
+			});
+			$("#table").bootstrapTable("load", {data: data.data});
+			$("#table").removeClass("hidden");
+			$(".spinner").addClass("hidden");
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+			$("span.waitmessage").text("An error occurred on communication with the backend.");
+		}
 	});
 }
 
