@@ -27,14 +27,6 @@ import warnings
 
 import backend.extension
 
-# Try to import the main program in order to use database access code
-# This will fail, if the database configuration does not exist or is invalid
-try:
-    import api
-except ImportError:
-    pass
-
-
 class PostsaiInstaller:
     """Installer for Postsai"""
 

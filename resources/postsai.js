@@ -74,8 +74,8 @@ function loadAdditionalScripts(scripts) {
 	for (var i = 0; i < scripts.length; i++) {
 		var script = document.createElement('script');
 		script.src = scripts[i];
-		document.head.appendChild(script)
-	};
+		document.head.appendChild(script);
+	}
 }
 
 /**
@@ -477,7 +477,7 @@ $("ready", function() {
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=1291893
 		navigator.serviceWorker.getRegistrations().then(function(registrations) {
 			for(let registration of registrations) {
-				registration.unregister()
+				registration.unregister();
 			}
 		});
 	}

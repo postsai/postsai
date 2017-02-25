@@ -128,7 +128,7 @@ class PostsaiCommitViewer:
         print("Cache-Control: max-age=60\r")
         if form.getfirst("download", "false") == "true":
             print("Content-Disposition: attachment; filename=\"patch.txt\"\r")
-            
+
         print("\r")
 
         print("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))

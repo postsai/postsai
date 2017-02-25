@@ -23,8 +23,8 @@ class ExtensionManager:
             if method_pointer != None:
                 method_pointer(*params)
 
-
-    def list_extension_files(self, filename):
+    @staticmethod
+    def list_extension_files(filename):
         """returns a list of all files with the specified name that exist in extensions"""
 
         res = []
