@@ -360,7 +360,7 @@ function formatFileLinkArray(value, row, index) {
 			res.push(argsubst('<a href="' + url + '">[file]</a>', prop));
 		}
 	}
-	return "<ul class=\"filelist\"><li>" + res.join("<li>") + "</ul>";
+	return "<ul class=\"filelist\"><li>" + res.join("<span class=\"hidden\">, </span><li>") + "</ul>";
 }
 
 function formatFileLink(value, row, index) {
