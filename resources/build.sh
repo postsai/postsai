@@ -17,7 +17,7 @@ cp --parents node_modules/highlightjs/styles/default.css node_modules/highlightj
 cp --parents node_modules/jquery/dist/jquery.min.js node_modules/jquery/LICENSE.txt                       dist/postsai
 cp --parents node_modules/js-md5/build/md5.min.js   node_modules/js-md5/LICENSE.txt                       dist/postsai
 cp --parents node_modules/sw-toolbox/sw-toolbox.js  node_modules/sw-toolbox/LICENSE                       dist/postsai
-cp --parents node_modules/tableExport.jquery.plugin/tableExport.min.js                                    dist/postsai
+cp --parents node_modules/tableexport.jquery.plugin/tableExport.min.js                                    dist/postsai
 rm dist/postsai/config.py*
 cd dist
 zip -r postsai-$npm_package_version.zip postsai
