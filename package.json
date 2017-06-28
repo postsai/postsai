@@ -1,6 +1,6 @@
 {
   "name": "postsai",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "description": "The Commit Database",
   "scripts": {
     "test": "npm run test:server",

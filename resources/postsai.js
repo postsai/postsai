@@ -421,6 +421,28 @@ function formatAuthor(value, row, index) {
 }
 
 /**
+ * enables or disables service worker based on config
+ */
+function setupServiceWorker() {
+	if (window.config.service_worker === false) {
+		if (navigator.serviceWorker) {
+			// Disable service worker for now because of 
+			// https://bugs.chromium.org/p/chromium/issues/detail?id=623464#
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1291893
+			navigator.serviceWorker.getRegistrations().then(function(registrations) {
+				for(let registration of registrations) {
+					registration.unregister();
+				}
+			});
+		}
+	} else {
+		if (navigator.serviceWorker) {
+			navigator.serviceWorker.register('service-worker.js');
+		}
+	}
+}
+
+/**
  * loads the search result from the server
  */
 function initTable() {
@@ -436,6 +458,7 @@ function initTable() {
 			window.config = data.config;
 			window.repositories = data.repositories;
 			loadAdditionalScripts(data.additional_scripts);
+			setupServiceWorker();
 			hideRedundantColumns();
 			$("#table").bootstrapTable({
 				onClickRow: function (row, $element) {
@@ -470,17 +493,6 @@ window["formatDiffLink"] = formatDiffLink;
 window["formatRepository"] = formatRepository;
 
 $("ready", function() {
-	if (navigator.serviceWorker) {
-		// navigator.serviceWorker.register('service-worker.js');
-		// Disable service worker for now because of 
-		// https://bugs.chromium.org/p/chromium/issues/detail?id=623464#
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=1291893
-		navigator.serviceWorker.getRegistrations().then(function(registrations) {
-			for(let registration of registrations) {
-				registration.unregister();
-			}
-		});
-	}
 	window.config = {};
 	addQueryStringToLink();
 	if (document.querySelector("body.page-searchresult")) {
