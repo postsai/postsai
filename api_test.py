@@ -351,7 +351,10 @@ class PostsaiImporterTests(unittest.TestCase):
         self.assertEqual(importer.extract_branch(), "", "master branch")
 
         importer.data["ref"] = "refs/heads/dev"
-        self.assertEqual(importer.extract_branch(), "dev", "master branch")
+        self.assertEqual(importer.extract_branch(), "dev", "dev branch")
+
+        importer.data["ref"] = "refs/heads/bugfix/1"
+        self.assertEqual(importer.extract_branch(), "bugfix/1", "branch name with slash")
 
 
     def test_extract_repo_name(self):

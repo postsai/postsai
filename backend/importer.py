@@ -119,7 +119,10 @@ class PostsaiImporter:
         if not "ref" in self.data:
             return ""
 
-        branch = self.data['ref'][self.data['ref'].rfind("/")+1:]
+        # skip "refs/heads/" prefix
+        ref = self.data['ref']
+        idx = ref.find("/", ref.find("/") + 1)
+        branch = ref[idx+1:]
         if branch == "master" or branch == "HEAD":
             return ""
         return branch
