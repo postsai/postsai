@@ -33,6 +33,6 @@
     "jquery": "^3.1.1",
     "js-md5": "^0.4.2",
     "sw-toolbox": "^3.6.0",
-    "tableExport.jquery.plugin": "git+https://github.com/hhurz/tableExport.jquery.plugin.git#v1.7.1"
+    "tableexport.jquery.plugin": "git+https://github.com/hhurz/tableExport.jquery.plugin.git#v1.7.1"
   }
 }

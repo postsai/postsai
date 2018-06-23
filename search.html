@@ -143,8 +143,6 @@
     <label for="commit" class="col-sm-2 control-label">Commit</label>
     <div class="col-sm-9">
       <input type="text" class="form-control" name="commit" id="commit">
-      <datalist id="repositorylist">
-      </datalist>
       <label class="radio-inline">
         <input type="radio" name="committype" id="commitmatch" value="match" checked> Match
       </label>
@@ -153,6 +151,21 @@
       </label>
       <label class="radio-inline">
         <input type="radio" name="committype" id="commitnotregexp" value="notregexp"> Not Regular Expression
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="forked_from" class="col-sm-2 control-label">Fork</label>
+    <div class="col-sm-9">
+      <label class="radio-inline">
+        <input type="radio" name="forked_from" id="forked_any" value="" checked> Any
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="forked_from" id="forked_root" value="-"> Root
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="forked_from" id="forked_fork" value="upstream"> Fork
       </label>
     </div>
   </div>

@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2017 Postsai
+# Copyright (c) 2016-2018 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -117,6 +117,7 @@ class PostsaiDB:
         tracker_url = ""
         icon_url = ""
         repository_url = row["repository_url"]
+        forked_from = row["forked_from"]
 
         # GitHub, Gitlab
         if base_url.find("https://github.com/") > -1 or base_url.find("gitlab") > -1:
@@ -144,7 +145,7 @@ class PostsaiDB:
             commit_url = base + "/?p=[repository];a=commitdiff;h=[commit]"
             file_url = base + "/?p=[repository];a=blob;f=[file];hb=[commit]"
 
-        return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
+        return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url, forked_from)
 
 
     def call_setup_repository(self, row, guess):
@@ -166,8 +167,8 @@ class PostsaiDB:
             extra_data = ", %s"
             data.append(len(value))
         elif column == "repository":
-            extra_column = ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url"
-            extra_data = ", %s, %s, %s, %s, %s, %s"
+            extra_column = ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url, forked_from"
+            extra_data = ", %s, %s, %s, %s, %s, %s, %s"
             data.extend(self.call_setup_repository(row, self.guess_repository_urls(row)))
         elif column == "hash":
             extra_column = ", authorid, committerid, co_when"

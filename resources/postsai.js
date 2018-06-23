@@ -131,7 +131,7 @@ function typeToOperator(type) {
  */
 function renderQueryParameters() {
 	$(".search-parameter").each(function() {
-		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Date", "Hours", "MinDate", "MaxDate"];
+		var params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Forked_from", "Date", "Hours", "MinDate", "MaxDate"];
 		var text = "";
 		var title = "";
 		var vars = getUrlVars();
@@ -150,7 +150,7 @@ function renderQueryParameters() {
 			}
 			var type = vars[key + "type"];
 			var operator = typeToOperator(type);
-			text = text + params[i] + ": " + operator + " " + value;
+			text = text + params[i].replace("_", " ") + ": " + operator + " " + value;
 			title = title + operator + " " + value;
 		}
 		$(this).text(text);

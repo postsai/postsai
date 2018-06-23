@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2017 Postsai
+# Copyright (c) 2016-2018 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -75,7 +75,8 @@ class Postsai:
 
         self.data = [self.get_read_permission_pattern()]
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, repositories.repository, commitids.hash 
+        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, 
+        repositories.repository, commitids.hash, repositories.forked_from 
         FROM checkins 
         JOIN branches ON checkins.branchid = branches.id
         JOIN descs ON checkins.descid = descs.id
@@ -94,6 +95,7 @@ class Postsai:
         self.create_where_for_column("cvsroot", form, "repository")
         self.create_where_for_column("repository", form, "repository")
         self.create_where_for_column("commit", form, "commitids.hash")
+        self.create_where_for_column("forked_from", form, "forked_from")
 
         self.create_where_for_date(form)
 
@@ -131,7 +133,11 @@ class Postsai:
         if (column == "branch" and value == "HEAD"):
             value = ""
 
-        matchtype = form.getfirst(column+"type", "match")
+        # replace root with empty string
+        if (column == "forked_from" and value == "-"):
+            value = ""
+
+        matchtype = form.getfirst(column + "type", "match")
         if internal_column == "description" and matchtype == "search" and not self.config.get("db", {}).get("old_mysql_version", False):
             self.sql = self.sql + " AND MATCH (" + internal_column + ") AGAINST (%s)"
         else:
