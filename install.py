@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # The MIT License (MIT)
-# Copyright (c) 2016-2017 Postsai
+# Copyright (c) 2016-2018 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -190,9 +190,11 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         # add columns to repositories table
         cursor.execute("SELECT * FROM repositories WHERE 1=0")
         if len(cursor.description) < 3:
-            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), repository_url varchar(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255))")
+            cursor.execute("ALTER TABLE repositories ADD (base_url VARCHAR(255), repository_url varchar(255), file_url VARCHAR(255), commit_url VARCHAR(255), icon_url VARCHAR(255), tracker_url VARCHAR(255), forked_from varchar(255) default '')")
         elif len(cursor.description) < 8:
-            cursor.execute("ALTER TABLE repositories ADD (repository_url varchar(255))")
+            cursor.execute("ALTER TABLE repositories ADD (repository_url varchar(255), forked_from varchar(255) default '')")
+        elif len(cursor.description) < 9:
+            cursor.execute("ALTER TABLE repositories ADD (forked_from varchar(255) default '')")
 
 
         # add columns to checkins table
@@ -301,6 +303,7 @@ CREATE TABLE IF NOT EXISTS `repositories` (
   `commit_url` varchar(255) DEFAULT NULL,
   `tracker_url` varchar(255) DEFAULT NULL,
   `icon_url` varchar(255) DEFAULT NULL,
+  `forked_from` varchar(255) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `repository` (`repository`)
 );

@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2017 Postsai
+# Copyright (c) 2016-2018 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -99,6 +99,20 @@ class PostsaiImporter:
         elif "url" in repo: # sourceforge, notify-cvs-webhook
             repository_url = repo["url"]
         return repository_url
+
+
+    def extract_repo_forked_from(self):
+        """extracts the name of the repository this repository was forked from. May be 'upstream', if the source repository is unknown."""
+
+        repo = self.data['repository']
+        forked_from = ""
+
+        if "forked_from" in repo:  # none, but would be nice
+            forked_from = repo["forked_from"]
+        elif "forked" in repo: # github
+            if repo["forked"]:
+                forked_from = "upstream"
+        return forked_from
 
 
     def extract_url(self):
@@ -246,6 +260,7 @@ class PostsaiImporter:
                     "url" : self.extract_url(),
                     "repository" : repo_name,
                     "repository_url" : self.extract_repo_url(),
+                    "forked_from" : self.extract_repo_forked_from(),
                     "dir" : folder,
                     "file" : file,
                     "revision" : self.file_revision(commit, full_path),

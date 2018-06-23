@@ -75,7 +75,8 @@ class PostsaiDBTests(unittest.TestCase):
             db.guess_repository_urls({
                 "url" : "https://github.com/postsai/postsai",
                 "repository": "postsai/postsai",
-                "repository_url": ""
+                "repository_url": "",
+                "forked_from": "-"
             })[3],
             "https://github.com/postsai/postsai/commit/[commit]",
             "Github")
@@ -85,6 +86,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "url" : "https://sourceforge.net",
                 "repository" : "/p/arianne/stendhal/",
                 "repository_url": "",
+                "forked_from": "-",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
             "https://sourceforge.net/[repository]/ci/[commit]/",
@@ -95,6 +97,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "url" : "https://sourceforge.net",
                 "repository" : "/p/testsf2/svn/",
                 "repository_url": "",
+                "forked_from": "-",
                 "revision" : "r4"
             })[3],
             "https://sourceforge.net/[repository]/[commit]/",
@@ -105,6 +108,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "url" : "http://localhost/cgi-bin/viewvc.cgi",
                 "repository" : "myrepo",
                 "repository_url": "",
+                "forked_from": "-",
                 "revision" : "1.1"
             })[3],
             "commit.html?repository=[repository]&commit=[commit]",
@@ -115,6 +119,7 @@ class PostsaiDBTests(unittest.TestCase):
                 "url" : "http://localhost",
                 "repository" : "myrepo",
                 "repository_url": "",
+                "forked_from": "-",
                 "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
             "http://localhost/?p=[repository];a=commitdiff;h=[commit]",
@@ -125,7 +130,7 @@ class PostsaiDBTests(unittest.TestCase):
         """test for extra_data_for_key_tables"""
 
         db = PostsaiDB({})
-        row = {"repository": "repo", "url": "http://example.com", "repository_url": "", "revision": "1.1"}
+        row = {"repository": "repo", "url": "http://example.com", "repository_url": "", "forked_from": "-", "revision": "1.1"}
 
         self.assertEqual(
             db.extra_data_for_key_tables(None, "column", row, "value"),
@@ -139,9 +144,9 @@ class PostsaiDBTests(unittest.TestCase):
 
         self.assertEqual(
             db.extra_data_for_key_tables(None, "repository", row, "value"),
-            (["value", "http://example.com/repo", "", "http://example.com/[repository]/[file]?revision=[revision]&view=markup", "commit.html?repository=[repository]&commit=[commit]", "", ""],
-             ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url",
-             ", %s, %s, %s, %s, %s, %s"),
+            (["value", "http://example.com/repo", "", "http://example.com/[repository]/[file]?revision=[revision]&view=markup", "commit.html?repository=[repository]&commit=[commit]", "", "", "-"],
+             ", base_url, repository_url, file_url, commit_url, tracker_url, icon_url, forked_from",
+             ", %s, %s, %s, %s, %s, %s, %s"),
             "Extra data for repository column")
 
 
