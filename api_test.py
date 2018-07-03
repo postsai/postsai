@@ -268,25 +268,27 @@ class PostsaiTests(unittest.TestCase):
 
     def test_extract_commits(self):
         self.assertEqual(api.Postsai.extract_commits([]), [], "empty result")
-        commit1 = ["", "", "", "file 1", "1.1", "", "", "", "", "commitid"]
-        commit2 = ["", "", "", "file 2", "1.2", "", "", "", "", "commitid"]
-        commit3 = ["", "", "", "file 3", "1.3", "", "", "", "", "commitid 2"]
+        commit1 = ["repo", "", "", "file 1", "1.1", "", "", "", "", "commitid"]
+        commit2 = ["repo", "", "", "file 2", "1.2", "", "", "", "", "commitid"]
+        commit3 = ["repo", "", "", "file 3", "1.3", "", "", "", "", "commitid 2"]
+        commit4 = ["repo2", "", "", "file 3", "1.3", "", "", "", "", "commitid 2"]
 
         self.assertEqual(
             api.Postsai.extract_commits([commit1]),
-            [["", "", "", ["file 1"], ["1.1"], "", "", "", "", "commitid"]],
+            [["repo", "", "", ["file 1"], ["1.1"], "", "", "", "", "commitid"]],
             "one row")
 
         self.assertEqual(
             api.Postsai.extract_commits([commit1, commit2]),
-            [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"]],
+            [["repo", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"]],
             "one commit")
 
         self.assertEqual(
-            api.Postsai.extract_commits([commit1, commit2, commit3]),
-            [["", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"],
-             ["", "", "", ["file 3"], ["1.3"], "", "", "", "", "commitid 2"]],
-            "two commits")
+            api.Postsai.extract_commits([commit1, commit2, commit3, commit4]),
+            [["repo", "", "", ["file 1", "file 2"], ["1.1", "1.2"], "", "", "", "", "commitid"],
+             ["repo", "", "", ["file 3"], ["1.3"], "", "", "", "", "commitid 2"],
+             ["repo2", "", "", ["file 3"], ["1.3"], "", "", "", "", "commitid 2"]],
+            "three commits")
 
 
 

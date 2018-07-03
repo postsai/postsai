@@ -175,7 +175,10 @@ class Postsai:
     def are_rows_in_same_commit(data, pre):
         """determines if both database rows belong to the same SCM commit"""
 
-        return data[9] == pre[9] and data[9] != None
+        return (data[0] == pre[0] # repository
+            and data[5] == pre[5] # branch
+            and data[9] == pre[9] # commitids
+            and data[9] != None)
 
 
     @staticmethod
