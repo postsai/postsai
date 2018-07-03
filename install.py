@@ -55,6 +55,11 @@ ui = {
 }
 
 
+def normalize_repository_name(repo):
+    \"""allows to overwrite the repository names\"""
+    return repo
+
+
 def setup_repository(data, base_url, repository_url, file_url, commit_url, tracker_url, icon_url):
     \"""custom rules for repository configuration\"""
     return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)

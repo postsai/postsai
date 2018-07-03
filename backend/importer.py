@@ -72,6 +72,14 @@ class PostsaiImporter:
         return folder, file
 
 
+    def call_normalize_repository_name(self, repo):
+        """let the configuration overwrite repository name"""
+
+        if not "normalize_repository_name" in self.config:
+            return repo
+        return self.config["normalize_repository_name"](repo)
+
+
     def extract_repo_name(self):
         """extracts the name of the repository"""
 
@@ -83,7 +91,8 @@ class PostsaiImporter:
             repo_name = self.data["project"]["path_with_namespace"]
         else:
             repo_name = repo["name"] # notify-webhook
-        return repo_name.strip("/") # sourceforge
+        repo_name = repo_name.strip("/") # sourceforge
+        return self.call_normalize_repository_name(repo_name)
 
 
     def extract_repo_url(self):
