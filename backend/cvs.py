@@ -102,7 +102,7 @@ class PostsaiCommitViewer:
         for file in commit:
             if file[4] == "" or "." not in file[4]:
                 sys.stdout.flush()
-                print("Index: " + file[3] + " deleted\r")
+                print(("Index: " + file[3] + " deleted\r"))
                 sys.stdout.flush()
             else:
                 subprocess.call([
@@ -131,6 +131,6 @@ class PostsaiCommitViewer:
 
         print("\r")
 
-        print("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type))
+        print(("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type)))
         sys.stdout.flush()
         PostsaiCommitViewer.dump_commit_diff(commit)

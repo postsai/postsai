@@ -51,7 +51,7 @@ class Postsai:
         if not "filter" in self.config:
             return ""
 
-        for key, condition_filter in self.config['filter'].items():
+        for key, condition_filter in list(self.config['filter'].items()):
             value = form.getfirst(key, "")
             if value != "":
                 if value.startswith("^") and value.endswith("$"):
@@ -251,4 +251,4 @@ class Postsai:
 
             db.disconnect()
 
-        print(json.dumps(result, default=convert_to_builtin_type))
+        print((json.dumps(result, default=convert_to_builtin_type)))

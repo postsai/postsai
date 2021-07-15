@@ -156,8 +156,8 @@ class PostsaiImporter:
         """Sourceforge includes folders in the file list, but we do not want them"""
 
         result = {}
-        for file_to_test, value in files.items():
-            for file in files.keys():
+        for file_to_test, value in list(files.items()):
+            for file in list(files.keys()):
                 if file.find(file_to_test + "/") == 0:
                     break
             else:
@@ -259,7 +259,7 @@ class PostsaiImporter:
         for commit in self.data['commits']:
             if ("replay" in self.data and self.data["replay"]):
                 timestamp = self.parse_timestamp(commit["timestamp"])
-            for full_path, change_type in self.filter_out_folders(self.extract_files(commit)).items():
+            for full_path, change_type in list(self.filter_out_folders(self.extract_files(commit)).items()):
                 folder, file = self.split_full_path(full_path)
                 row = {
                     "type" : change_type,
