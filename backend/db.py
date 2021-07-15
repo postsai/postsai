@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2018 Postsai
+# Copyright (c) 2016-2021 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -24,7 +24,7 @@ import MySQLdb as mdb
 import datetime
 from os import environ
 
-from cache import Cache
+from backend.cache import Cache
 
 
 class PostsaiDB:

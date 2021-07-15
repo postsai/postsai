@@ -1,7 +1,7 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
 # The MIT License (MIT)
-# Copyright (c) 2016-2017 Postsai
+# Copyright (c) 2016-2021 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -34,8 +34,8 @@ from backend.importer import PostsaiImporter
 
 
 
-if __name__ == '__main__':
-    if environ.has_key('REQUEST_METHOD') and environ['REQUEST_METHOD'] == "POST":
+if __name__ == "__main__":
+    if "REQUEST_METHOD" in environ and environ['REQUEST_METHOD'] == "POST":
         PostsaiImporter(vars(config), json.loads(sys.stdin.read(), strict=False)).import_from_webhook()
     else:
         form = cgi.FieldStorage()

@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # The MIT License (MIT)
-# Copyright (c) 2016-2018 Postsai
+# Copyright (c) 2016-2021 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,6 +22,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 import sys
+import traceback
 import time
 import warnings
 
@@ -114,7 +115,7 @@ def get_write_permission_pattern():
             if not param in self.config["db"]:
                 print("ERR: Missing parameter in \"db\" section of config file.")
                 self.print_config_help_and_exit()
-        print "OK: Found database configuration"
+        print("OK: Found database configuration")
 
 
     def connect(self):
@@ -128,6 +129,7 @@ def get_write_permission_pattern():
         except Exception as err:
             print("ERR: Failed to connect to database \"" + self.config["db"]["database"] + "\":")
             print(err)
+            print(traceback.format_exc());
             sys.exit(1)
 
 
@@ -338,7 +340,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
         """
         print("OK: Starting database structure check and update")
         print("      (Depending on the version and size of the database, ")
-        print("      this may take anything for less than a second to several hours)")
+        print("      this may take anything from less than a second to several hours)")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for sql in structure.split(";"):

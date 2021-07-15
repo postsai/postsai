@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2018 Postsai
+# Copyright (c) 2016-2021 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -24,8 +24,8 @@ import cgi
 import json
 import re
 
-from db import PostsaiDB
-import extension
+from backend.db import PostsaiDB
+from backend import extension
 
 
 def convert_to_builtin_type(obj):
