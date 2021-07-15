@@ -61,9 +61,9 @@ def normalize_repository_name(repo):
     return repo
 
 
-def setup_repository(data, base_url, repository_url, file_url, commit_url, tracker_url, icon_url):
+def setup_repository(data, base_url, repository_url, file_url, commit_url, tracker_url, icon_url, forked_from):
     \"""custom rules for repository configuration\"""
-    return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url)
+    return (base_url, repository_url, file_url, commit_url, tracker_url, icon_url, forked_from)
 
 
 def get_read_permission_pattern():
@@ -256,7 +256,7 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   `removedlines` int(11) NOT NULL,
   `descid` mediumint(9) NOT NULL,
   `commitid` mediumint(9),
-  `importaction` mediumint(9),
+  `importactionid` mediumint(9),
   PRIMARY KEY(`id`),
   UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`),
   KEY `ci_when` (`ci_when`),
