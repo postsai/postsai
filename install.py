@@ -209,8 +209,29 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         if len(cursor.description) <= 14:
             columns_to_add = ""
             if len(cursor.description) < 13:
-                columns_to_add = ", `id` mediumint(9) NOT NULL AUTO_INCREMENT, commitid mediumint(9), key commitid(commitid), PRIMARY KEY(id)"
-            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (importactionid mediumint(9) " + columns_to_add + ")"))
+                columns_to_add = ", `id` bigint NOT NULL AUTO_INCREMENT, commitid bigint, key commitid(commitid), PRIMARY KEY(id)"
+            cursor.execute(self.db.rewrite_sql("ALTER TABLE checkins ADD (importactionid bigint " + columns_to_add + ")"))
+
+
+        cursor.execute(self.db.rewrite_sql("SELECT * FROM tags WHERE 1=0"))
+        if len(cursor.description) <= 5:
+            cursor.execute(self.db.rewrite_sql("ALTER TABLE `tags` ADD (`id` bigint NOT NULL AUTO_INCREMENT, PRIMARY KEY(id))"))
+
+
+        # increase size of id-columns
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `branches` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `importactions` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `descs` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `dirs` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `files` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `people` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `repositories` MODIFY `id` bigint NOT NULL AUTO_INCREMENT;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `tags` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `repositoryid` bigint NOT NULL, MODIFY `branchid` bigint NOT NULL, MODIFY `dirid` bigint NOT NULL, MODIFY `fileid` bigint NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `commitids` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `authorid` bigint NOT NULL, MODIFY `committerid` bigint NOT NULL;"))
+        cursor.execute(self.db.rewrite_sql("ALTER TABLE `checkins` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `whoid` bigint NOT NULL, "
+                                          + "MODIFY `repositoryid` bigint NOT NULL, MODIFY `dirid` bigint NOT NULL, MODIFY `fileid` bigint NOT NULL, "
+                                          + "MODIFY `branchid` bigint NOT NULL, MODIFY `descid` bigint NOT NULL, MODIFY `commitid` bigint, "
+                                          + "MODIFY  `importactionid` bigint;"))
 
         cursor.close()
 
@@ -237,26 +258,26 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         structure = """
 ALTER DATABASE """ + self.config["db"]["database"] + """ CHARSET 'UTF8';
 CREATE TABLE IF NOT EXISTS `branches` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `branch` varchar(254),
   PRIMARY KEY (`id`), UNIQUE KEY `branch` (`branch`)
 );
 CREATE TABLE IF NOT EXISTS `checkins` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `type` enum('Change','Add','Remove') DEFAULT NULL,
   `ci_when`  timestamp NOT NULL DEFAULT current_timestamp,
-  `whoid` mediumint(9) NOT NULL,
-  `repositoryid` mediumint(9) NOT NULL,
-  `dirid` mediumint(9) NOT NULL,
-  `fileid` mediumint(9) NOT NULL,
+  `whoid` bigint NOT NULL,
+  `repositoryid` bigint NOT NULL,
+  `dirid` bigint NOT NULL,
+  `fileid` bigint NOT NULL,
   `revision` char(50) DEFAULT NULL,
   `stickytag` varchar(255) NOT NULL,
-  `branchid` mediumint(9) NOT NULL,
+  `branchid` bigint NOT NULL,
   `addedlines` int(11) NOT NULL,
   `removedlines` int(11) NOT NULL,
-  `descid` mediumint(9) NOT NULL,
-  `commitid` mediumint(9),
-  `importactionid` mediumint(9),
+  `descid` bigint NOT NULL,
+  `commitid` bigint,
+  `importactionid` bigint,
   PRIMARY KEY(`id`),
   UNIQUE KEY `domainid` (`repositoryid`, `branchid`, `dirid`, `fileid`, `revision`),
   KEY `ci_when` (`ci_when`),
@@ -268,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `checkins` (
   KEY `descid` (`descid`)
 );
 CREATE TABLE IF NOT EXISTS `importactions` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `remote_addr` varchar(255),
   `remote_user` varchar(255),
   `sender_addr` varchar(255),
@@ -277,32 +298,32 @@ CREATE TABLE IF NOT EXISTS `importactions` (
   PRIMARY KEY(`id`)
 );
 CREATE TABLE IF NOT EXISTS `descs` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `description` text,
   `hash` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `hash` (`hash`)
 );
 CREATE TABLE IF NOT EXISTS `dirs` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `dir` varchar(254) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `dir` (`dir`)
 );
 CREATE TABLE IF NOT EXISTS `files` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `file` varchar(254) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `file` (`file`)
 );
 CREATE TABLE IF NOT EXISTS `people` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `who` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `who` (`who`)
 );
 CREATE TABLE IF NOT EXISTS `repositories` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `repository` varchar(254) NOT NULL,
   `base_url` varchar(255) DEFAULT NULL,
   `repository_url` varchar(255) DEFAULT NULL,
@@ -315,11 +336,11 @@ CREATE TABLE IF NOT EXISTS `repositories` (
   UNIQUE KEY `repository` (`repository`)
 );
 CREATE TABLE IF NOT EXISTS `tags` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `repositoryid` mediumint(9) NOT NULL,
-  `branchid` mediumint(9) NOT NULL,
-  `dirid` mediumint(9) NOT NULL,
-  `fileid` mediumint(9) NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `repositoryid` bigint NOT NULL,
+  `branchid` bigint NOT NULL,
+  `dirid` bigint NOT NULL,
+  `fileid` bigint NOT NULL,
   `revision` varchar(32) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `repositoryid` (`repositoryid`,`dirid`,`fileid`,`branchid`,`revision`),
@@ -329,11 +350,11 @@ CREATE TABLE IF NOT EXISTS `tags` (
   KEY `branchid` (`branchid`)
 );
 CREATE TABLE IF NOT EXISTS `commitids` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `hash` varchar(60),
   `co_when` timestamp NOT NULL default current_timestamp,
-  `authorid` mediumint(9) NOT NULL,
-  `committerid` mediumint(9) NOT NULL,
+  `authorid` bigint NOT NULL,
+  `committerid` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`)
 )  
