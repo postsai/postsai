@@ -36,7 +36,14 @@ from backend.importer import PostsaiImporter
 
 if __name__ == "__main__":
     if "REQUEST_METHOD" in environ and environ['REQUEST_METHOD'] == "POST":
-        PostsaiImporter(vars(config), json.loads(sys.stdin.read(), strict=False)).import_from_webhook()
+        data = sys.stdin.read()
+        parsed = None
+        try:
+            parsed = json.loads(data, strict=False)
+        except UnicodeDecodeError:
+            data = data.decode("iso-8859-15").encode("utf-8")
+            parsed = json.loads(data, strict=False)
+        PostsaiImporter(vars(config), parsed).import_from_webhook()
     else:
         form = cgi.FieldStorage()
         if form.getfirst("method", "") == "commit":
