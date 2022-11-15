@@ -483,6 +483,11 @@ function initTable() {
 	});
 }
 
+function copyHandler(event) {
+	let text = window.getSelection().toString().replace(/[\u200B-\u200D\uFEFF]/g, '');
+	event.clipboardData.setData('text/plain', text);
+	event.preventDefault();
+}
 
 // export functions
 window["formatAuthor"] = formatAuthor;
@@ -495,6 +500,7 @@ window["formatRepository"] = formatRepository;
 $("ready", function() {
 	window.config = {};
 	addQueryStringToLink();
+	document.querySelector("body").addEventListener("copy", copyHandler);
 	if (document.querySelector("body.page-searchresult")) {
 		renderQueryParameters();
 		initTable();
