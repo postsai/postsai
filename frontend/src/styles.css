@@ -10,7 +10,24 @@ html, body {
 body {
 	margin: 0;
 	font-family: Roboto, "Helvetica Neue", sans-serif;
+	font-size: 14px;
+}
 
-font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-font-size: 14px;
+td, th {
+	border:1px solid #EEE;
+	padding: 8px !important;
+}
+
+td {
+	vertical-align: top;
+}
+
+th {
+	font-weight: bold;
+	font-size: 150% !important;
+}
+
+td ul {
+	margin: 0;
+	padding-left: 1em;
 }
