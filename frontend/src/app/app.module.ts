@@ -13,11 +13,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { NavigationComponent } from './navigation/navigation.component';
+import { ResultComponent } from './result/result.component';
 
 @NgModule({
 	declarations: [
 		AppComponent,
-		NavigationComponent
+		NavigationComponent,
+		ResultComponent
 	],
 	imports: [
 		BrowserModule,
