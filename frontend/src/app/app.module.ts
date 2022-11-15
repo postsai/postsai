@@ -12,9 +12,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
+import { NavigationComponent } from './navigation/navigation.component';
+
 @NgModule({
 	declarations: [
-		AppComponent
+		AppComponent,
+		NavigationComponent
 	],
 	imports: [
 		BrowserModule,
