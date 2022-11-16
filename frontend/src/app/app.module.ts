@@ -15,6 +15,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavigationComponent } from './navigation/navigation.component';
 import { ResultComponent } from './result/result.component';
 import { MatTableResponsiveDirective } from './mat-table-responsive/mat-table-responsive.directive';
+import { QueryParameterPipe } from './queryparameter/queryparameter.pipe';
 
 @NgModule({
 	declarations: [
@@ -22,6 +23,7 @@ import { MatTableResponsiveDirective } from './mat-table-responsive/mat-table-re
 
 		AppComponent,
 		NavigationComponent,
+		QueryParameterPipe,
 		ResultComponent
 	],
 	imports: [

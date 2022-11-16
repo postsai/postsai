@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { mockdata } from './data';
 
 @Component({
@@ -7,8 +8,14 @@ import { mockdata } from './data';
 })
 export class ResultComponent {
 	public data = mockdata;
-
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
+	public queryParameters?: ParamMap;
+
+	constructor(route: ActivatedRoute) {
+		route.queryParamMap.subscribe((map) => {
+			this.queryParameters = map;
+		})
+	}
 	
 	breaks(value?: string) {
 		if (!value) {
