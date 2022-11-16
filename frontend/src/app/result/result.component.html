@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="data.data">
+<table mat-table matTableResponsive [dataSource]="data.data">
 	<ng-container matColumnDef="repository">
 		<th mat-header-cell *matHeaderCellDef> Repository </th>
 		<td mat-cell *matCellDef="let element"> {{breaks(element[0])}} </td>
