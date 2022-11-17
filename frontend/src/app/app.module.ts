@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from '@angular/cdk/layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,6 +17,7 @@ import { NavigationComponent } from './navigation/navigation.component';
 import { ResultComponent } from './result/result.component';
 import { MatTableResponsiveDirective } from './mat-table-responsive/mat-table-responsive.directive';
 import { QueryParameterPipe } from './queryparameter/queryparameter.pipe';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
 	declarations: [
@@ -30,10 +32,12 @@ import { QueryParameterPipe } from './queryparameter/queryparameter.pipe';
 		BrowserModule,
 		AppRoutingModule,
 		BrowserAnimationsModule,
+		FormsModule,
 		LayoutModule,
 		MatButtonModule,
-		MatListModule,
 		MatIconModule,
+		MatInputModule,
+		MatListModule,
 		MatTableModule,
 		MatToolbarModule
 	],

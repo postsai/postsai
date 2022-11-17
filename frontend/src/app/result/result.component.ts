@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { mockdata } from './data';
 
@@ -8,15 +9,22 @@ import { mockdata } from './data';
 })
 export class ResultComponent {
 	public data = mockdata;
+	public dataSource = new MatTableDataSource<any>([]);
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
 	public queryParameters?: ParamMap;
+	public search = '';
 
 	constructor(route: ActivatedRoute) {
 		route.queryParamMap.subscribe((map) => {
 			this.queryParameters = map;
+			this.dataSource = new MatTableDataSource(this.data.data);
 		})
 	}
-	
+
+	applyFilter() {
+		this.dataSource.filter = this.search.trim().toLowerCase();
+	}
+
 	breaks(value?: string) {
 		if (!value) {
 			return value;

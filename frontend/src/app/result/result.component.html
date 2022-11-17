@@ -1,8 +1,14 @@
+<mat-form-field appearance="outline" style="float: right; margin-right:1em">
+<input type="search" matInput placeholder="Search" name= "search" [(ngModel)]= "search" (keyup)="applyFilter()">
+<mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
 <div style="padding: 1em">
 {{queryParameters | queryparameter}}
 </div>
+<div style="clear:both"></div>
 
-<table mat-table matTableResponsive [dataSource]="data.data">
+<table mat-table matTableResponsive [dataSource]="dataSource">
 	<ng-container matColumnDef="repository">
 		<th mat-header-cell *matHeaderCellDef> Repository </th>
 		<td mat-cell *matCellDef="let element"> {{breaks(element[0])}} </td>
