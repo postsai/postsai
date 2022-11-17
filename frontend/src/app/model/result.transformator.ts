@@ -1,3 +1,4 @@
+import { Params } from "@angular/router";
 import { Commit } from "./commit";
 import { FileEntry } from "./fileentry";
 
@@ -6,8 +7,67 @@ export class ResultTransformator {
 	constructor(
 		private config: any,
 		private repositories: any,
-		) {
+	) {
 	}
+
+	private getRepoProp(repository: string, key: string, fallback?: any) {
+		if (!this.repositories) {
+			return fallback;
+		}
+		let repoConfig = this.repositories[repository];
+		if (!repoConfig) {
+			return fallback;
+		}
+		return (repoConfig[key] !== "") ? repoConfig[key] : fallback;
+	}
+
+	private guessSCM(revision: string) {
+		if ((revision === "") || revision.indexOf(".") >= 0) {
+			return "cvs";
+		} else if (revision.length < 40) {
+			return "subversion";
+		}
+		return "git";
+	}
+
+	private entryToProp(entry: any[]) {
+		let scm = this.guessSCM(entry[4][0]);
+		let commit = entry[9];
+		if (!commit) {
+			commit = entry[4][0];
+		}
+		let prop = {
+			"[repository]": entry[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"),
+			"[file]": entry[3],
+			"[revision]": entry[4],
+			"[commit]": commit,
+			"[short_commit]": commit,
+			"[scm]": scm
+		};
+		if (scm === "cvs") {
+			prop["[short_commit]"] = commit.substring(commit.length - 8, commit.length);
+		}
+		if (scm === "git") {
+			prop["[short_commit]"] = commit.substring(0, 8);
+		}
+		return prop;
+	}
+
+	argsubst(str: string, prop: Params) {
+		if (!str) {
+			return str;
+		}
+		for (let key in prop) {
+			if (prop.hasOwnProperty(key)) {
+				let value = prop[key];
+				while (str.indexOf(key) > -1) {
+					str = str.replace(key, value);
+				}
+			}
+		}
+		return str;
+	}
+
 
 	public transform(data: any[][]) {
 		let res: Commit[] = [];
@@ -19,23 +79,66 @@ export class ResultTransformator {
 
 	public transformRow(entry: any[]): Commit {
 		let commit = new Commit();
+		let prop = this.entryToProp(entry);
 		commit.repository = entry[0];
-		// commit.repositoryIcon
+		commit.repositoryIcon = this.getRepoProp(commit.repository, "icon_url");
 		commit.branch = entry[5];
-		commit.when = entry[1];
-		commit.who = entry[2];
-		// commit.avatar
-		commit.files = this.transformFileList(entry[3]);
+		commit.when = entry[1].substring(0, 16);
+		commit.who = this.transformAuthor(entry[2]);
+		// TODO commit.avatar
+		commit.files = this.transformFileList(prop, commit.repository, entry[3], entry[4]);
 		commit.commit = entry[9].substring(0, 8)
-		commit.description = entry[7];
+		commit.commitUrl = this.transformDiffLink(prop, commit.repository, entry[9]);
+		commit.description = this.formatDescription(commit.repository, entry[7]);
+		console.log(commit.description);
 		return commit;
 	}
 
-	private transformFileList(list: string[]) {
+	private transformAuthor(mail: string) {
+		if (this.config.trim_email) {
+			return mail.replace(/@.*/, "");
+		}
+		return mail;
+	}
+
+	private transformFileList(prop: Params, repository: string, list: string[], revisions: string[]) {
+		let url = this.getRepoProp(repository, "file_url");
 		let res: FileEntry[] = [];
-		for (let file of list) {
-			res.push(new FileEntry(file, undefined));
+		for (var i = 0; i < list.length; i++) {
+			let file = list[i];
+			prop['[revision]'] = revisions[i];
+			res.push(new FileEntry(file, this.argsubst(url, prop)));
 		}
 		return res;
+		// TODO	return "<ul class=\"filelist\"><li>" + res.join("<span class=\"hidden\">, </span><li>") + "</ul>";
 	}
+
+	private transformDiffLink(prop: Params, repository: string, revision: string) {
+		if (!revision) {
+			return undefined;
+		}
+		let url = this.getRepoProp(repository, "commit_url");
+		return this.argsubst(url, prop);
+	}
+
+	/**
+	 * formats the description column to link to an issue tracker
+	 */
+	private formatDescription(repository: string, description?: string) {
+		if (!description) {
+			return "-";
+		}
+		let url = this.getRepoProp(repository, "tracker_url", this.config.tracker);
+
+		// HTML escpale 
+		let e = document.createElement("div");
+		e.innerText = description.replace(/([A-Z/_.@])/g, "\u200b$1");
+		let text = e.innerHTML;
+		if (!url) {
+			return text;
+		}
+		return text.replace(/#([0-9]+)/g, '<a href="' + url + '">#$1</a>');
+	}
+
+
 }

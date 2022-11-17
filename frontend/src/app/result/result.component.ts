@@ -40,13 +40,6 @@ export class ResultComponent {
 		return value.toString().replace(/([A-Z/_.@])/g, "\u200b$1");
 	}
 
-	formatTimestamp(value?: string) {
-		if (!value) {
-			return "-";
-		}
-		return value.substring(0, 16);
-	}
-
 	@HostListener('copy', ['$event'])
 	onCopyHandler(event: ClipboardEvent) {
 		let originalText = window.getSelection();

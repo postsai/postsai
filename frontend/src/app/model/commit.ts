@@ -9,6 +9,7 @@ export class Commit {
 	public avatar?: string;
 	public files!: FileEntry[];
 	public commit!: string;
+	public commitUrl?: string;
 	public description!: string;
 
 }
