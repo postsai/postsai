@@ -1,6 +1,8 @@
 import { Component, HostListener } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+import { ResultTransformator } from '../model/result.transformator';
 import { mockdata } from './data';
 
 @Component({
@@ -8,7 +10,8 @@ import { mockdata } from './data';
 	templateUrl: './result.component.html'
 })
 export class ResultComponent {
-	public data = mockdata;
+	public config: { [index:string] : any } = {};
+	public repositories: { [index:string] : any } = {};
 	public dataSource = new MatTableDataSource<any>([]);
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
 	public queryParameters?: ParamMap;
@@ -17,8 +20,13 @@ export class ResultComponent {
 	constructor(route: ActivatedRoute) {
 		route.queryParamMap.subscribe((map) => {
 			this.queryParameters = map;
-			this.dataSource = new MatTableDataSource(this.data.data);
-		})
+			new BehaviorSubject(mockdata).subscribe((response) => {
+				this.config = response.config;
+				this.repositories = response.repositories;
+				let t = new ResultTransformator(response.config, response.repositories);
+				this.dataSource = new MatTableDataSource(t.transform(response.data));
+			});
+		});
 	}
 
 	applyFilter() {

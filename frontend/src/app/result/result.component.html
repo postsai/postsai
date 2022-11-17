@@ -11,37 +11,39 @@
 <table mat-table matTableResponsive [dataSource]="dataSource">
 	<ng-container matColumnDef="repository">
 		<th mat-header-cell *matHeaderCellDef> Repository </th>
-		<td mat-cell *matCellDef="let element"> {{breaks(element[0])}} </td>
+		<td mat-cell *matCellDef="let element">
+			{{breaks(element.repository)}}
+		</td>
 	</ng-container>
 	<ng-container matColumnDef="when">
 		<th mat-header-cell *matHeaderCellDef> When </th>
-		<td mat-cell *matCellDef="let element"> {{formatTimestamp(element[1])}} </td>
+		<td mat-cell *matCellDef="let element"> {{formatTimestamp(element.when)}} </td>
 	</ng-container>
 	<ng-container matColumnDef="who">
 		<th mat-header-cell *matHeaderCellDef> Who </th>
-		<td mat-cell *matCellDef="let element"> {{breaks(element[2])}} </td>
+		<td mat-cell *matCellDef="let element"> {{breaks(element.who)}} </td>
 	</ng-container>
 	<ng-container matColumnDef="file">
 		<th mat-header-cell *matHeaderCellDef> File </th>
 		<td mat-cell *matCellDef="let element">
 			<ul>
-				<li *ngFor="let file of element[3]">
-					{{breaks(file)}}
+				<li *ngFor="let file of element.files">
+					{{breaks(file.filename)}}
 				</li>
 			</ul>
 		</td>
 	</ng-container>
 	<ng-container matColumnDef="commit">
 		<th mat-header-cell *matHeaderCellDef> Commit </th>
-		<td mat-cell *matCellDef="let element"> {{breaks(element[9].substring(0, 8))}} </td>
+		<td mat-cell *matCellDef="let element"> {{breaks(element.commit)}} </td>
 	</ng-container>
 	<ng-container matColumnDef="branch">
 		<th mat-header-cell *matHeaderCellDef> Branch </th>
-		<td mat-cell *matCellDef="let element"> {{breaks(element[5])}} </td>
+		<td mat-cell *matCellDef="let element"> {{breaks(element.branch)}} </td>
 	</ng-container>
 	<ng-container matColumnDef="description">
 		<th mat-header-cell *matHeaderCellDef> Description </th>
-		<td mat-cell *matCellDef="let element"> {{breaks(element[7])}} </td>
+		<td mat-cell *matCellDef="let element"> {{breaks(element.description)}} </td>
 	</ng-container>
 
 	<tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
