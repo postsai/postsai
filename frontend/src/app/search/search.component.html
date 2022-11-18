@@ -1,0 +1,131 @@
+<form class="form-horizontal">
+
+	<div class="form-group">
+		<label for="description" class="col-sm-2 control-label">Description</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['description']" name="description" pattern="...+">
+			<mat-radio-group [(ngModel)]="params['descriptiontype']" name="descriptiontype">
+				<mat-radio-button value="search">Search</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="repository" class="col-sm-2 control-label">Repository</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['repository']" name="repository" list="repositorylist">
+			<datalist id="repositorylist">
+			</datalist>
+			<mat-radio-group [(ngModel)]="params['repositorytype']" name="repositorytype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="branch" class="col-sm-2 control-label">Branch</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['branch']" name="branch">
+			<mat-radio-group [(ngModel)]="params['branchtype']" name="branchtype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="dir" class="col-sm-2 control-label">Directory</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['dir']" name="dir">
+			<mat-radio-group [(ngModel)]="params['dirtype']" name="dirtype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="file" class="col-sm-2 control-label">File</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['file']" name="file">
+			<mat-radio-group [(ngModel)]="params['filetype']" name="filetype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="who" class="col-sm-2 control-label">Who</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['who']" name="who">
+			<mat-radio-group [(ngModel)]="params['whotype']" name="whotype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="commit" class="col-sm-2 control-label">Commit</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" [(ngModel)]="params['commit']" name="commit">
+			<mat-radio-group [(ngModel)]="params['committype']" name="committype">
+				<mat-radio-button value="match">Match</mat-radio-button>
+				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
+				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
+			</mat-radio-group>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label for="datehours" class="col-sm-2 control-label">Date</label>
+		<div class="col-sm-9">
+			<mat-radio-group [(ngModel)]="params['date']" name="date">
+				<div class="radio  form-inline">
+					<mat-radio-button value="hours">
+						In the last <input type="text" id="hours" name="hours" [(ngModel)]="params['hours']"> hours
+					</mat-radio-button>
+				</div>
+				<div class="radio">
+					<mat-radio-button value="day">In the last day</mat-radio-button>
+				</div>
+				<div class="radio">
+					<mat-radio-button value="week">In the last week</mat-radio-button>
+				</div>
+				<div class="radio">
+					<mat-radio-button value="month">In the last month</mat-radio-button>
+				</div>
+				<div class="radio">
+					<mat-radio-button value="all">Since the beginning of time</mat-radio-button>
+				</div>
+				<div class="radio form-inline">
+					<mat-radio-button value="explicit">Between
+					<input type="text" id="mindate" name="mindate" [(ngModel)]="params['mindate']"
+						placeholder="yyyy-mm-dd hh:mm:ss">
+					and <input type="text" id="maxdate" name="maxdate" [(ngModel)]="params['maxdate']"
+						placeholder="yyyy-mm-dd hh:mm:ss">
+					</mat-radio-button>
+				</div>
+			</mat-radio-group>
+		</div>
+	</div>
+
+
+	<div class="form-group">
+		<label for="searchbutton" class="col-sm-2 control-label"></label>
+		<div class="col-sm-offset-2 col-sm-9">
+			<button mat-raised-button color="primary" id="searchbutton" (click)="onSearch($event)">Search</button>
+		</div>
+	</div>
+
+</form>
+
