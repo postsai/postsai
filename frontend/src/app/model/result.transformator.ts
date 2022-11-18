@@ -1,8 +1,11 @@
-import { Params } from "@angular/router";
+const tsmd5 = require("ts-md5/dist/md5");
+
 import { Commit } from "./commit";
 import { FileEntry } from "./fileentry";
 
+
 export class ResultTransformator {
+	private hashCache: Record<string, string> = {};
 
 	constructor(
 		private config: any,
@@ -53,7 +56,7 @@ export class ResultTransformator {
 		return prop;
 	}
 
-	argsubst(str: string, prop: Params) {
+	argsubst(str: string, prop: Record<string, string>) {
 		if (!str) {
 			return str;
 		}
@@ -66,6 +69,16 @@ export class ResultTransformator {
 			}
 		}
 		return str;
+	}
+
+	hashWithCache(input: string) {
+		let hash = this.hashCache[input];
+		if (!hash) {
+			const md5 = new tsmd5.Md5();
+			hash = md5.appendStr(input).end();
+			this.hashCache[input] = hash;
+		}
+		return hash;
 	}
 
 
@@ -85,12 +98,11 @@ export class ResultTransformator {
 		commit.branch = entry[5];
 		commit.when = entry[1].substring(0, 16);
 		commit.who = this.transformAuthor(entry[2]);
-		// TODO commit.avatar
+		commit.avatar = this.transformAvatar(entry[2]);
 		commit.files = this.transformFileList(prop, commit.repository, entry[3], entry[4]);
 		commit.commit = entry[9].substring(0, 8)
 		commit.commitUrl = this.transformDiffLink(prop, commit.repository, entry[9]);
 		commit.description = this.formatDescription(commit.repository, entry[7]);
-		console.log(commit.description);
 		return commit;
 	}
 
@@ -101,7 +113,14 @@ export class ResultTransformator {
 		return mail;
 	}
 
-	private transformFileList(prop: Params, repository: string, list: string[], revisions: string[]) {
+	private transformAvatar(mail: string) {
+		if (!this.config.avatar) {
+			return undefined;
+		}
+		return this.config.avatar + "/avatar/" + this.hashWithCache(mail) + ".jpg?s=20&d=wavatar";
+	}
+
+	private transformFileList(prop: Record<string, string>, repository: string, list: string[], revisions: string[]) {
 		let url = this.getRepoProp(repository, "file_url");
 		let res: FileEntry[] = [];
 		for (var i = 0; i < list.length; i++) {
@@ -113,7 +132,7 @@ export class ResultTransformator {
 		// TODO	return "<ul class=\"filelist\"><li>" + res.join("<span class=\"hidden\">, </span><li>") + "</ul>";
 	}
 
-	private transformDiffLink(prop: Params, repository: string, revision: string) {
+	private transformDiffLink(prop: Record<string, string>, repository: string, revision: string) {
 		if (!revision) {
 			return undefined;
 		}
