@@ -5,13 +5,41 @@ import { BehaviorSubject } from 'rxjs';
 import { ResultTransformator } from '../model/result.transformator';
 import { mockdata } from './data';
 
+
+class DataSource<T> extends MatTableDataSource<T> {
+
+	override filterPredicate: (data: T, filter: string) => boolean = (data: T, filter: string): boolean => {
+		const matchSoftBreakCharacters = /[\u200b-\u200d\ufeff\u00ad]/g
+
+		// Transform the data into a lowercase string of all property values.
+		const dataStr = Object.keys(data as unknown as Record<string, any>)
+			.reduce((currentTerm: string, key: string) => {
+				// Use an obscure Unicode character to delimit the words in the concatenated string.
+				// This avoids matches where the values of two columns combined will match the user's query
+				// (e.g. `Flute` and `Stop` will match `Test`). The character is intended to be something
+				// that has a very low chance of being typed in by somebody in a text field. This one in
+				// particular is "White up-pointing triangle with dot" from
+				// https://en.wikipedia.org/wiki/List_of_Unicode_characters
+				let cellValue = (data as unknown as Record<string, any>)[key] ?? "";
+				return currentTerm + cellValue.replace(matchSoftBreakCharacters, '') + '◬';
+			}, '')
+			.toLowerCase();
+
+		// Transform the filter by converting it to lowercase and removing whitespace.
+		const transformedFilter = filter.trim().toLowerCase().replace(matchSoftBreakCharacters, '');
+
+		return dataStr.indexOf(transformedFilter) != -1;
+	};
+}
+
+
 @Component({
 	selector: 'app-result',
 	templateUrl: './result.component.html'
 })
 export class ResultComponent {
-	public config: { [index:string] : any } = {};
-	public repositories: { [index:string] : any } = {};
+	public config: { [index: string]: any } = {};
+	public repositories: { [index: string]: any } = {};
 	public dataSource = new MatTableDataSource<any>([]);
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
 	public queryParameters?: ParamMap;
@@ -24,7 +52,7 @@ export class ResultComponent {
 				this.config = response.config;
 				this.repositories = response.repositories;
 				let t = new ResultTransformator(response.config, response.repositories);
-				this.dataSource = new MatTableDataSource(t.transform(response.data));
+				this.dataSource = new DataSource(t.transform(response.data));
 			});
 		});
 	}
