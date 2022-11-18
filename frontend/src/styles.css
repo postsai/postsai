@@ -2,6 +2,7 @@
 @import 'assets/styles/roboto.css';
 
 @import 'assets/styles/material-icons.css';
+
 @import 'app/mat-table-responsive/mat-table-responsive.directive.css';
 
 html, body {
@@ -15,7 +16,7 @@ body {
 }
 
 td, th {
-	border:1px solid #EEE;
+	border: 1px solid #EEE;
 	padding: 8px !important;
 }
 
@@ -31,4 +32,44 @@ th {
 td ul {
 	margin: 0;
 	padding-left: 1em;
+}
+
+.searchbox {
+	float: right;
+	margin-right: 1em
+}
+
+table img {
+	vertical-align: middle;
+}
+
+table a {
+	text-decoration: none
+}
+
+form {
+	display: table;
+	border-spacing: 1em;
+}
+
+form>div {
+	display: table-row;
+}
+
+form input.form-control {
+	width: 100%
+}
+
+input#hours {
+	width: 3em;
+}
+
+label.control-label {
+	display: table-cell;
+	text-align: right;
+	font-weight: bold;
+}
+
+.form-group {
+	margin-bottom: 1em;
 }
