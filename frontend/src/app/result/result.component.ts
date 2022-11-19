@@ -20,8 +20,8 @@ class DataSource<T> extends MatTableDataSource<T> {
 				// that has a very low chance of being typed in by somebody in a text field. This one in
 				// particular is "White up-pointing triangle with dot" from
 				// https://en.wikipedia.org/wiki/List_of_Unicode_characters
-				let cellValue = (data as unknown as Record<string, any>)[key] ?? "";
-				return currentTerm + cellValue.replace(matchSoftBreakCharacters, '') + '◬';
+				let cellValue = (data as unknown as Record<string, any>)[key] || '';
+				return currentTerm + cellValue.toString().replace(matchSoftBreakCharacters, '') + '◬';
 			}, '')
 			.toLowerCase();
 
@@ -68,6 +68,28 @@ export class ResultComponent {
 		return value.toString().replace(/([A-Z/_.@])/g, "\u200b$1");
 	}
 
+	forceBreakAfter(value: string|undefined, char: string) {
+		if (!value) {
+			return value;
+		}
+		let pos = value.lastIndexOf(char);
+		if (pos > -1) {
+			return value.substring(0, pos + 1) + "\n" + value.substring(pos + 1);
+		}
+		return value;
+	}
+
+	forceBreakBefore(value: string|undefined, char: string) {
+		if (!value) {
+			return value;
+		}
+		let pos = value.lastIndexOf(char);
+		if (pos > -1) {
+			return value.substring(0, pos) + "\n" + value.substring(pos);
+		}
+		return value;
+	}
+
 	@HostListener('copy', ['$event'])
 	onCopyHandler(event: ClipboardEvent) {
 		let originalText = window.getSelection();
@@ -77,6 +99,5 @@ export class ResultComponent {
 			event.preventDefault();
 		}
 	}
-
 
 }
