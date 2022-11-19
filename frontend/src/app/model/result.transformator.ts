@@ -94,7 +94,7 @@ export class ResultTransformator {
 		let commit = new Commit();
 		let prop = this.entryToProp(entry);
 		commit.repository = entry[0];
-		commit.repositoryIcon = this.getRepoProp(commit.repository, "icon_url");
+		commit.repositoryIcon = this.getRepoProp(commit.repository, "icon_url", this.config.icon_url);
 		commit.branch = entry[5];
 		commit.when = entry[1].substring(0, 16);
 		commit.who = this.transformAuthor(entry[2]);
@@ -129,7 +129,6 @@ export class ResultTransformator {
 			res.push(new FileEntry(file, this.argsubst(url, prop)));
 		}
 		return res;
-		// TODO	return "<ul class=\"filelist\"><li>" + res.join("<span class=\"hidden\">, </span><li>") + "</ul>";
 	}
 
 	private transformDiffLink(prop: Record<string, string>, repository: string, revision: string) {
@@ -158,6 +157,5 @@ export class ResultTransformator {
 		}
 		return text.replace(/#([0-9]+)/g, '<a href="' + url + '">#$1</a>');
 	}
-
 
 }
