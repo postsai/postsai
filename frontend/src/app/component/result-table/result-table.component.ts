@@ -1,6 +1,6 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Commit } from '../model/commit';
+import { Commit } from '../../model/commit';
 
 
 export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {

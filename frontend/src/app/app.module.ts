@@ -14,14 +14,15 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTableResponsiveDirective } from './mat-table-responsive/mat-table-responsive.directive';
+import { MatTableResponsiveDirective } from './component/mat-table-responsive/mat-table-responsive.directive';
+
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { NavigationComponent } from './navigation/navigation.component';
-import { ResultComponent } from './result/result.component';
-import { ResultTableComponent } from './result-table/result-table.component';
-import { QueryParameterPipe } from './queryparameter/queryparameter.pipe';
-import { SearchComponent } from './search/search.component';
+import { NavigationComponent } from './component/navigation/navigation.component';
+import { ResultComponent } from './component/result/result.component';
+import { ResultTableComponent } from './component/result-table/result-table.component';
+import { QueryParameterPipe } from './component/queryparameter/queryparameter.pipe';
+import { SearchComponent } from './component/search/search.component';
 
 @NgModule({
 	declarations: [

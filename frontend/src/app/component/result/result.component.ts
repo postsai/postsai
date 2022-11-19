@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { BehaviorSubject, delay } from 'rxjs';
-import { Commit } from '../model/commit';
-import { ResultTransformator } from '../model/result.transformator';
+import { Commit } from '../../model/commit';
+import { ResultTransformator } from '../../model/result.transformator';
 import { SoftBreakSupportingDataSource } from '../result-table/result-table.component';
 import { mockdata } from './data';
 

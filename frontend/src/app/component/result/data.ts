@@ -39,5 +39,16 @@ export var mockdata = {
 			"f5aab4565b592ef32306c5449fa247a09ed2abc5",
 			""
 		]
-	]
+	],
+	"repositories": {
+		"common/git_test": {
+			"base_url": "https://gitlab.example.com/common/git_test",
+			"commit_url": "http://git.example.com/gitweb/?p=[repository].git;a=commitdiff;h=[commit]",
+			"file_url": "http://git.example.com/gitweb/?p=[repository].git;a=blob;f=[file];hb=[commit]",
+			"icon_url": "../images/common/git_test.png",
+			"id": 219,
+			"repository": "common/git_test",
+			"tracker_url": "https://bugzilla.example.com/hiszilla/show_bug.cgi?id=$1"
+		}
+	}
 };

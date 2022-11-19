@@ -3,7 +3,7 @@
 
 @import 'assets/styles/material-icons.css';
 
-@import 'app/mat-table-responsive/mat-table-responsive.directive.css';
+@import 'app/component/mat-table-responsive/mat-table-responsive.directive.css';
 
 html, body {
 	height: 100%;
