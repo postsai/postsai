@@ -8,7 +8,12 @@
 </div>
 <div style="clear:both"></div>
 
-<app-result-table [dataSource]="dataSource"></app-result-table>
+<p *ngIf="!dataSource" class="wait">
+Please wait while Postai is pondering your request.<br><br><br>
+<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</p>
+
+<app-result-table *ngIf="dataSource" [dataSource]="dataSource"></app-result-table>
 
 <br>
 <div class="footer">Rendered by <a href="https://postsai.github.io">Postsai</a></div>

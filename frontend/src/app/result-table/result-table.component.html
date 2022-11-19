@@ -52,4 +52,8 @@
 
 	<tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
 	<tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></tr>
+	<tr class="mat-row" *matNoDataRow>
+		<td class="mat-cell" colspan="7">No data found.</td>
+	</tr>
+
 </table>

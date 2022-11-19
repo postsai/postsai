@@ -88,3 +88,8 @@ mat-radio-button {
 	margin-top: 0.2em;
 	margin-right: 3em;
 }
+
+.wait {
+	text-align: center;
+	margin: 10em;
+}

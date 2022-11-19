@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, delay } from 'rxjs';
+import { Commit } from '../model/commit';
 import { ResultTransformator } from '../model/result.transformator';
 import { SoftBreakSupportingDataSource } from '../result-table/result-table.component';
 import { mockdata } from './data';
@@ -11,14 +12,14 @@ import { mockdata } from './data';
 	templateUrl: './result.component.html'
 })
 export class ResultComponent {
-	public dataSource = new MatTableDataSource<any>([]);
+	public dataSource?: MatTableDataSource<Commit>;
 	public queryParameters?: ParamMap;
 	public search = '';
 
 	constructor(route: ActivatedRoute) {
 		route.queryParamMap.subscribe((map) => {
 			this.queryParameters = map;
-			new BehaviorSubject(mockdata).subscribe((response) => {
+			new BehaviorSubject(mockdata).pipe(delay(1)).subscribe((response) => {
 				let t = new ResultTransformator(response.config, response.repositories);
 				this.dataSource = new SoftBreakSupportingDataSource(t.transform(response.data));
 			});
@@ -26,7 +27,9 @@ export class ResultComponent {
 	}
 
 	applyFilter() {
-		this.dataSource.filter = this.search.trim().toLowerCase();
+		if (this.dataSource) {
+			this.dataSource.filter = this.search.trim().toLowerCase();
+		}
 	}
 
 }
