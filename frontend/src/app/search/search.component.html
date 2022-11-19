@@ -4,7 +4,7 @@
 		<label for="description" class="col-sm-2 control-label">Description</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['description']" name="description" pattern="...+">
-			<mat-radio-group [(ngModel)]="params['descriptiontype']" name="descriptiontype">
+			<mat-radio-group [(ngModel)]="params['descriptiontype']" name="descriptiontype" color="primary">
 				<mat-radio-button value="search">Search</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -18,7 +18,7 @@
 			<input type="text" class="form-control" [(ngModel)]="params['repository']" name="repository" list="repositorylist">
 			<datalist id="repositorylist">
 			</datalist>
-			<mat-radio-group [(ngModel)]="params['repositorytype']" name="repositorytype">
+			<mat-radio-group [(ngModel)]="params['repositorytype']" name="repositorytype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -30,7 +30,7 @@
 		<label for="branch" class="col-sm-2 control-label">Branch</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['branch']" name="branch">
-			<mat-radio-group [(ngModel)]="params['branchtype']" name="branchtype">
+			<mat-radio-group [(ngModel)]="params['branchtype']" name="branchtype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -42,7 +42,7 @@
 		<label for="dir" class="col-sm-2 control-label">Directory</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['dir']" name="dir">
-			<mat-radio-group [(ngModel)]="params['dirtype']" name="dirtype">
+			<mat-radio-group [(ngModel)]="params['dirtype']" name="dirtype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -54,7 +54,7 @@
 		<label for="file" class="col-sm-2 control-label">File</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['file']" name="file">
-			<mat-radio-group [(ngModel)]="params['filetype']" name="filetype">
+			<mat-radio-group [(ngModel)]="params['filetype']" name="filetype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -66,7 +66,7 @@
 		<label for="who" class="col-sm-2 control-label">Who</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['who']" name="who">
-			<mat-radio-group [(ngModel)]="params['whotype']" name="whotype">
+			<mat-radio-group [(ngModel)]="params['whotype']" name="whotype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -78,7 +78,7 @@
 		<label for="commit" class="col-sm-2 control-label">Commit</label>
 		<div class="col-sm-9">
 			<input type="text" class="form-control" [(ngModel)]="params['commit']" name="commit">
-			<mat-radio-group [(ngModel)]="params['committype']" name="committype">
+			<mat-radio-group [(ngModel)]="params['committype']" name="committype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
 				<mat-radio-button value="notregexp">Not Regular Expression</mat-radio-button>
@@ -89,7 +89,7 @@
 	<div class="form-group">
 		<label for="datehours" class="col-sm-2 control-label">Date</label>
 		<div class="col-sm-9">
-			<mat-radio-group [(ngModel)]="params['date']" name="date">
+			<mat-radio-group [(ngModel)]="params['date']" name="date" color="primary">
 				<div class="radio  form-inline">
 					<mat-radio-button value="hours">
 						In the last <input type="text" id="hours" name="hours" [(ngModel)]="params['hours']"> hours
