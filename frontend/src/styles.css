@@ -93,3 +93,8 @@ mat-radio-button {
 	text-align: center;
 	margin: 10em;
 }
+
+.footer {
+	text-align: right;
+	margin: 1em
+}

@@ -10,6 +10,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule} from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -44,6 +45,7 @@ import { SearchComponent } from './search/search.component';
 		MatIconModule,
 		MatInputModule,
 		MatListModule,
+		MatProgressBarModule,
 		MatRadioModule,
 		MatTableModule,
 		MatToolbarModule,
