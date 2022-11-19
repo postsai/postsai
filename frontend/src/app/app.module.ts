@@ -18,6 +18,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { NavigationComponent } from './navigation/navigation.component';
 import { ResultComponent } from './result/result.component';
+import { ResultTableComponent } from './result-table/result-table.component';
 import { QueryParameterPipe } from './queryparameter/queryparameter.pipe';
 import { SearchComponent } from './search/search.component';
 
@@ -29,7 +30,8 @@ import { SearchComponent } from './search/search.component';
 		NavigationComponent,
 		QueryParameterPipe,
 		SearchComponent,
-		ResultComponent
+		ResultComponent,
+		ResultTableComponent
 	],
 	imports: [
 		BrowserModule,
