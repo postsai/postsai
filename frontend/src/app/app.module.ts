@@ -23,6 +23,7 @@ import { ResultComponent } from './component/result/result.component';
 import { ResultTableComponent } from './component/result-table/result-table.component';
 import { QueryParameterPipe } from './component/queryparameter/queryparameter.pipe';
 import { SearchComponent } from './component/search/search.component';
+import { BackendService } from './service/backend.service';
 
 @NgModule({
 	declarations: [
@@ -52,7 +53,9 @@ import { SearchComponent } from './component/search/search.component';
 		MatToolbarModule,
 		RouterModule
 	],
-	providers: [],
+	providers: [
+		BackendService
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
