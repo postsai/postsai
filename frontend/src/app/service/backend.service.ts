@@ -10,12 +10,18 @@ import { mockdata } from './data';
 
 @Injectable()
 export class BackendService {
-	
+
 	getData(_params: Params) {
-		let subject = new BehaviorSubject<SoftBreakSupportingDataSource<Commit>|undefined>(undefined);
+		let subject = new BehaviorSubject<SoftBreakSupportingDataSource<Commit> | undefined>(undefined);
 		let t = new ResultTransformator(mockdata.config, mockdata.repositories);
 		let dataSource = new SoftBreakSupportingDataSource(t.transform(mockdata.data));
 		subject.next(dataSource);
+		return subject;
+	}
+
+	getRepositoryList() {
+		let subject = new BehaviorSubject<Record<string, Record<string, any>>|undefined>(undefined);
+		subject.next(mockdata.repositories);
 		return subject;
 	}
 }

@@ -15,9 +15,13 @@
 	<div class="form-group">
 		<label for="repository" class="col-sm-2 control-label">Repository</label>
 		<div class="col-sm-9">
-			<input type="text" class="form-control" [(ngModel)]="params['repository']" name="repository" list="repositorylist">
-			<datalist id="repositorylist">
-			</datalist>
+			<input type="text" class="form-control" [(ngModel)]="params['repository']"
+				name="repository" [matAutocomplete]="autocompleteRepository" (ngModelChange)="onRepositoryChange()">
+			<mat-autocomplete #autocompleteRepository="matAutocomplete">
+				<mat-option *ngFor="let repository of filteredRepositories" [value]="repository">
+					{{repository}}
+				</mat-option>
+			</mat-autocomplete>
 			<mat-radio-group [(ngModel)]="params['repositorytype']" name="repositorytype" color="primary">
 				<mat-radio-button value="match">Match</mat-radio-button>
 				<mat-radio-button value="regexp">Regular Expression</mat-radio-button>
@@ -108,12 +112,11 @@
 					<mat-radio-button value="all">Since the beginning of time</mat-radio-button>
 				</div>
 				<div class="radio form-inline">
-					<mat-radio-button value="explicit">Between
+					<mat-radio-button id="between" value="explicit">Between</mat-radio-button>
 					<input type="text" id="mindate" name="mindate" [(ngModel)]="params['mindate']"
 						placeholder="yyyy-mm-dd hh:mm:ss">
 					and <input type="text" id="maxdate" name="maxdate" [(ngModel)]="params['maxdate']"
 						placeholder="yyyy-mm-dd hh:mm:ss">
-					</mat-radio-button>
 				</div>
 			</mat-radio-group>
 		</div>
