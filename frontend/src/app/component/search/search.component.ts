@@ -29,8 +29,8 @@ export class SearchComponent {
 			params['date'] = params['date'] || 'day';
 			this.params = params;
 		});
-		backendService.getRepositoryList().subscribe((repositories) => {
-			this.repositories = Object.keys(repositories!);
+		backendService.getRepositoryList().subscribe((data: any) => {
+			this.repositories = Object.keys(data.repositories);
 		});
 
 	}

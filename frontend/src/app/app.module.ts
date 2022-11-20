@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
 import { LayoutModule } from '@angular/cdk/layout';
 import { RouterModule } from '@angular/router';
 
@@ -37,12 +38,15 @@ import { BackendService } from './service/backend.service';
 		ResultComponent,
 		ResultTableComponent
 	],
+
 	imports: [
 		BrowserModule,
 		AppRoutingModule,
 		BrowserAnimationsModule,
 		FormsModule,
+		HttpClientModule,
 		LayoutModule,
+
 		MatAutocompleteModule,
 		MatButtonModule,
 		MatGridListModule,
@@ -55,9 +59,13 @@ import { BackendService } from './service/backend.service';
 		MatToolbarModule,
 		RouterModule
 	],
+
 	providers: [
 		BackendService
 	],
-	bootstrap: [AppComponent]
+
+	bootstrap: [
+		AppComponent
+	]
 })
 export class AppModule { }

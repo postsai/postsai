@@ -1,0 +1,6 @@
+{
+	"/api.py": {
+		"target": "http://localhost/postsai/api.py",
+		"secure": false
+	}
+}

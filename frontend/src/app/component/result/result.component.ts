@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 
 import { BackendService } from '../../service/backend.service';
 
 import { Commit } from '../../model/commit';
+import { ResultTransformator } from 'src/app/model/result.transformator';
+import { SoftBreakSupportingDataSource } from '../result-table/result-table.component';
 
 @Component({
 	selector: 'app-result',
@@ -12,14 +14,15 @@ import { Commit } from '../../model/commit';
 })
 export class ResultComponent {
 	public dataSource?: MatTableDataSource<Commit>;
-	public queryParameters?: ParamMap;
+	public queryParameters?: Params;
 	public search = '';
 
 	constructor(route: ActivatedRoute, backendService: BackendService) {
-		route.queryParamMap.subscribe((map) => {
+		route.queryParams.subscribe((map) => {
 			this.queryParameters = map;
-			backendService.getData(map).subscribe((dataSource) => {
-				this.dataSource = dataSource
+			backendService.getData(map).subscribe((data: any) => {
+				let t = new ResultTransformator(data.config, data.repositories);
+				this.dataSource = new SoftBreakSupportingDataSource(t.transform(data.data));
 			});
 		});
 	}

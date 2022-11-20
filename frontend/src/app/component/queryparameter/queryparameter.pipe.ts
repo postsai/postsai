@@ -1,12 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ParamMap } from '@angular/router';
+import { Params } from '@angular/router';
 
 @Pipe({
 	name: 'queryparameter',
 })
 export class QueryParameterPipe implements PipeTransform {
 
-	transform(vars?: ParamMap, ..._args: any[]) {
+	transform(vars?: Params, ..._args: any[]) {
 		if (!vars) {
 			return "";
 		}
@@ -19,7 +19,7 @@ export class QueryParameterPipe implements PipeTransform {
 			if (!this.isQueryParameterImportant(vars, key)) {
 				continue;
 			}
-			let value = vars.get(key);
+			let value = vars[key];
 			if (!value) {
 				continue;
 			}
@@ -27,7 +27,7 @@ export class QueryParameterPipe implements PipeTransform {
 				text = text + ", ";
 				title = title + ", ";
 			}
-			let type = vars.get(key + "type");
+			let type = vars[key + "type"];
 			let operator = this.typeToOperator(type);
 			text = text + params[i].replace("_", " ") + ": " + operator + " " + value;
 			title = title + operator + " " + value;
@@ -40,11 +40,11 @@ export class QueryParameterPipe implements PipeTransform {
 	/**
 	 * Is this a primary paramter or a sub-paramter of a selected parent?
 	 */
-	isQueryParameterImportant(vars: ParamMap, key: string) {
+	isQueryParameterImportant(vars: Params, key: string) {
 		if (key === "hours") {
-			return (vars.get("date") === "hours");
+			return (vars["date"] === "hours");
 		} else if (key === "mindate" || key === "maxdate") {
-			return (vars.get("date") === "explicit");
+			return (vars["date"] === "explicit");
 		}
 		return true;
 	}
