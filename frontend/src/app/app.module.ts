@@ -12,6 +12,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule} from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
+import { MatPaginatorModule } from '@angular/material/paginator'; 
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatTableModule } from '@angular/material/table';
@@ -53,6 +54,7 @@ import { BackendService } from './service/backend.service';
 		MatIconModule,
 		MatInputModule,
 		MatListModule,
+		MatPaginatorModule,
 		MatProgressBarModule,
 		MatRadioModule,
 		MatTableModule,

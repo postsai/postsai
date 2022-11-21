@@ -1,4 +1,4 @@
-<table mat-table matTableResponsive [dataSource]="dataSource">
+<table mat-table matTableResponsive [dataSource]="_dataSource">
 	<ng-container matColumnDef="repository">
 		<th mat-header-cell *matHeaderCellDef>Repository</th>
 		<td mat-cell *matCellDef="let element">
@@ -57,3 +57,7 @@
 	</tr>
 
 </table>
+
+<mat-paginator #paginator [pageSize]="10000" [pageSizeOptions]="[10000, 100000]"
+	showFirstLastButtons aria-label="Select page">
+</mat-paginator>

@@ -1,4 +1,5 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Commit } from '../../model/commit';
 
@@ -35,8 +36,24 @@ export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {
 	templateUrl: './result-table.component.html'
 })
 export class ResultTableComponent {
-	@Input() public dataSource = new MatTableDataSource<Commit>([]);
+	@Input() public _dataSource = new MatTableDataSource<Commit>([]);
+
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
+
+	@ViewChild(MatPaginator) paginator!: MatPaginator;
+
+	@Input() set dataSource(dataSource: MatTableDataSource<Commit>) {
+		if (dataSource) {
+			dataSource.paginator=this.paginator;
+		}
+		this._dataSource = dataSource;
+	}
+
+	ngAfterViewInit() {
+		if (this._dataSource) {
+			this._dataSource.paginator=this.paginator;
+		}
+	}
 
 	breaks(value?: string) {
 		if (!value) {
@@ -78,3 +95,4 @@ export class ResultTableComponent {
 	}
 
 }
+
