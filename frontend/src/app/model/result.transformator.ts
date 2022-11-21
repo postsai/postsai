@@ -40,18 +40,18 @@ export class ResultTransformator {
 			commit = entry[4][0];
 		}
 		let prop = {
-			"[repository]": entry[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"),
-			"[file]": entry[3],
-			"[revision]": entry[4],
-			"[commit]": commit,
-			"[short_commit]": commit,
-			"[scm]": scm
+			"repository": entry[0].replace("/srv/cvs/", "").replace("/var/lib/cvs/"),
+			"file": entry[3],
+			"revision": entry[4],
+			"commit": commit,
+			"short_commit": commit,
+			"scm": scm
 		};
 		if (scm === "cvs") {
-			prop["[short_commit]"] = commit.substring(commit.length - 8, commit.length);
+			prop["short_commit"] = commit.substring(commit.length - 8, commit.length);
 		}
 		if (scm === "git") {
-			prop["[short_commit]"] = commit.substring(0, 8);
+			prop["short_commit"] = commit.substring(0, 8);
 		}
 		return prop;
 	}
@@ -60,15 +60,24 @@ export class ResultTransformator {
 		if (!str) {
 			return str;
 		}
-		for (let key in prop) {
-			if (prop.hasOwnProperty(key)) {
-				let value = prop[key];
-				while (str.indexOf(key) > -1) {
-					str = str.replace(key, value);
-				}
-			}
+		let posOpen = str.indexOf('[');
+		let posClose = -1;
+		if (posOpen < 0) {
+			return str;
 		}
-		return str;
+		let res = '';
+		while (posOpen > - 1) {
+			res = res + str.substring(posClose + 1, posOpen);
+			posClose = str.indexOf(']', posOpen);
+			if (posClose < 0) {
+				return res + str.substring(posOpen);
+			}
+			let key = str.substring(posOpen + 1, posClose);
+			res = res + prop[key];
+			posOpen = str.indexOf('[', posClose);
+		}
+		res = res + str.substring(posClose + 1);
+		return res;
 	}
 
 	hashWithCache(input: string) {
@@ -94,7 +103,7 @@ export class ResultTransformator {
 		let commit = new Commit();
 		let prop = this.entryToProp(entry);
 		commit.repository = entry[0];
-		commit.repositoryIcon = this.getRepoProp(commit.repository, "icon_url", this.config.icon_url);
+		commit.repositoryIcon = this.transformRepositoryIcon(prop, commit.repository);
 		commit.branch = entry[5];
 		commit.when = entry[1].substring(0, 16);
 		commit.who = this.transformAuthor(entry[2]);
@@ -104,6 +113,11 @@ export class ResultTransformator {
 		commit.commitUrl = this.transformDiffLink(prop, commit.repository, entry[9]);
 		commit.description = this.formatDescription(commit.repository, entry[7]);
 		return commit;
+	}
+
+	private transformRepositoryIcon(prop: Record<string, string>, repository: string) {
+		let iconUrl = this.getRepoProp(repository, "icon_url", this.config.icon_url);
+		return this.argsubst(iconUrl, prop);
 	}
 
 	private transformAuthor(mail: string) {
@@ -125,7 +139,8 @@ export class ResultTransformator {
 		let res: FileEntry[] = [];
 		for (var i = 0; i < list.length; i++) {
 			let file = list[i];
-			prop['[revision]'] = revisions[i];
+			prop['file'] = file;
+			prop['revision'] = revisions[i];
 			res.push(new FileEntry(file, this.argsubst(url, prop)));
 		}
 		return res;
