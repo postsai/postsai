@@ -32,7 +32,7 @@
   }
   .mat-table[matTableResponsive] .mat-row td.mat-cell:not(.mat-column-actions) {
     display: grid;
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 30% 70%;
     padding: 0.5rem;
     text-align: left;
     word-break: break-word;
