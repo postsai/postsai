@@ -13,6 +13,7 @@ import { SoftBreakSupportingDataSource } from '../result-table/result-table.comp
 	templateUrl: './result.component.html'
 })
 export class ResultComponent {
+	public config: Record<string, any> = {};
 	public dataSource?: MatTableDataSource<Commit>;
 	public queryParameters?: Params;
 	public search = '';
@@ -23,6 +24,7 @@ export class ResultComponent {
 			backendService.getData(map).subscribe((data: any) => {
 				let t = new ResultTransformator(data.config, data.repositories);
 				this.dataSource = new SoftBreakSupportingDataSource(t.transform(data.data));
+				this.config = data.config;
 			});
 		});
 	}

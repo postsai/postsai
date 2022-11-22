@@ -47,8 +47,11 @@ td ul {
 }
 
 table img {
-	margin-top: 0.5em;
 	float: left
+}
+
+img.multiline {
+	margin-top: 0.5em;
 }
 
 table a {

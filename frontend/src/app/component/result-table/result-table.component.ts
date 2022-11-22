@@ -36,6 +36,7 @@ export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {
 	templateUrl: './result-table.component.html'
 })
 export class ResultTableComponent {
+	@Input() public config: Record<string, any> = {};
 	@Input() public _dataSource = new MatTableDataSource<Commit>([]);
 
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
