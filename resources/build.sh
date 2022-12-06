@@ -2,25 +2,33 @@
 
 cd `dirname $0`/..
 
+# Prepare target directory
 rm -rf dist
 mkdir -p dist/postsai
+mkdir dist/postsai/resources
 
-cp -ax *.html *.js *.md *.py *.txt resources                                                              dist/postsai
-cp --parents backend/*.py extensions/__init__.py                                                          dist/postsai
-cp --parents node_modules/bootstrap/dist/css/bootstrap.min.css node_modules/bootstrap/dist/js/bootstrap.min.js                    dist/postsai
-cp --parents node_modules/bootstrap/dist/fonts/* node_modules/bootstrap/LICENSE                           dist/postsai
-cp --parents node_modules/bootstrap-table/dist/bootstrap-table.min.css node_modules/bootstrap-table/dist/bootstrap-table.min.js   dist/postsai
-cp --parents node_modules/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js            dist/postsai
-cp --parents node_modules/bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js            dist/postsai
-cp --parents node_modules/bootstrap-table/LICENSE                                                         dist/postsai
-cp --parents node_modules/highlightjs/styles/default.css node_modules/highlightjs/highlight.pack.min.js node_modules/highlightjs/LICENSE   dist/postsai
-cp --parents node_modules/jquery/dist/jquery.min.js node_modules/jquery/LICENSE.txt                       dist/postsai
-cp --parents node_modules/js-md5/build/md5.min.js   node_modules/js-md5/LICENSE.txt                       dist/postsai
-cp --parents node_modules/sw-toolbox/sw-toolbox.js  node_modules/sw-toolbox/LICENSE                       dist/postsai
-cp --parents node_modules/tableexport.jquery.plugin/tableExport.min.js                                    dist/postsai
+# Copy resources
+cp -ax *.md *.py *.txt resources                  dist/postsai
+
+# Angular build
+cd frontend
+rm -rf dist
+ng build
+cd ..
+
+# Move and post-process angular build
+mv frontend/dist/frontend/* dist/postsai/resources/
+rm -rf dist/postsai/resources/assets/fonts
+
+sed 's|src="|src="resources/|g' < dist/postsai/resources/index.html | sed 's|href="|href="resources/|g' | sed 's|url(|url(resources/|g' | sed 's|<base href="resources//">|<base href=".">|' | sed 's|resources/resources|resources|' > dist/postsai/index.html
+cp dist/postsai/index.html dist/postsai/query.html 
+cp dist/postsai/index.html dist/postsai/search.html
+
+# Copy backend
+cp --parents backend/*.py extensions/__init__.py  dist/postsai
 rm dist/postsai/config.py*
+
+# Create .zip file
 cd dist
 zip -r postsai-$npm_package_version.zip postsai
-
-
 

@@ -1,0 +1,143 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'assets/styles/roboto.css';
+
+@import 'assets/styles/material-icons.css';
+
+@import 'app/component/mat-table-responsive/mat-table-responsive.directive.css';
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: Roboto, "Helvetica Neue", sans-serif;
+	font-size: 16px;
+}
+
+/* Search Result */
+
+.wait {
+	text-align: center;
+	margin: 10em;
+}
+
+td, th {
+	border: 1px solid #EEE;
+	padding: 8px !important;
+}
+
+td {
+	vertical-align: top;
+}
+
+th {
+	font-weight: bold;
+	font-size: 150% !important;
+}
+
+td ul {
+	margin: 0;
+	padding-left: 1em;
+}
+
+.floatright {
+	float: right;
+	margin-right: 1em
+}
+
+.floatright mat-checkbox {
+	margin-right: 1em;
+}
+
+table img {
+	float: left
+}
+
+img.multiline {
+	margin-top: 0.5em;
+}
+
+table a {
+	text-decoration: none
+}
+
+div.preformatted {
+	white-space: pre-wrap;
+}
+
+img + div.preformatted {
+	margin-left: 25px;
+}
+
+.mat-cell, .mat-footer-cell {
+	font-size: unset;
+}
+
+/* Search Form */
+
+form {
+	display: table;
+	border-spacing: 1em;
+	margin-left: 2em;
+}
+
+form>div {
+	display: table-row;
+}
+
+form .mat-radio-label {
+	white-space: unset;
+}
+
+form input.form-control {
+	width: 100%;
+	height: 1.5em;
+}
+
+.mat-option {
+	font-size: unset;
+	height: 2em;
+}
+
+input#hours {
+	width: 3em;
+}
+
+input#mindate, input#maxdate {
+	width: 11em;
+}
+
+label.control-label {
+	display: table-cell;
+	text-align: right;
+	font-weight: bold;
+}
+
+.form-group {
+	margin-bottom: 2em;
+}
+
+mat-radio-button {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-right: 3em;
+}
+
+mat-radio-button#between {
+	margin-right: 0.5em;
+}
+
+/* Footer */
+
+.footer {
+	text-align: right;
+	margin: 1em
+}
+
+
+@media (max-width: 768px) {
+	form {
+		margin-left: 0;
+	}
+}

@@ -1,0 +1,25 @@
+<div class="floatright">
+	<mat-checkbox color="primary" [(ngModel)]="includeForks"
+		(change)="onIncludeForksChange()">Include Forks</mat-checkbox>
+
+	<mat-form-field appearance="outline" class="searchbox">
+	<input type="search" matInput placeholder="Search" name= "search" [(ngModel)]= "search" (keyup)="applyFilter()">
+	<mat-icon matSuffix>search</mat-icon>
+	</mat-form-field>
+</div>
+
+<div style="padding: 1em">
+{{queryParameters | queryparameter}}
+</div>
+<div style="clear:both"></div>
+
+<p *ngIf="!dataSource && !error" class="wait">
+Please wait while Postai is pondering your request.<br><br><br>
+<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</p>
+
+<p *ngIf="error" class="error">
+Error: Backend is not responding.
+</p>
+
+<app-result-table *ngIf="dataSource" [dataSource]="dataSource" [config]="config"></app-result-table>

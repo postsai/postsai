@@ -1,6 +1,6 @@
 {
   "name": "postsai",
-  "version": "0.9.9",
+  "version": "1.9.0",
   "description": "The Commit Database",
   "scripts": {
     "test": "npm run test:server",
@@ -27,12 +27,5 @@
   },
   "homepage": "https://github.com/postsai/postsai#readme",
   "dependencies": {
-    "bootstrap": "^3.3.7",
-    "bootstrap-table": "^1.11.2 ",
-    "highlightjs": "^9.8.0",
-    "jquery": "^3.1.1",
-    "js-md5": "^0.4.2",
-    "sw-toolbox": "^3.6.0",
-    "tableexport.jquery.plugin": "git+https://github.com/hhurz/tableExport.jquery.plugin.git#v1.7.1"
   }
 }
