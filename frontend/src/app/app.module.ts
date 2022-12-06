@@ -8,6 +8,7 @@ import { RouterModule } from '@angular/router';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox'; 
 import { MatGridListModule } from '@angular/material/grid-list'; 
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule} from '@angular/material/input';
@@ -50,6 +51,7 @@ import { BackendService } from './service/backend.service';
 
 		MatAutocompleteModule,
 		MatButtonModule,
+		MatCheckboxModule,
 		MatGridListModule,
 		MatIconModule,
 		MatInputModule,

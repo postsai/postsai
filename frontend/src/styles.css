@@ -41,9 +41,13 @@ td ul {
 	padding-left: 1em;
 }
 
-.searchbox {
+.floatright {
 	float: right;
 	margin-right: 1em
+}
+
+.floatright mat-checkbox {
+	margin-right: 1em;
 }
 
 table img {

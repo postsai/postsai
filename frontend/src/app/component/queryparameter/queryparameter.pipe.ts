@@ -11,7 +11,7 @@ export class QueryParameterPipe implements PipeTransform {
 			return "";
 		}
 
-		let params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Forked_from", "Date", "Hours", "MinDate", "MaxDate"];
+		let params = ["Repository", "Branch", "When", "Who", "Dir", "File", "Rev", "Description", "Commit", "Date", "Hours", "MinDate", "MaxDate"];
 		let text = "";
 		let title = "";
 		for (let i = 0; i < params.length; i++) {
