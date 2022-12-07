@@ -31,12 +31,12 @@ class PostsaiDB:
     """Database access for postsai"""
 
     column_table_mapping = {
-        "repository" : "repositories",
-        "who" : "people",
-        "dir" : "dirs",
-        "file" : "files",
-        "branch" : "branches",
-        "description" : "descs",
+        "repository": "repositories",
+        "who": "people",
+        "dir": "dirs",
+        "file": "files",
+        "branch": "branches",
+        "description": "descs",
         "hash": "commitids"
     }
 
@@ -51,13 +51,13 @@ class PostsaiDB:
         """connects to the database"""
 
         self.conn = mdb.connect(
-            host    = self.config["db"]["host"],
-            user    = self.config["db"]["user"],
-            passwd  = self.config["db"]["password"],
-            db      = self.config["db"]["database"],
-            port    = self.config["db"].get("port", 3306),
-            use_unicode = True,
-            charset = "utf8")
+            host=self.config["db"]["host"],
+            user=self.config["db"]["user"],
+            passwd=self.config["db"]["password"],
+            db=self.config["db"]["database"],
+            port=self.config["db"].get("port", 3306),
+            use_unicode=True,
+            charset="utf8")
 
         # checks whether this is a ViewVC database instead of a Bonsai database
         cursor = self.conn.cursor()
@@ -130,7 +130,7 @@ class PostsaiDB:
             if row["revision"].find(".") == -1 and len(row["revision"]) < 30:  # Subversion
                 commit_url = "https://sourceforge.net/[repository]/[commit]/"
                 file_url = "https://sourceforge.net/[repository]/[commit]/tree/[file]"
-            else: # CVS, Git
+            else:  # CVS, Git
                 commit_url = "https://sourceforge.net/[repository]/ci/[commit]/"
                 file_url = "https://sourceforge.net/[repository]/ci/[revision]/tree/[file]"
             icon_url = "https://a.fsdn.com/allura/[repository]/../icon"
@@ -141,7 +141,7 @@ class PostsaiDB:
             file_url = base + "/[repository]/[file]?revision=[revision]&view=markup"
 
         # Git
-        else: # git instaweb
+        else:  # git instaweb
             commit_url = base + "/?p=[repository];a=commitdiff;h=[commit]"
             file_url = base + "/?p=[repository];a=blob;f=[file];hb=[commit]"
 
@@ -151,7 +151,7 @@ class PostsaiDB:
     def call_setup_repository(self, row, guess):
         """let the configruation overwrite guessed repository info"""
 
-        if not "setup_repository" in self.config:
+        if "setup_repository" not in self.config:
             return guess
         return self.config["setup_repository"](row, *guess)
 
@@ -211,7 +211,7 @@ class PostsaiDB:
         sql = """INSERT INTO importactions (remote_addr, remote_user, sender_addr, sender_user, ia_when) VALUES (%s, %s, %s, %s, %s)"""
         cursor.execute(sql, [
             environ.get("REMOTE_ADDR", ""), environ.get("REMOTE_USER", ""),
-            head["sender_addr"],head["sender_user"],
+            head["sender_addr"], head["sender_user"],
             datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         ])
         importactionid = cursor.lastrowid
@@ -238,7 +238,7 @@ class PostsaiDB:
                 "",
                 self.cache.get("hash", row["commitid"]),
                 str(importactionid)
-                ])
+            ])
 
         cursor.close()
         self.disconnect()

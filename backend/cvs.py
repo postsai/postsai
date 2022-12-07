@@ -52,7 +52,7 @@ class PostsaiCommitViewer:
         sql = """SELECT repositories.repository, checkins.ci_when, people.who,
             trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
             revision, descs.description, commitids.hash, commitids.co_when, repository_url
-            FROM checkins 
+            FROM checkins
             JOIN descs ON checkins.descid = descs.id
             JOIN dirs ON checkins.dirid = dirs.id
             JOIN files ON checkins.fileid = files.id

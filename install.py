@@ -28,6 +28,7 @@ import warnings
 
 import backend.extension
 
+
 class PostsaiInstaller:
     """Installer for Postsai"""
 
@@ -38,7 +39,7 @@ class PostsaiInstaller:
         """prints a stub configuration to stdout file and exist the installer"""
 
         help_config_file = """
-    Please create a file called config.py with this content an run install.py again: 
+    Please create a file called config.py with this content an run install.py again:
 
 import os
 
@@ -50,7 +51,7 @@ db = {
 }
 
 ui = {
-    # "service_worker": False, # disable, if you use HTTP Basic Auth   
+    # "service_worker": False, # disable, if you use HTTP Basic Auth
     "avatar" : "https://gravatar.com",
     "trim_email" : True
 }
@@ -107,12 +108,12 @@ def get_write_permission_pattern():
            If there is no complete database configuration, we print out a sample
            configuration file to stdout before we exit the installer"""
 
-        if not "db" in self.config:
+        if "db" not in self.config:
             print("ERR: Missing parameter \"db\" in config file.")
             self.print_config_help_and_exit()
 
         for param in ["host", "user", "password", "database"]:
-            if not param in self.config["db"]:
+            if param not in self.config["db"]:
                 print("ERR: Missing parameter in \"db\" section of config file.")
                 self.print_config_help_and_exit()
         print("OK: Found database configuration")
@@ -129,7 +130,7 @@ def get_write_permission_pattern():
         except Exception as err:
             print("ERR: Failed to connect to database \"" + self.config["db"]["database"] + "\":")
             print(err)
-            print(traceback.format_exc());
+            print(traceback.format_exc())
             sys.exit(1)
 
 
@@ -146,14 +147,14 @@ def get_write_permission_pattern():
         """Converts all database tables to InnoDB"""
 
         sql = "ALTER TABLE `dirs` MODIFY COLUMN `dir` VARCHAR(254)"
-        rows = self.db.query(sql, []);
+        rows = self.db.query(sql, [])
 
         sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND ENGINE = 'MyISAM'"
         data = [self.config["db"]["database"]]
-        rows = self.db.query(sql, data);
+        rows = self.db.query(sql, data)
         data = []
         for row in rows:
-            self.db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data);
+            self.db.query("ALTER TABLE " + row[0] + " ENGINE=INNODB", data)
 
 
     def convert_to_utf8(self):
@@ -164,17 +165,17 @@ FROM information_schema.tables, information_schema.collation_character_set_appli
 WHERE collation_character_set_applicability.collation_name = tables.table_collation
 AND table_schema = %s AND character_set_name != 'utf8'"""
         data = [self.config["db"]["database"]]
-        tables = self.db.query(query, data);
+        tables = self.db.query(query, data)
 
         for table in tables:
-            self.db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", []);
+            self.db.query("ALTER TABLE " + table[0] + "  CONVERT TO CHARSET 'UTF8' COLLATE utf8_bin", [])
             cursor = self.db.conn.cursor()
             cursor.execute("SELECT * FROM " + table[0] + " WHERE 1=0")
             for column in cursor.description:
                 if column[1] >= 252:
                     try:
                         cursor.execute("update " + table[0] + " set " + column[0] + " = @txt where char_length(" + column[0] + ") = length(@txt := convert(binary convert(" + column[0] + " using latin1) using utf8));")
-                    except:
+                    except:  # noqa: E722
                         pass
             cursor.close()
 
@@ -229,9 +230,9 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         cursor.execute(self.db.rewrite_sql("ALTER TABLE `tags` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `repositoryid` bigint NOT NULL, MODIFY `branchid` bigint NOT NULL, MODIFY `dirid` bigint NOT NULL, MODIFY `fileid` bigint NOT NULL;"))
         cursor.execute(self.db.rewrite_sql("ALTER TABLE `commitids` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `authorid` bigint NOT NULL, MODIFY `committerid` bigint NOT NULL;"))
         cursor.execute(self.db.rewrite_sql("ALTER TABLE `checkins` MODIFY `id` bigint NOT NULL AUTO_INCREMENT, MODIFY `whoid` bigint NOT NULL, "
-                                          + "MODIFY `repositoryid` bigint NOT NULL, MODIFY `dirid` bigint NOT NULL, MODIFY `fileid` bigint NOT NULL, "
-                                          + "MODIFY `branchid` bigint NOT NULL, MODIFY `descid` bigint NOT NULL, MODIFY `commitid` bigint, "
-                                          + "MODIFY  `importactionid` bigint;"))
+                                           + "MODIFY `repositoryid` bigint NOT NULL, MODIFY `dirid` bigint NOT NULL, MODIFY `fileid` bigint NOT NULL, "
+                                           + "MODIFY `branchid` bigint NOT NULL, MODIFY `descid` bigint NOT NULL, MODIFY `commitid` bigint, "
+                                           + "MODIFY  `importactionid` bigint;"))
 
         cursor.close()
 
@@ -248,7 +249,7 @@ AND table_schema = %s AND character_set_name != 'utf8'"""
         if not self.has_index("descs", "i_description"):
             try:
                 self.db.query("CREATE FULLTEXT INDEX `i_description` ON `descs` (`description`)", [])
-            except:
+            except:  # noqa: E722
                 print("WARN: Could not create fulltext index. MySQL version >= 5.6 required.")
 
 
@@ -357,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
   `committerid` bigint NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `hash` (`hash`)
-)  
+)
         """
         print("OK: Starting database structure check and update")
         print("      (Depending on the version and size of the database, ")
@@ -380,7 +381,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
     def are_rows_in_same_commit(row, last_row):
         """checks whether the modifications belong to the same commit"""
 
-        #id, ci_when, whoid, repositoryid, branchid, descid
+        # id, ci_when, whoid, repositoryid, branchid, descid
         for i in range(2, 6):
             if (row[i] != last_row[i]):
                 return False
@@ -390,7 +391,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
     def synthesize_cvs_commit_ids(self):
         """generates cvs commitid for checkins without one"""
 
-        rows = self.db.query(self.db.rewrite_sql("SELECT count(*) FROM checkins WHERE commitid IS NULL"), []);
+        rows = self.db.query(self.db.rewrite_sql("SELECT count(*) FROM checkins WHERE commitid IS NULL"), [])
         count = rows[0][0]
         if (count == 0):
             return
@@ -416,7 +417,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
             self.db.conn.commit()
             self.db.conn.begin()
             print("    Updated " + str(i) + " / " + str(count))
-            rows = self.db.query(select, []);
+            rows = self.db.query(select, [])
         cursor.close()
         self.db.conn.commit()
         print("OK: Converted CVS legacy entries")

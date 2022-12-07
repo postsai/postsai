@@ -50,4 +50,3 @@ if __name__ == "__main__":
             PostsaiCommitViewer(vars(config)).process()
         else:
             Postsai(vars(config)).process()
-

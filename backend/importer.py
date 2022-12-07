@@ -42,10 +42,10 @@ class PostsaiImporter:
         if len(t) <= 19:
             return t
 
-        parsed = datetime.datetime.strptime(t[0:19],'%Y-%m-%dT%H:%M:%S')
-        if t[19]=='+':
+        parsed = datetime.datetime.strptime(t[0:19], '%Y-%m-%dT%H:%M:%S')
+        if t[19] == '+':
             parsed -= datetime.timedelta(hours=int(t[20:22]))
-        elif t[19]=='-':
+        elif t[19] == '-':
             parsed += datetime.timedelta(hours=int(t[20:22]))
         return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
 
@@ -54,10 +54,10 @@ class PostsaiImporter:
     def check_permission(self, repo_name):
         """checks writes write permissions"""
 
-        if not "get_write_permission_pattern" in self.config:
+        if "get_write_permission_pattern" not in self.config:
             return True
         regex = self.config["get_write_permission_pattern"]()
-        return not re.match(regex, repo_name) == None
+        return not re.match(regex, repo_name) is None
 
 
     @staticmethod
@@ -68,14 +68,14 @@ class PostsaiImporter:
         folder = ""
         if (sep > -1):
             folder = full_path[0:sep]
-        file = full_path[sep+1:]
+        file = full_path[sep + 1:]
         return folder, file
 
 
     def call_normalize_repository_name(self, repo):
         """let the configuration overwrite repository name"""
 
-        if not "normalize_repository_name" in self.config:
+        if "normalize_repository_name" not in self.config:
             return repo
         return self.config["normalize_repository_name"](repo)
 
@@ -87,11 +87,11 @@ class PostsaiImporter:
 
         if "full_name" in repo:  # github, sourceforge
             repo_name = repo["full_name"]
-        elif "project" in self.data and "path_with_namespace" in self.data["project"]: # gitlab
+        elif "project" in self.data and "path_with_namespace" in self.data["project"]:  # gitlab
             repo_name = self.data["project"]["path_with_namespace"]
         else:
-            repo_name = repo["name"] # notify-webhook
-        repo_name = repo_name.strip("/") # sourceforge
+            repo_name = repo["name"]  # notify-webhook
+        repo_name = repo_name.strip("/")  # sourceforge
         return self.call_normalize_repository_name(repo_name)
 
 
@@ -103,9 +103,9 @@ class PostsaiImporter:
 
         if "clone_url" in repo:  # github
             repository_url = repo["clone_url"]
-        elif "git_ssh_url" in repo: # gitlab
+        elif "git_ssh_url" in repo:  # gitlab
             repository_url = repo["git_ssh_url"]
-        elif "url" in repo: # sourceforge, notify-cvs-webhook
+        elif "url" in repo:  # sourceforge, notify-cvs-webhook
             repository_url = repo["url"]
         return repository_url
 
@@ -118,7 +118,7 @@ class PostsaiImporter:
 
         if "forked_from" in repo:  # none, but would be nice
             forked_from = repo["forked_from"]
-        elif "forked" in repo: # github
+        elif "forked" in repo:  # github
             if repo["forked"]:
                 forked_from = "upstream"
         return forked_from
@@ -127,7 +127,7 @@ class PostsaiImporter:
     def extract_url(self):
         """extracts the url to the web interface"""
 
-        if "project" in self.data and "web_url" in self.data["project"]: # gitlab
+        if "project" in self.data and "web_url" in self.data["project"]:  # gitlab
             url = self.data["project"]["web_url"]
         elif "home_url" in self.data['repository']:
             url = self.data['repository']["home_url"]
@@ -139,13 +139,13 @@ class PostsaiImporter:
     def extract_branch(self):
         """Extracts the branch name, master/HEAD are converted to an empty string."""
 
-        if not "ref" in self.data:
+        if "ref" not in self.data:
             return ""
 
         # skip "refs/heads/" prefix
         ref = self.data['ref']
         idx = ref.find("/", ref.find("/") + 1)
-        branch = ref[idx+1:]
+        branch = ref[idx + 1:]
         if branch == "master" or branch == "HEAD":
             return ""
         return branch
@@ -171,13 +171,13 @@ class PostsaiImporter:
 
         result = {}
         actionMap = {
-            "added" : "Add",
+            "added": "Add",
             "copied": "Add",
-            "removed" : "Remove",
-            "modified" : "Change"
+            "removed": "Remove",
+            "modified": "Change"
         }
         for change in ("added", "copied", "removed", "modified"):
-            if not change in commit:
+            if change not in commit:
                 continue
             for full_path in commit[change]:
                 result[full_path] = actionMap[change]
@@ -262,25 +262,25 @@ class PostsaiImporter:
             for full_path, change_type in list(self.filter_out_folders(self.extract_files(commit)).items()):
                 folder, file = self.split_full_path(full_path)
                 row = {
-                    "type" : change_type,
-                    "ci_when" : timestamp,
-                    "co_when" : self.parse_timestamp(commit["timestamp"]),
-                    "who" : self.extract_email(commit["author"]),
-                    "url" : self.extract_url(),
-                    "repository" : repo_name,
-                    "repository_url" : self.extract_repo_url(),
-                    "forked_from" : self.extract_repo_forked_from(),
-                    "dir" : folder,
-                    "file" : file,
-                    "revision" : self.file_revision(commit, full_path),
-                    "branch" : self.extract_branch(),
-                    "addedlines" : "0",
-                    "removedlines" : "0",
-                    "description" : commit["message"],
-                    "commitid" : commit["id"],
-                    "hash" : commit["id"],
-                    "author" : self.extract_email(commit["author"]),
-                    "committer" : self.extract_email(self.extract_committer(commit))
+                    "type": change_type,
+                    "ci_when": timestamp,
+                    "co_when": self.parse_timestamp(commit["timestamp"]),
+                    "who": self.extract_email(commit["author"]),
+                    "url": self.extract_url(),
+                    "repository": repo_name,
+                    "repository_url": self.extract_repo_url(),
+                    "forked_from": self.extract_repo_forked_from(),
+                    "dir": folder,
+                    "file": file,
+                    "revision": self.file_revision(commit, full_path),
+                    "branch": self.extract_branch(),
+                    "addedlines": "0",
+                    "removedlines": "0",
+                    "description": commit["message"],
+                    "commitid": commit["id"],
+                    "hash": commit["id"],
+                    "author": self.extract_email(commit["author"]),
+                    "committer": self.extract_email(self.extract_committer(commit))
                 }
                 rows.append(row)
 
