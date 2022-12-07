@@ -48,7 +48,7 @@ class Postsai:
     def validate_input(self, form):
         """filter inputs, e. g. for privacy reasons"""
 
-        if not "filter" in self.config:
+        if "filter" not in self.config:
             return ""
 
         for key, condition_filter in list(self.config['filter'].items()):
@@ -56,7 +56,7 @@ class Postsai:
             if value != "":
                 if value.startswith("^") and value.endswith("$"):
                     value = value[1:-1]
-                if re.match(condition_filter, value) == None:
+                if re.match(condition_filter, value) is None:
                     return "Missing permissions for query on column \"" + key + "\""
 
         return ""
@@ -65,7 +65,7 @@ class Postsai:
     def get_read_permission_pattern(self):
         """get read permissions pattern"""
 
-        if not "get_read_permission_pattern" in self.config:
+        if "get_read_permission_pattern" not in self.config:
             return ".*"
         return self.config["get_read_permission_pattern"]()
 
@@ -75,9 +75,9 @@ class Postsai:
 
         self.data = [self.get_read_permission_pattern()]
         self.sql = """SELECT repositories.repository, checkins.ci_when, people.who, trim(leading '/' from concat(concat(dirs.dir, '/'), files.file)),
-        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description, 
-        repositories.repository, commitids.hash, repositories.forked_from 
-        FROM checkins 
+        revision, branches.branch, concat(concat(checkins.addedlines, '/'), checkins.removedlines), descs.description,
+        repositories.repository, commitids.hash, repositories.forked_from
+        FROM checkins
         JOIN branches ON checkins.branchid = branches.id
         JOIN descs ON checkins.descid = descs.id
         JOIN dirs ON checkins.dirid = dirs.id
@@ -175,10 +175,10 @@ class Postsai:
     def are_rows_in_same_commit(data, pre):
         """determines if both database rows belong to the same SCM commit"""
 
-        return (data[0] == pre[0] # repository
-            and data[5] == pre[5] # branch
-            and data[9] == pre[9] # commitids
-            and data[9] != None)
+        return (data[0] == pre[0]  # repository
+                and data[5] == pre[5]  # branch
+                and data[9] == pre[9]  # commitids
+                and data[9] is not None)
 
 
     @staticmethod
@@ -201,7 +201,7 @@ class Postsai:
             tmp = Postsai.convert_database_row_to_array(row)
             tmp[3] = [tmp[3]]
             tmp[4] = [tmp[4]]
-            if (lastRow == None):
+            if (lastRow is None):
                 lastRow = tmp
                 result.append(tmp)
             else:
@@ -241,8 +241,8 @@ class Postsai:
                 ui = self.config['ui']
 
             result = {
-                "config" : ui,
-                "data" : rows,
+                "config": ui,
+                "data": rows,
                 "repositories": repositories,
                 "extension": {},
                 "additional_scripts": self.extension_manager.list_extension_files("query.js")

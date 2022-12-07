@@ -27,8 +27,10 @@ from backend.db import PostsaiDB
 import api
 import unittest
 
+
 def get_permission_pattern():
     return "^test$"
+
 
 class CacheTests(unittest.TestCase):
     """tests for the cache"""
@@ -73,7 +75,7 @@ class PostsaiDBTests(unittest.TestCase):
 
         self.assertEqual(
             db.guess_repository_urls({
-                "url" : "https://github.com/postsai/postsai",
+                "url": "https://github.com/postsai/postsai",
                 "repository": "postsai/postsai",
                 "repository_url": "",
                 "forked_from": "-"
@@ -83,44 +85,44 @@ class PostsaiDBTests(unittest.TestCase):
 
         self.assertEqual(
             db.guess_repository_urls({
-                "url" : "https://sourceforge.net",
-                "repository" : "/p/arianne/stendhal/",
+                "url": "https://sourceforge.net",
+                "repository": "/p/arianne/stendhal/",
                 "repository_url": "",
                 "forked_from": "-",
-                "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
+                "revision": "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
             "https://sourceforge.net/[repository]/ci/[commit]/",
             "SourceForge Git")
 
         self.assertEqual(
             db.guess_repository_urls({
-                "url" : "https://sourceforge.net",
-                "repository" : "/p/testsf2/svn/",
+                "url": "https://sourceforge.net",
+                "repository": "/p/testsf2/svn/",
                 "repository_url": "",
                 "forked_from": "-",
-                "revision" : "r4"
+                "revision": "r4"
             })[3],
             "https://sourceforge.net/[repository]/[commit]/",
             "SourceForge Subversion")
 
         self.assertEqual(
             db.guess_repository_urls({
-                "url" : "http://localhost/cgi-bin/viewvc.cgi",
-                "repository" : "myrepo",
+                "url": "http://localhost/cgi-bin/viewvc.cgi",
+                "repository": "myrepo",
                 "repository_url": "",
                 "forked_from": "-",
-                "revision" : "1.1"
+                "revision": "1.1"
             })[3],
             "commit.html?repository=[repository]&commit=[commit]",
             "CVS")
 
         self.assertEqual(
             db.guess_repository_urls({
-                "url" : "http://localhost",
-                "repository" : "myrepo",
+                "url": "http://localhost",
+                "repository": "myrepo",
                 "repository_url": "",
                 "forked_from": "-",
-                "revision" : "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
+                "revision": "37ab54349f9ee12c4bfc6236cc2ce61ed24692ec"
             })[3],
             "http://localhost/?p=[repository];a=commitdiff;h=[commit]",
             "Git")
@@ -166,17 +168,17 @@ class PostsaiTests(unittest.TestCase):
 
     def test_validate_input(self):
         postsai = api.Postsai({})
-        form = self.FormMock({"who" : "postman"})
+        form = self.FormMock({"who": "postman"})
         self.assertEqual(postsai.validate_input(form), "", "no filter")
 
-        postsai = api.Postsai({"filter" : { "who" : "^cvsscript$" }})
-        form = self.FormMock({"who" : "postman"})
+        postsai = api.Postsai({"filter": {"who": "^cvsscript$"}})
+        form = self.FormMock({"who": "postman"})
         self.assertNotEqual(postsai.validate_input(form), "", "postman is not a permitted user")
 
-        form = self.FormMock({"who" : "cvsscript"})
+        form = self.FormMock({"who": "cvsscript"})
         self.assertEqual(postsai.validate_input(form), "", "cvsscript is a permitted user")
 
-        form = self.FormMock({"who" : "^cvsscript$"})
+        form = self.FormMock({"who": "^cvsscript$"})
         self.assertEqual(postsai.validate_input(form), "", "^cvsscript$ is a permitted user")
 
         form = self.FormMock({})
@@ -187,7 +189,7 @@ class PostsaiTests(unittest.TestCase):
         postsai = api.Postsai({})
         self.assertEqual(postsai.get_read_permission_pattern(), ".*", "no read permission function")
 
-        postsai = api.Postsai({"get_read_permission_pattern" : get_permission_pattern})
+        postsai = api.Postsai({"get_read_permission_pattern": get_permission_pattern})
         self.assertEqual(postsai.get_read_permission_pattern(), "^test$", "read permission function defined")
 
 
@@ -196,11 +198,11 @@ class PostsaiTests(unittest.TestCase):
 
         postsai.sql = ""
         postsai.data = []
-        form = self.FormMock({"file" : "config.py", "filetype" : "",
-                              "branch" : "HEAD", "branchtype" : "match",
-                              "dir": "webapps.*", "dirtype" : "regexp",
-                              "repository" : "stendhal", "repositorytype" : "notregexp",
-                              "description" : "bla", "descriptiontype" : "search"})
+        form = self.FormMock({"file": "config.py", "filetype": "",
+                              "branch": "HEAD", "branchtype": "match",
+                              "dir": "webapps.*", "dirtype": "regexp",
+                              "repository": "stendhal", "repositorytype": "notregexp",
+                              "description": "bla", "descriptiontype": "search"})
 
         postsai.create_where_for_column("who", form, "who")
         self.assertEqual(postsai.sql, "", "undefined parameter")
@@ -228,41 +230,41 @@ class PostsaiTests(unittest.TestCase):
         postsai.data = []
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "none"}))
+        postsai.create_where_for_date(self.FormMock({"date": "none"}))
         self.assertEqual(postsai.sql, " AND 1 = 0")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "day"}))
+        postsai.create_where_for_date(self.FormMock({"date": "day"}))
         self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "week"}))
+        postsai.create_where_for_date(self.FormMock({"date": "week"}))
         self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 WEEK)")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "month"}))
+        postsai.create_where_for_date(self.FormMock({"date": "month"}))
         self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 MONTH)")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "hours", "hours" : "2"}))
+        postsai.create_where_for_date(self.FormMock({"date": "hours", "hours": "2"}))
         self.assertEqual(postsai.sql, " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "2016-02-22", "maxdate" : ""}))
+        postsai.create_where_for_date(self.FormMock({"date": "explicit", "mindate": "2016-02-22", "maxdate": ""}))
         self.assertEqual(postsai.sql, " AND ci_when >= %s")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "explicit", "mindate" : "", "maxdate" : "2016-02-22"}))
+        postsai.create_where_for_date(self.FormMock({"date": "explicit", "mindate": "", "maxdate": "2016-02-22"}))
         self.assertEqual(postsai.sql, " AND ci_when <= %s")
 
         postsai.sql = ""
-        postsai.create_where_for_date(self.FormMock({"date" : "invalid21345"}))
+        postsai.create_where_for_date(self.FormMock({"date": "invalid21345"}))
         self.assertEqual(postsai.sql, "")
 
 
     def test_create_query(self):
         postsai = api.Postsai({})
-        postsai.create_query(self.FormMock({"limit" : "10"}))
+        postsai.create_query(self.FormMock({"limit": "10"}))
         self.assertTrue("LIMIT 10" in postsai.sql, "Limit")
 
 
@@ -298,7 +300,7 @@ class PostsaiCommitViewerTest(unittest.TestCase):
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.2"), "1.1")
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.4"), "1.3.2.3")
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.3.2.1"), "1.3")
-        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.1"),     "1.0")
+        self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.1"), "1.0")
 
 
 
@@ -334,7 +336,7 @@ class PostsaiImporterTests(unittest.TestCase):
 
     def test_filter_out_folders(self):
         postsai = api.PostsaiImporter({}, {})
-        res = postsai.filter_out_folders({"content" : "change", "content/game" : "change", "content/game/sourcelog.php" : "change" })
+        res = postsai.filter_out_folders({"content": "change", "content/game": "change", "content/game/sourcelog.php": "change"})
         self.assertIn("content/game/sourcelog.php", res, "file remained in list")
         self.assertNotIn("content", res, "folder was removed from list")
         self.assertNotIn("content/game", res, "folder was removed from list")
@@ -342,9 +344,9 @@ class PostsaiImporterTests(unittest.TestCase):
 
     def test_file_revision(self):
         postsai = api.PostsaiImporter({}, {})
-        self.assertEqual(postsai.file_revision({"id" : "r2"}, {}), "2", "Subversion version without r")
-        self.assertEqual(postsai.file_revision({"id" : "eef37d923574175c5606d04af19793f63c056f82"}, {}), "eef37d923574175c5606d04af19793f63c056f82", "Git revision")
-        self.assertEqual(postsai.file_revision({"revisions" : {"bla" : "1.1"}}, "bla"), "1.1", "CVS file revision")
+        self.assertEqual(postsai.file_revision({"id": "r2"}, {}), "2", "Subversion version without r")
+        self.assertEqual(postsai.file_revision({"id": "eef37d923574175c5606d04af19793f63c056f82"}, {}), "eef37d923574175c5606d04af19793f63c056f82", "Git revision")
+        self.assertEqual(postsai.file_revision({"revisions": {"bla": "1.1"}}, "bla"), "1.1", "CVS file revision")
 
 
     def test_extract_branch(self):
@@ -365,42 +367,42 @@ class PostsaiImporterTests(unittest.TestCase):
 
 
     def test_extract_repo_name(self):
-        importer = api.PostsaiImporter({}, {"repository" : { "full_name" : "arianne/stendhal"}})
+        importer = api.PostsaiImporter({}, {"repository": {"full_name": "arianne/stendhal"}})
         self.assertEqual(importer.extract_repo_name(), "arianne/stendhal", "GitHub repository")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "full_name" : "/p/arianne/stendhal-website/"}})
+        importer = api.PostsaiImporter({}, {"repository": {"full_name": "/p/arianne/stendhal-website/"}})
         self.assertEqual(importer.extract_repo_name(), "p/arianne/stendhal-website", "SourceForge repository")
 
-        importer = api.PostsaiImporter({}, {"project" : { "path_with_namespace" : "cs.sys/cs.sys.portal"},
-                                            "repository": { "name": "cs.sys.portal"}})
+        importer = api.PostsaiImporter({}, {"project": {"path_with_namespace": "cs.sys/cs.sys.portal"},
+                                            "repository": {"name": "cs.sys.portal"}})
         self.assertEqual(importer.extract_repo_name(), "cs.sys/cs.sys.portal", "Gitlab repository")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "name" : "gittest"}})
+        importer = api.PostsaiImporter({}, {"repository": {"name": "gittest"}})
         self.assertEqual(importer.extract_repo_name(), "gittest", "Git repository")
 
 
     def test_extract_repo_url(self):
-        importer = api.PostsaiImporter({}, {"repository" : {}})
+        importer = api.PostsaiImporter({}, {"repository": {}})
         self.assertEqual(importer.extract_repo_url(), "", "No repository url")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "clone_url": "https://github.com/arianne/stendhal.git"}})
+        importer = api.PostsaiImporter({}, {"repository": {"clone_url": "https://github.com/arianne/stendhal.git"}})
         self.assertEqual(importer.extract_repo_url(), "https://github.com/arianne/stendhal.git", "GitHub repository")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "git_ssh_url" : "git@example.com:cs.sys/cs.sys.portal.git"}})
+        importer = api.PostsaiImporter({}, {"repository": {"git_ssh_url": "git@example.com:cs.sys/cs.sys.portal.git"}})
         self.assertEqual(importer.extract_repo_url(), "git@example.com:cs.sys/cs.sys.portal.git", "Gitlab repository")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "url" : ":pserver:anonymous:@cvs.example.com/srv/cvs/repository"}})
+        importer = api.PostsaiImporter({}, {"repository": {"url": ":pserver:anonymous:@cvs.example.com/srv/cvs/repository"}})
         self.assertEqual(importer.extract_repo_url(), ":pserver:anonymous:@cvs.example.com/srv/cvs/repository", "CVS repository")
 
 
     def test_extract_url(self):
-        importer = api.PostsaiImporter({}, {"repository" : { "url" : "https://github.com/arianne/stendhal"}})
+        importer = api.PostsaiImporter({}, {"repository": {"url": "https://github.com/arianne/stendhal"}})
         self.assertEqual(importer.extract_url(), "https://github.com/arianne/stendhal", "GitHub repository")
 
-        importer = api.PostsaiImporter({}, {"repository" : { "home_url" : "https://cvs.example.com/viewvc"}})
+        importer = api.PostsaiImporter({}, {"repository": {"home_url": "https://cvs.example.com/viewvc"}})
         self.assertEqual(importer.extract_url(), "https://cvs.example.com/viewvc", "CVS")
 
-        importer.data = {"project": { "web_url":"https://example.com/arianne/stendhal" }}
+        importer.data = {"project": {"web_url": "https://example.com/arianne/stendhal"}}
         self.assertEqual(importer.extract_url(), "https://example.com/arianne/stendhal", "Gitlab repository")
 
 
@@ -418,7 +420,7 @@ class PostsaiImporterTests(unittest.TestCase):
         importer = api.PostsaiImporter({}, {})
         self.assertTrue(importer.check_permission("something"), "no permission pattern defined")
 
-        importer = api.PostsaiImporter({"get_write_permission_pattern" : get_permission_pattern}, {})
+        importer = api.PostsaiImporter({"get_write_permission_pattern": get_permission_pattern}, {})
         self.assertTrue(importer.check_permission("test"), "matching permission pattern defined")
         self.assertFalse(importer.check_permission("something"), "not matching permission defined")
 
@@ -447,35 +449,11 @@ class PostsaiImporterTests(unittest.TestCase):
 
 
     def test_parse_data(self):
-        importer = api.PostsaiImporter({},
-            {
-                "ref": "refs/heads/HEAD",
-                "after": "10056E40FB51177B8D0",
-                "commits": [
-                    {
-                        "id": "10056E40FB51177B8D0",
-                        "distinct": "true",
-                        "message": "this is the commit message",
-                        "timestamp": "2016-03-12T13:46:45",
-                        "author": {
-                           "name": "myself",
-                            "email": "myself@example.com",
-                            "username": "myself"
-                        },
-                        "committer": {
-                            "name": "myself",
-                            "email": "myself@example.com",
-                            "username": "myself"
-                        },
-                        "added": [],
-                        "removed": [],
-                        "modified": ["mymodule/myfile"],
-                        "revisions": {
-                            "mymodule/myfile": "1.9"
-                        }
-                    }
-                ],
-                "head_commit": {
+        importer = api.PostsaiImporter({}, {
+            "ref": "refs/heads/HEAD",
+            "after": "10056E40FB51177B8D0",
+            "commits": [
+                {
                     "id": "10056E40FB51177B8D0",
                     "distinct": "true",
                     "message": "this is the commit message",
@@ -496,18 +474,41 @@ class PostsaiImporterTests(unittest.TestCase):
                     "revisions": {
                         "mymodule/myfile": "1.9"
                     }
-                },
-                "repository": {
-                     "name": "local",
-                     "full_name": "local",
-                     "home_url": "https://cvs.example.com/viewvc/",
-                     "url": ":pserver:username:password@cvs.example.com/repository"
-                },
-                "sender": {
-                    "login": "username",
-                    "addr": "127.0.0.1"
                 }
-            })
+            ],
+            "head_commit": {
+                "id": "10056E40FB51177B8D0",
+                "distinct": "true",
+                "message": "this is the commit message",
+                "timestamp": "2016-03-12T13:46:45",
+                "author": {
+                    "name": "myself",
+                    "email": "myself@example.com",
+                    "username": "myself"
+                },
+                "committer": {
+                    "name": "myself",
+                    "email": "myself@example.com",
+                    "username": "myself"
+                },
+                "added": [],
+                "removed": [],
+                "modified": ["mymodule/myfile"],
+                "revisions": {
+                    "mymodule/myfile": "1.9"
+                }
+            },
+            "repository": {
+                "name": "local",
+                "full_name": "local",
+                "home_url": "https://cvs.example.com/viewvc/",
+                "url": ":pserver:username:password@cvs.example.com/repository"
+            },
+            "sender": {
+                "login": "username",
+                "addr": "127.0.0.1"
+            }
+        })
         head, rows = importer.parse_data()
         self.assertEqual(head["sender_user"], "username")
         self.assertEqual(head["sender_addr"], "127.0.0.1")

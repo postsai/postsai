@@ -21,6 +21,7 @@
 
 import os
 
+
 class ExtensionManager:
     """Manages extensions"""
 
@@ -41,7 +42,7 @@ class ExtensionManager:
 
         for extension in self.extensions:
             method_pointer = getattr(extension, method, None)
-            if method_pointer != None:
+            if method_pointer is not None:
                 method_pointer(*params)
 
     @staticmethod
