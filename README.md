@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/postsai/postsai/master/resources/postsai-64.png) Postsai &nbsp;&nbsp;&nbsp;&nbsp;[![Travis](https://img.shields.io/travis/postsai/postsai.svg)](https://travis-ci.org/postsai/postsai/) [![Codacy](https://img.shields.io/codacy/b057b8d7eafc41b1a2c4c131b59bcd7c.svg)](https://www.codacy.com/app/arianne/postsai) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
+![Logo](https://raw.githubusercontent.com/postsai/postsai/master/resources/postsai-64.png) Postsai &nbsp;&nbsp;&nbsp;&nbsp;![Build](https://img.shields.io/github/workflow/status/postsai/postsai/PythonAnalysis) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
 -------
 
 The commit database
