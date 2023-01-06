@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/postsai/postsai/master/resources/postsai-64.png) Postsai &nbsp;&nbsp;&nbsp;&nbsp;![Build](https://img.shields.io/github/workflow/status/postsai/postsai/PythonAnalysis) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
+![Logo](https://raw.githubusercontent.com/postsai/postsai/master/resources/postsai-64.png) Postsai &nbsp;&nbsp;&nbsp;&nbsp;![Build](https://img.shields.io/github/actions/workflow/status/postsai/postsai/python-analysis.yml?branch=master) [![MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/postsai/postsai/blob/master/LICENSE.txt)
 -------
 
 The commit database
