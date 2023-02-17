@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2023 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -50,14 +50,22 @@ class PostsaiImporter:
         return datetime.datetime.fromtimestamp(calendar.timegm(parsed.timetuple())).isoformat()
 
 
-
     def check_permission(self, repo_name):
-        """checks writes write permissions"""
+        """checks write permissions"""
 
-        if "get_write_permission_pattern" not in self.config:
-            return True
-        regex = self.config["get_write_permission_pattern"]()
-        return not re.match(regex, repo_name) is None
+        allowed = True
+        if "get_write_permission_pattern" in self.config:
+            regex = self.config["get_write_permission_pattern"]()
+            allowed = not re.match(regex, repo_name) is None
+
+        if not allowed:
+            return False
+
+        if "get_repository_ignore_pattern" in self.config:
+            regex = self.config["get_repository_ignore_pattern"]()
+            return re.match(regex, repo_name) is None
+
+        return True
 
 
     @staticmethod
@@ -296,6 +304,7 @@ class PostsaiImporter:
             print("Content-Type: text/html; charset='utf-8'\r")
             print("\r")
             print("<html><body>Missing permission</body></html>")
+            return
 
         print("Content-Type: text/plain; charset='utf-8'\r")
         print("\r")
