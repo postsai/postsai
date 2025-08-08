@@ -6,12 +6,18 @@ import { BackendService } from '../../service/backend.service';
 
 import { Commit } from '../../model/commit';
 import { ResultTransformator } from 'src/app/model/result.transformator';
-import { SoftBreakSupportingDataSource } from '../result-table/result-table.component';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { SoftBreakSupportingDataSource, ResultTableComponent } from '../result-table/result-table.component';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatInput, MatSuffix } from '@angular/material/input';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { QueryParameterPipe } from '../queryparameter/queryparameter.pipe';
 
 @Component({
-	selector: 'app-result',
-	templateUrl: './result.component.html'
+    selector: 'app-result',
+    templateUrl: './result.component.html',
+    imports: [MatCheckbox, FormsModule, MatFormField, MatInput, MatIcon, MatSuffix, MatProgressBar, ResultTableComponent, QueryParameterPipe]
 })
 export class ResultComponent {
 	public error: any;

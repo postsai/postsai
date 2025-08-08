@@ -1,4 +1,4 @@
-const tsmd5 = require("ts-md5/dist/md5");
+import * as tsmd5 from 'ts-md5/dist/esm';
 
 import { Commit } from "./commit";
 import { FileEntry } from "./fileentry";
@@ -84,7 +84,7 @@ export class ResultTransformator {
 		let hash = this.hashCache[input];
 		if (!hash) {
 			const md5 = new tsmd5.Md5();
-			hash = md5.appendStr(input).end();
+			hash = md5.appendStr(input).end() as string;
 			this.hashCache[input] = hash;
 		}
 		return hash;

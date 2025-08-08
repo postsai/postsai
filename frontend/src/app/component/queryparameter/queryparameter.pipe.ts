@@ -1,9 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Params } from '@angular/router';
 
-@Pipe({
-	name: 'queryparameter',
-})
+@Pipe({ name: 'queryparameter' })
 export class QueryParameterPipe implements PipeTransform {
 
 	transform(vars?: Params, ..._args: any[]) {
