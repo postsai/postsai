@@ -15,9 +15,7 @@ import {
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map, mapTo, takeUntil } from 'rxjs/operators';
 
-@Directive({
-  selector: '[matTableResponsive]'
-})
+@Directive({ selector: '[matTableResponsive]' })
 export class MatTableResponsiveDirective
   implements OnInit, AfterViewInit, OnDestroy {
   private onDestroy$ = new Subject<boolean>();

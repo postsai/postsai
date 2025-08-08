@@ -1,7 +1,9 @@
 import { Component, HostListener, Input, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
 import { Commit } from '../../model/commit';
+import { MatTableResponsiveDirective } from '../mat-table-responsive/mat-table-responsive.directive';
+import { NgClass } from '@angular/common';
 
 
 export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {
@@ -32,8 +34,9 @@ export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {
 
 
 @Component({
-	selector: 'app-result-table',
-	templateUrl: './result-table.component.html'
+    selector: 'app-result-table',
+    templateUrl: './result-table.component.html',
+    imports: [MatTable, MatTableResponsiveDirective, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator]
 })
 export class ResultTableComponent {
 	@Input() public config: Record<string, any> = {};
