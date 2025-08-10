@@ -1,4 +1,4 @@
-import * as tsmd5 from 'ts-md5/dist/esm';
+import * as tsmd5 from 'ts-md5';
 
 import { Commit } from "./commit";
 import { FileEntry } from "./fileentry";
