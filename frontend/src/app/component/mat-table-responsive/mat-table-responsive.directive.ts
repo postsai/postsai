@@ -36,6 +36,9 @@ export class MatTableResponsiveDirective
   constructor(private table: ElementRef, private renderer: Renderer2) {}
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
     this.thead = this.table.nativeElement.querySelector('thead');
     this.tbody = this.table.nativeElement.querySelector('tbody');
 
@@ -44,9 +47,7 @@ export class MatTableResponsiveDirective
       subtree: true
     });
     this.tbodyObserver.observe(this.tbody, { childList: true });
-  }
 
-  ngAfterViewInit() {
     /**
      * Set the "data-column-name" attribute for every body row cell, either on
      * thead row changes (e.g. language changes) or tbody rows changes (add, delete).
@@ -73,6 +74,7 @@ export class MatTableResponsiveDirective
           )
         )
       );
+	this.tbodyChanged$.next(true)
   }
 
   ngOnDestroy(): void {
