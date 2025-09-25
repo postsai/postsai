@@ -18,7 +18,7 @@
     "@angular/forms": "^20.3.1",
     "@angular/material": "^20.2.4",
     "@angular/platform-browser": "^20.3.1",
-    "@angular/platform-browser-dynamic": "^20.3.1",
+    "@angular/platform-browser-dynamic": "^20.3.2",
     "@angular/router": "^20.3.1",
     "rxjs": "~7.8.2",
     "ts-md5": "^2.0.1",
