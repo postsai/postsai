@@ -18,7 +18,7 @@
       <input type="text" class="form-control" [(ngModel)]="params['repository']"
         name="repository" [matAutocomplete]="autocompleteRepository" (ngModelChange)="onRepositoryChange()">
       <mat-autocomplete #autocompleteRepository="matAutocomplete">
-        @for (repository of filteredRepositories; track repository) {
+        @for (repository of filteredRepositories(); track repository) {
           <mat-option [value]="repository">
             {{repository}}
           </mat-option>

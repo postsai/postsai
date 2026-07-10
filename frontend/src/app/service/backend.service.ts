@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Params, Router } from "@angular/router";
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BackendService {
 
 	constructor(private http: HttpClient, private router: Router) {

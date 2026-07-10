@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BackendService } from 'src/app/service/backend.service';
 import { FormsModule } from '@angular/forms';
@@ -12,9 +12,10 @@ import { MatButton } from '@angular/material/button';
     imports: [FormsModule, MatRadioGroup, MatRadioButton, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatButton]
 })
 export class SearchComponent {
+	
 	public params: Record<string, string> = {};
 	public repositories?: string[];
-	public filteredRepositories?: string[];
+	public filteredRepositories = signal<string[]>([]);
 
 	constructor(
 		backendService: BackendService,
@@ -42,9 +43,9 @@ export class SearchComponent {
 
 	onRepositoryChange() {
 		let filter = this.params['repository'].toLowerCase();
-		this.filteredRepositories = this.repositories!.filter((value) => {
+		this.filteredRepositories.set(this.repositories!.filter((value) => {
 			return value.toLowerCase().indexOf(filter) > -1;
-		})
+		}))
 	}
 
 	onSearch(_event: any) {
