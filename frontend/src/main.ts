@@ -1,9 +1,6 @@
-import { enableProdMode, importProvidersFrom } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
+import { enableProdMode, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 
 import { environment } from './environments/environment';
-import { BackendService } from './app/service/backend.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { AppRoutingModule } from './app/app-routing.module';
@@ -26,15 +23,15 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app/app.component';
 
 if (environment.production) {
-  enableProdMode();
+	enableProdMode();
 }
 
 bootstrapApplication(AppComponent, {
-    providers: [
-        importProvidersFrom(BrowserModule, AppRoutingModule, FormsModule, LayoutModule, MatAutocompleteModule, MatButtonModule, MatCheckboxModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule, MatProgressBarModule, MatRadioModule, MatTableModule, MatToolbarModule, RouterModule),
-        BackendService,
-        provideHttpClient(withInterceptorsFromDi()),
-        provideAnimations()
-    ]
+	providers: [
+		importProvidersFrom(BrowserModule, AppRoutingModule, FormsModule, LayoutModule, MatAutocompleteModule, MatButtonModule, MatCheckboxModule, MatGridListModule, MatIconModule, MatInputModule, MatListModule, MatPaginatorModule, MatProgressBarModule, MatRadioModule, MatTableModule, MatToolbarModule, RouterModule),
+		provideHttpClient(withInterceptorsFromDi()),
+		provideAnimations(),
+		provideZonelessChangeDetection()
+	]
 })
-  .catch(err => console.error(err));
+	.catch(err => console.error(err));

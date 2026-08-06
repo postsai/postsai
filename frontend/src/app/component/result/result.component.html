@@ -13,19 +13,19 @@
 </div>
 <div style="clear:both"></div>
 
-@if (!dataSource && !error) {
+@if (!dataSource() && !error()) {
   <p class="wait">
     Please wait while Postai is pondering your request.<br><br><br>
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </p>
 }
 
-@if (error) {
+@if (error()) {
   <p class="error">
     Error: Backend is not responding.
   </p>
 }
 
-@if (dataSource) {
-  <app-result-table [dataSource]="dataSource" [config]="config"></app-result-table>
+@if (dataSource()) {
+  <app-result-table [dataSource]="dataSource()!" [config]="config()"></app-result-table>
 }
