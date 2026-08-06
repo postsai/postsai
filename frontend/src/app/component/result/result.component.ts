@@ -1,11 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import { BackendService } from '../../service/backend.service';
 
 import { Commit } from '../../model/commit';
-import { ResultTransformator } from 'src/app/model/result.transformator';
+import { ResultTransformator } from '../../model/result.transformator';
 import { SoftBreakSupportingDataSource, ResultTableComponent } from '../result-table/result-table.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +17,7 @@ import { QueryParameterPipe } from '../queryparameter/queryparameter.pipe';
 @Component({
     selector: 'app-result',
     templateUrl: './result.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCheckbox, FormsModule, MatFormField, MatInput, MatIcon, MatSuffix, MatProgressBar, ResultTableComponent, QueryParameterPipe]
 })
 export class ResultComponent {
