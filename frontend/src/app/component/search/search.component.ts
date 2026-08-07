@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { BackendService } from 'src/app/service/backend.service';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BackendService } from '../../service/backend.service';
 import { FormsModule } from '@angular/forms';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
@@ -9,6 +9,7 @@ import { MatButton } from '@angular/material/button';
 @Component({
     selector: 'app-search',
     templateUrl: './search.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, MatRadioGroup, MatRadioButton, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatButton]
 })
 export class SearchComponent {

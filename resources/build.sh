@@ -17,7 +17,7 @@ ng build
 cd ..
 
 # Move and post-process angular build
-mv frontend/dist/frontend/* dist/postsai/resources/
+mv frontend/dist/frontend/browser/* frontend/dist/frontend/3rdpartylicenses.txt dist/postsai/resources/
 rm -rf dist/postsai/resources/assets/fonts
 
 sed 's|src="|src="resources/|g' < dist/postsai/resources/index.html | sed 's|href="|href="resources/|g' | sed 's|url(|url(resources/|g' | sed 's|<base href="resources//">|<base href=".">|' | sed 's|resources/resources|resources|' > dist/postsai/index.html

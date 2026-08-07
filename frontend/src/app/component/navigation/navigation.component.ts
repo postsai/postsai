@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatButton } from '@angular/material/button';
@@ -6,6 +6,7 @@ import { MatButton } from '@angular/material/button';
 @Component({
     selector: 'app-navigation',
     templateUrl: './navigation.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatToolbar, MatButton, RouterLink]
 })
 export class NavigationComponent {
