@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,12 +20,13 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-import cgi
 import json
+import os
 import sys
 import subprocess
 
 from backend.db import PostsaiDB
+from backend.request import Request
 
 
 def convert_to_builtin_type(obj):
@@ -121,7 +122,7 @@ class PostsaiCommitViewer:
     def process(self):
         """Returns information about a commit"""
 
-        form = cgi.FieldStorage()
+        form = Request.from_environ(os.environ)
         commit = self.read_commit(form)
 
         print("Content-Type: text/plain; charset='utf-8'\r")
@@ -131,6 +132,8 @@ class PostsaiCommitViewer:
 
         print("\r")
 
-        print(("#" + json.dumps(PostsaiCommitViewer.format_commit_header(commit), default=convert_to_builtin_type)))
+        print(("#" + json.dumps(
+            PostsaiCommitViewer.format_commit_header(commit),
+            default=convert_to_builtin_type)))
         sys.stdout.flush()
         PostsaiCommitViewer.dump_commit_diff(commit)

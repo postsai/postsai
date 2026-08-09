@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -21,11 +21,12 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+# pylint: disable=missing-function-docstring,too-few-public-methods
 
+import unittest
+import api
 from backend.cache import Cache
 from backend.db import PostsaiDB
-import api
-import unittest
 
 
 def get_permission_pattern():
@@ -295,6 +296,7 @@ class PostsaiTests(unittest.TestCase):
 
 
 class PostsaiCommitViewerTest(unittest.TestCase):
+    """test for the commit viewer"""
 
     def test_calculate_previous_cvs_revision(self):
         self.assertEqual(api.PostsaiCommitViewer.calculate_previous_cvs_revision("1.2"), "1.1")

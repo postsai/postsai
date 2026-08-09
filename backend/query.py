@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,12 +20,13 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-import cgi
 import json
+import os
 import re
 
 from backend.db import PostsaiDB
 from backend import extension
+from backend.request import Request
 
 
 def convert_to_builtin_type(obj):
@@ -36,13 +37,16 @@ def convert_to_builtin_type(obj):
 
 
 class Postsai:
+    """Postsai API"""
 
     def __init__(self, config):
         """Creates a Postsai api instance"""
 
+        self.data = None
         self.config = config
         self.extension_manager = extension.ExtensionManager()
         self.extension_manager.call_all("query_extension_setup", [config])
+        self.sql = None
 
 
     def validate_input(self, form):
@@ -112,12 +116,12 @@ class Postsai:
         """convert the operator into a database operator"""
 
         operator = '='
-        if (matchtype == "match"):
+        if matchtype == "match":
             operator = '='
-        elif (matchtype == "regexp" or matchtype == "search"):
+        elif matchtype in ("regexp", "search"):
             # support for MySQL <= 5.5
             operator = "REGEXP"
-        elif (matchtype == "notregexp"):
+        elif matchtype == "notregexp":
             operator = "NOT REGEXP"
         return operator
 
@@ -126,15 +130,15 @@ class Postsai:
         """create the where part for the specified column with data from the request"""
 
         value = form.getfirst(column, "")
-        if (value == ""):
-            return ""
+        if value == "":
+            return
 
         # replace HEAD branch with empty string
-        if (column == "branch" and value == "HEAD"):
+        if column == "branch" and value == "HEAD":
             value = ""
 
         # replace root with empty string
-        if (column == "forked_from" and value == "-"):
+        if column == "forked_from" and value == "-":
             value = ""
 
         matchtype = form.getfirst(column + "type", "match")
@@ -149,18 +153,18 @@ class Postsai:
         """parses the date parameters and adds them to the database query"""
 
         datetype = form.getfirst("date", "day")
-        if (datetype == "none"):
+        if datetype == "none":
             self.sql = self.sql + " AND 1 = 0"
-        elif (datetype == "day"):
+        elif datetype == "day":
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 DAY)"
-        elif (datetype == "week"):
+        elif datetype == "week":
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 WEEK)"
-        elif (datetype == "month"):
+        elif datetype == "month":
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL 1 MONTH)"
-        elif (datetype == "hours"):
+        elif datetype == "hours":
             self.sql = self.sql + " AND ci_when >= DATE_SUB(NOW(),INTERVAL %s HOUR)"
             self.data.append(form.getfirst("hours"))
-        elif (datetype == "explicit"):
+        elif datetype == "explicit":
             mindate = form.getfirst("mindate", "")
             if mindate != "":
                 self.sql = self.sql + " AND ci_when >= %s"
@@ -196,21 +200,21 @@ class Postsai:
         """Merges query result rows to extract commits"""
 
         result = []
-        lastRow = None
+        last_row = None
         for row in rows:
             tmp = Postsai.convert_database_row_to_array(row)
             tmp[3] = [tmp[3]]
             tmp[4] = [tmp[4]]
-            if (lastRow is None):
-                lastRow = tmp
+            if last_row is None:
+                last_row = tmp
                 result.append(tmp)
             else:
-                if Postsai.are_rows_in_same_commit(lastRow, tmp):
-                    lastRow[3].append(tmp[3][0])
-                    lastRow[4].append(tmp[4][0])
+                if Postsai.are_rows_in_same_commit(last_row, tmp):
+                    last_row[3].append(tmp[3][0])
+                    last_row[4].append(tmp[4][0])
                 else:
                     result.append(tmp)
-                    lastRow = tmp
+                    last_row = tmp
 
         return result
 
@@ -221,7 +225,7 @@ class Postsai:
         print("Content-Type: text/json; charset='utf-8'\r")
         print("Cache-Control: max-age=60\r")
         print("\r")
-        form = cgi.FieldStorage()
+        form = Request.from_environ(os.environ)
 
         result = self.validate_input(form)
 
