@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2023 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -74,7 +74,7 @@ class PostsaiImporter:
 
         sep = full_path.rfind("/")
         folder = ""
-        if (sep > -1):
+        if sep > -1:
             folder = full_path[0:sep]
         file = full_path[sep + 1:]
         return folder, file
@@ -154,7 +154,7 @@ class PostsaiImporter:
         ref = self.data['ref']
         idx = ref.find("/", ref.find("/") + 1)
         branch = ref[idx + 1:]
-        if branch == "master" or branch == "HEAD":
+        if branch in ("master", "HEAD"):
             return ""
         return branch
 
@@ -178,7 +178,7 @@ class PostsaiImporter:
         """Extracts a file list from the commit information"""
 
         result = {}
-        actionMap = {
+        action_map = {
             "added": "Add",
             "copied": "Add",
             "removed": "Remove",
@@ -188,7 +188,7 @@ class PostsaiImporter:
             if change not in commit:
                 continue
             for full_path in commit[change]:
-                result[full_path] = actionMap[change]
+                result[full_path] = action_map[change]
         return result
 
 
@@ -198,12 +198,12 @@ class PostsaiImporter:
 
         if "revisions" in commit:
             return commit["revisions"][full_path]
-        else:
-            rev = commit["id"]
-            # For Subversion, remove leading r
-            if rev[0] == "r":
-                rev = rev[1:]
-            return rev
+
+        rev = commit["id"]
+        # For Subversion, remove leading r
+        if rev[0] == "r":
+            rev = rev[1:]
+        return rev
 
 
     @staticmethod
@@ -212,8 +212,8 @@ class PostsaiImporter:
 
         if "committer" in commit:
             return commit["committer"]
-        else:
-            return commit["author"]
+
+        return commit["author"]
 
 
     @staticmethod
@@ -222,8 +222,10 @@ class PostsaiImporter:
 
         if "email" in author and author["email"] != "":
             return author["email"].lower()
-        elif "name" in author:
+
+        if "name" in author:
             return author["name"].lower()
+
         return ""
 
 

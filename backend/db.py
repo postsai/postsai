@@ -1,5 +1,5 @@
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -20,9 +20,9 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-import MySQLdb as mdb
 import datetime
 from os import environ
+import MySQLdb as mdb
 
 from backend.cache import Cache
 
@@ -44,7 +44,10 @@ class PostsaiDB:
     def __init__(self, config):
         """Creates a Postsai api instance"""
 
+        self.cache = None
         self.config = config
+        self.conn = None
+        self.is_viewvc_database = False
 
 
     def connect(self):
@@ -62,7 +65,7 @@ class PostsaiDB:
         # checks whether this is a ViewVC database instead of a Bonsai database
         cursor = self.conn.cursor()
         cursor.execute("show tables like 'commits'")
-        self.is_viewvc_database = (cursor.rowcount == 1)
+        self.is_viewvc_database = cursor.rowcount == 1
         cursor.execute("SET SESSION innodb_lock_wait_timeout = 500")
         cursor.close()
         self.conn.begin()
@@ -109,7 +112,7 @@ class PostsaiDB:
 
         base = row["url"]
         base_url = base
-        if (base_url.find(row["repository"]) == -1):
+        if base_url.find(row["repository"]) == -1:
             base_url = base_url + "/" + row["repository"]
 
         file_url = ""

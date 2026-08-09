@@ -1,5 +1,3 @@
-#! /usr/bin/python3
-
 # The MIT License (MIT)
 # Copyright (c) 2016-2026 Postsai
 #
@@ -21,34 +19,41 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-# pylint: disable=invalid-name
 
-import json
-import sys
+from urllib.parse import parse_qs
 from os import environ
 
-import config
 
-from backend.cvs import PostsaiCommitViewer
-from backend.query import Postsai
-from backend.importer import PostsaiImporter
-from backend.request import Request
+class Request:
+    """Represents parsed request parameters."""
 
+    def __init__(self, params):
+        """initialize the request object"""
+        self._params = params or {}
 
+    @classmethod
+    def from_environ(cls, env=None):
+        """create a Request object from the CGI environment"""
+        env = env or environ
+        params = parse_qs(env.get('QUERY_STRING', ''), keep_blank_values=True)
+        return cls(params)
 
-if __name__ == "__main__":
-    if "REQUEST_METHOD" in environ and environ['REQUEST_METHOD'] == "POST":
-        data = sys.stdin.read()
-        parsed = None
-        try:
-            parsed = json.loads(data, strict=False)
-        except UnicodeDecodeError:
-            data = data.decode("iso-8859-15").encode("utf-8")
-            parsed = json.loads(data, strict=False)
-        PostsaiImporter(vars(config), parsed).import_from_webhook()
-    else:
-        form = Request.from_environ(environ)
-        if form.getfirst("method", "") == "commit":
-            PostsaiCommitViewer(vars(config)).process()
-        else:
-            Postsai(vars(config)).process()
+    def getfirst(self, name, default=None):
+        """get the first value"""
+        v = self._params.get(name)
+        if v:
+            return v[0]
+        return default
+
+    def getlist(self, name):
+        """get the list of values"""
+        return self._params.get(name, [])
+
+    def getvalue(self, name, default=None):
+        """get the value or the list of values"""
+        v = self._params.get(name)
+        if v is None:
+            return default
+        if len(v) == 1:
+            return v[0]
+        return v

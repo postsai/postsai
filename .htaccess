@@ -1,2 +1,1 @@
-AddHandler cgi-script .py
-
+AddHandler cgi-script .py .pyc

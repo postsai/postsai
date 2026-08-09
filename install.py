@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # The MIT License (MIT)
-# Copyright (c) 2016-2021 Postsai
+# Copyright (c) 2016-2026 Postsai
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -21,6 +21,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+# pylint: disable=broad-exception-caught,bare-except
+
 import sys
 import traceback
 import time
@@ -33,6 +35,8 @@ class PostsaiInstaller:
     """Installer for Postsai"""
 
     def __init__(self):
+        self.db = None
+        self.config = None
         self.extension_manager = backend.extension.ExtensionManager()
 
     def print_config_help_and_exit(self):
@@ -92,6 +96,7 @@ def get_write_permission_pattern():
            and print out a sample configuration file to stdout before we exit
            the installer."""
 
+        # pylint: disable=import-outside-toplevel
         try:
             import config
         except ImportError:
@@ -122,6 +127,7 @@ def get_write_permission_pattern():
     def connect(self):
         """tries to connect to the database"""
 
+        # pylint: disable=import-outside-toplevel
         try:
             from backend.db import PostsaiDB
             self.db = PostsaiDB(self.config)
@@ -383,7 +389,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
         # id, ci_when, whoid, repositoryid, branchid, descid
         for i in range(2, 6):
-            if (row[i] != last_row[i]):
+            if row[i] != last_row[i]:
                 return False
         return True
 
@@ -393,7 +399,7 @@ CREATE TABLE IF NOT EXISTS `commitids` (
 
         rows = self.db.query(self.db.rewrite_sql("SELECT count(*) FROM checkins WHERE commitid IS NULL"), [])
         count = rows[0][0]
-        if (count == 0):
+        if count == 0:
             return
 
         print("Updating " + str(count) + " legacy CVS entries")
