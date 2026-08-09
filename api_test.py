@@ -58,13 +58,13 @@ class PostsaiDBTests(unittest.TestCase):
         db = PostsaiDB({})
 
         db.is_viewvc_database = False
-        self.assertEquals(
+        self.assertEqual(
             db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"),
             "SELECT revision FROM checkins WHERE 1=0",
             "No rewriting on bonsai databases")
 
         db.is_viewvc_database = True
-        self.assertEquals(
+        self.assertEqual(
             db.rewrite_sql("SELECT revision FROM checkins WHERE 1=0"),
             "SELECT revision FROM commits WHERE 1=0",
             "Rewriting on ViewVC databases")
@@ -322,16 +322,16 @@ class PostsaiImporterTests(unittest.TestCase):
     def test_split_full_path(self):
         postsai = api.PostsaiImporter({}, {})
         folder, file = postsai.split_full_path("README.md")
-        self.assertEquals(folder, "", "empty folder on README.md")
-        self.assertEquals(file, "README.md", "file README.md on README.md")
+        self.assertEqual(folder, "", "empty folder on README.md")
+        self.assertEqual(file, "README.md", "file README.md on README.md")
 
         folder, file = postsai.split_full_path("")
-        self.assertEquals(folder, "", "empty folder on empty")
-        self.assertEquals(file, "", "empty file on empty")
+        self.assertEqual(folder, "", "empty folder on empty")
+        self.assertEqual(file, "", "empty file on empty")
 
         folder, file = postsai.split_full_path("folder/README.md")
-        self.assertEquals(folder, "folder", "folder folder on folder/README.md")
-        self.assertEquals(file, "README.md", "file README on folder/README.md")
+        self.assertEqual(folder, "folder", "folder folder on folder/README.md")
+        self.assertEqual(file, "README.md", "file README on folder/README.md")
 
 
     def test_filter_out_folders(self):
