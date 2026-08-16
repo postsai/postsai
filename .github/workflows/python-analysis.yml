@@ -19,7 +19,7 @@ jobs:
         python-version: ["3.11", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
       with:
@@ -27,15 +27,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest mysqlclient
+        python -m pip install flake8 pylint pytest mysqlclient
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 --ignore E303,E501,W503
-    - name: Lint with pylint
-      run:  pylint --disable C0301,C0114,R0801 *.py backend/*.py
     - name: Test with unittest
       run: |
         touch config.py
         python3 -m unittest api_test.py
+    - name: Lint with pylint
+      run:  pylint --disable C0301,C0114,R0801 *.py backend/*.py
