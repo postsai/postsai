@@ -57,7 +57,8 @@ db = {
 ui = {
     # "service_worker": False, # disable, if you use HTTP Basic Auth
     "avatar" : "https://gravatar.com",
-    "trim_email" : True
+    "trim_email" : True,
+    "details_threshold": 30
 }
 
 
