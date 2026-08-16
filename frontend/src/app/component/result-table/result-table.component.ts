@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, HostListener, input, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
 import { Commit } from '../../model/commit';
@@ -40,7 +40,7 @@ export class SoftBreakSupportingDataSource<T> extends MatTableDataSource<T> {
     imports: [MatTable, MatTableResponsiveDirective, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, MatPaginator]
 })
 export class ResultTableComponent {
-	@Input() public config: Record<string, any> = {};
+	public config = input<Record<string, any>>({});
 	@Input() public _dataSource = new MatTableDataSource<Commit>([]);
 
 	public columnsToDisplay = ["repository", "when", "who", "file", "commit", "branch", "description"];
