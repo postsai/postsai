@@ -23,6 +23,8 @@
 
 # pylint: disable=invalid-name
 
+"""this is the main entry point for the postsai backend."""
+
 import json
 import sys
 from os import environ
