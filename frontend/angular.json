@@ -16,7 +16,6 @@
             "outputPath": {
               "base": "dist/frontend"
             },
-            "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
@@ -55,12 +54,6 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
-            },
-            "testing": {
-              "aot": false,
-              "optimization": false,
-              "extractLicenses": false
             }
           },
           "defaultConfiguration": "production"
@@ -77,29 +70,8 @@
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "@angular/build:extract-i18n",
-          "options": {
-            "buildTarget": "frontend:build"
-          }
-        },
         "test": {
           "builder": "@angular/build:unit-test",
-          "options": {
-            "tsConfig": "tsconfig.spec.json",
-            "reporters": [
-              "default"
-            ],
-            "coverageReporters": [
-              "html",
-              "text-summary"
-            ],
-            "setupFiles": [
-              "src/test.ts"
-            ],
-            "buildTarget": ":build:testing",
-            "runner": "vitest"
-          }
         }
       }
     }
