@@ -27,7 +27,7 @@
 		"@angular/build": "^22.2.2",
 		"@angular/cli": "^22.2.2",
 		"@angular/compiler-cli": "^22.2.2",
-		"jsdom": "^30.1.2",
+		"jsdom": "^30.1.3",
 		"prettier": "^3.9.10",
 		"typescript": "~7.0.2",
 		"vitest": "^5.0.4"
