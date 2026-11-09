@@ -25,6 +25,18 @@ Installation and configuration
 - [Installation Instructions](https://postsai.github.io/)
 - [Bugs and feature requests](https://github.com/postsai/postsai/issues)
 
+To allow browser queries from multiple origins, set `allowed_origins` in
+`config.py` to the exact origins, including scheme and port when applicable:
+
+```python
+allowed_origins = [
+	"https://first.example",
+	"https://second.example",
+]
+```
+
+The default empty list disables cross-origin access to query responses.
+
 Legal
 -
 (C) Copyright 2016-2026 Postsai. Postsai is released as Free and Open Source Software under [MIT](https://raw.githubusercontent.com/postsai/postsai/master/LICENSE.txt) license.

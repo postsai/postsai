@@ -25,7 +25,9 @@
 
 """this is test file for the main entry point of the postsai backend."""
 
+import io
 import unittest
+from unittest.mock import patch
 import api
 from backend.cache import Cache
 from backend.db import PostsaiDB
@@ -158,6 +160,29 @@ class PostsaiDBTests(unittest.TestCase):
 
 class PostsaiTests(unittest.TestCase):
     "test for the api"
+
+    def test_allowed_origins(self):
+        allowed_origins = ["https://first.example", "https://second.example"]
+        postsai = api.Postsai({"allowed_origins": allowed_origins})
+        for origin in allowed_origins + ["https://unlisted.example", "https://first.example.evil", ""]:
+            with self.subTest(origin=origin):
+                with patch.dict("os.environ", {"HTTP_ORIGIN": origin}, clear=True), \
+                        patch.object(postsai, "validate_input", return_value="denied"), \
+                        patch("sys.stdout", new_callable=io.StringIO) as output:
+                    postsai.process()
+                headers = output.getvalue().split("\r\n\r\n", 1)[0].split("\r\n")
+                self.assertIn("Vary: Origin", headers)
+                cors_headers = [header for header in headers if header.startswith("Access-Control-Allow-Origin:")]
+                expected = ["Access-Control-Allow-Origin: " + origin] if origin in allowed_origins else []
+                self.assertEqual(cors_headers, expected)
+
+    def test_origins_disabled_by_default(self):
+        postsai = api.Postsai({})
+        with patch.dict("os.environ", {"HTTP_ORIGIN": "https://first.example"}, clear=True), \
+                patch.object(postsai, "validate_input", return_value="denied"), \
+                patch("sys.stdout", new_callable=io.StringIO) as output:
+            postsai.process()
+        self.assertNotIn("Access-Control-Allow-Origin:", output.getvalue())
 
     class FormMock:
         """mock cgi form based on a dictionary"""

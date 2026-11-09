@@ -224,6 +224,10 @@ class Postsai:
 
         print("Content-Type: text/json; charset='utf-8'\r")
         print("Cache-Control: max-age=60\r")
+        print("Vary: Origin\r")
+        origin = os.environ.get("HTTP_ORIGIN")
+        if origin and origin in self.config.get("allowed_origins", []):
+            print("Access-Control-Allow-Origin: " + origin + "\r")
         print("\r")
         form = Request.from_environ(os.environ)
 
